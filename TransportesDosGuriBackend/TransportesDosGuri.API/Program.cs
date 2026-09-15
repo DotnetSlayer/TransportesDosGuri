@@ -112,6 +112,7 @@ builder.Services.AddSwaggerGen(options =>
         Title = "Transportes dos Guri WEB API",
         Version = "1.0"
     });
+
 });
 
 builder.Services.AddApiVersioning().AddApiExplorer(options =>
@@ -185,12 +186,16 @@ builder.Services.AddAuthentication(options =>
 
             ValidateIssuerSigningKey = true,
 
-            IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]))
+            IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
+
+
+            RoleClaimType = System.Security.Claims.ClaimTypes.Role
         };
     });
 
 builder.Services.AddAuthorization(options =>
 {
+    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
 });
 
 var app = builder.Build();

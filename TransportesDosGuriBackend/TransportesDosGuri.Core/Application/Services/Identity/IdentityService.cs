@@ -11,15 +11,20 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
 {
     public class IdentityService : IIdentityService
     {
-
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly RoleManager<ApplicationRole> _roleManager; // Adicionado para gerenciar Roles se necessário
         private readonly IJwtService _jwtService;
 
-        public IdentityService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager, IJwtService jwtService)
+        public IdentityService(
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
+            RoleManager<ApplicationRole> roleManager,
+            IJwtService jwtService)
         {
             _userManager = userManager;
             _signInManager = signInManager;
+            _roleManager = roleManager;
             _jwtService = jwtService;
         }
 
@@ -50,8 +55,6 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
             }
 
             string? jwtToken = tokenModel.Token;
-            string? refreshToken = tokenModel.RefreshToken;
-
             ClaimsPrincipal? principal = _jwtService.GetPrincipalFromJwtToken(jwtToken);
 
             if (principal == null)
@@ -59,7 +62,13 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
                 return (false, null, new[] { "Invalid JWT Access Token!" });
             }
 
-            string? email = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            // AJUSTE: Buscando pelo ClaimTypes.Email (ou NameIdentifier/ID dependendo da sua convenção)
+            string? email = principal.FindFirstValue(ClaimTypes.Email);
+
+            if (string.IsNullOrEmpty(email))
+            {
+                return (false, null, new[] { "User identity not found in token!" });
+            }
 
             ApplicationUser? user = await _userManager.FindByEmailAsync(email);
 
@@ -68,7 +77,8 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
                 return (false, null, new[] { "Invalid Refresh Token!" });
             }
 
-            AuthenticationResponseDTO authenticationResponse = _jwtService.CreateJwtToken(user);
+            // AJUSTE: Uso de 'await'
+            AuthenticationResponseDTO authenticationResponse = await _jwtService.CreateJwtToken(user);
 
             user.RefreshToken = authenticationResponse.RefreshToken;
             user.RefreshTokenExpirationDateTime = authenticationResponse.RefreshTokenExpirationDateTime;
@@ -94,7 +104,6 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
                 return null;
             }
 
-
             return MapToUserProfileDTO(user);
         }
 
@@ -114,15 +123,13 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
                 return (false, new[] { "Wrong Username or Password!" }, null, null);
             }
 
-            var authenticationResponse = _jwtService.CreateJwtToken(user);
+            // AJUSTE: Uso de 'await'
+            var authenticationResponse = await _jwtService.CreateJwtToken(user);
 
             user.RefreshToken = authenticationResponse.RefreshToken;
-
             user.RefreshTokenExpirationDateTime = authenticationResponse.RefreshTokenExpirationDateTime;
 
             await _userManager.UpdateAsync(user);
-
-
 
             return (true, Enumerable.Empty<string>(), user.Id, authenticationResponse);
         }
@@ -151,10 +158,16 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
                 return (false, result.Errors.Select(e => e.Description), null);
             }
 
+            // ATENÇÃO: Atribuindo Role padrão (ex: "User" ou "Admin") no cadastro do usuário
+            const string defaultRole = "User";
+            if (!await _roleManager.RoleExistsAsync(defaultRole))
+            {
+                await _roleManager.CreateAsync(new ApplicationRole { Name = defaultRole });
+            }
+            await _userManager.AddToRoleAsync(user, defaultRole);
 
             return (true, Enumerable.Empty<string>(), user.Id);
         }
-
 
         public async Task<(bool Success, IEnumerable<string> Errors)> UpdateAsync(long id, UpdateDTO update)
         {
@@ -186,23 +199,6 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
             return (true, Enumerable.Empty<string>());
         }
 
-        private static UserProfileResponseDTO MapToUserProfileDTO(ApplicationUser user) => new()
-        {
-            Id = user.Id,
-            Name = user.Name,
-            LastName = user.LastName,
-            FullName = user.FullName,
-            Email = user.Email,
-            IdentityNumber = user.IdentityNumber,
-            CustomerAsaasId = user.CustomerAsaasId,
-            ZipCode = user.ZipCode,
-            Address = user.Address,
-            AddressNumber = user.AddressNumber,
-            District = user.District,
-            City = user.City,
-            State = user.State
-        };
-
         public async Task<(bool Success, IEnumerable<string> Errors)> LogoutAsync(TokenModelDTO tokenModel)
         {
             if (tokenModel == null || string.IsNullOrWhiteSpace(tokenModel.Token))
@@ -217,7 +213,8 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
                 return (false, new[] { "Invalid JWT Access Token!" });
             }
 
-            string? email = principal.FindFirstValue(ClaimTypes.NameIdentifier);
+            // AJUSTE: Buscando pelo ClaimTypes.Email
+            string? email = principal.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email))
             {
                 return (false, new[] { "User identity not found in token!" });
@@ -244,5 +241,22 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
 
             return (true, Enumerable.Empty<string>());
         }
+
+        private static UserProfileResponseDTO MapToUserProfileDTO(ApplicationUser user) => new()
+        {
+            Id = user.Id,
+            Name = user.Name,
+            LastName = user.LastName,
+            FullName = user.FullName,
+            Email = user.Email,
+            IdentityNumber = user.IdentityNumber,
+            CustomerAsaasId = user.CustomerAsaasId,
+            ZipCode = user.ZipCode,
+            Address = user.Address,
+            AddressNumber = user.AddressNumber,
+            District = user.District,
+            City = user.City,
+            State = user.State
+        };
     }
 }

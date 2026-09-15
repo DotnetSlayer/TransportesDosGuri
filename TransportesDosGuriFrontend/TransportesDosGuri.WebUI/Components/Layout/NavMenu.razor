@@ -1,0 +1,73 @@
+﻿@rendermode InteractiveServer
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+@using TransportesDosGuri.Core.Interfaces
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">TransportesDosGuri</a>
+    </div>
+</div>
+
+<div class="nav-scrollable">
+    <nav class="nav flex-column">
+        <!-- Home -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door-fill" aria-hidden="true"></span> Home
+            </NavLink>
+        </div>
+
+        <!-- Módulos do Sistema -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="aeronaves">
+                <span class="bi bi-airplane-engines" aria-hidden="true"></span> Aeronaves
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="aeroportos">
+                <span class="bi bi-geo-alt" aria-hidden="true"></span> Aeroportos
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="voos">
+                <span class="bi bi-send" aria-hidden="true"></span> Voos
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="viagens">
+                <span class="bi bi-journal-bookmark" aria-hidden="true"></span> Viagens
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="usuarios">
+                <span class="bi bi-people" aria-hidden="true"></span> Usuários
+            </NavLink>
+        </div>
+
+        <!-- Autenticação -->
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="account/login">
+                <span class="bi bi-person-badge" aria-hidden="true"></span> Login
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="account/register">
+                <span class="bi bi-person-plus" aria-hidden="true"></span> Registrar-se
+            </NavLink>
+        </div>
+        <div class="nav-item px-3">
+            <button class="nav-link btn btn-link text-start w-100" @onclick="Logout">
+                <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Sair
+            </button>
+        </div>
+    </nav>
+</div>
+
+@code {
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        NavigationManager.NavigateTo("account/login", forceLoad: true);
+    }
+}
