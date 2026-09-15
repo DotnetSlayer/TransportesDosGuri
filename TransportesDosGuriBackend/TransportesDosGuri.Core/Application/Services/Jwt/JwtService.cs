@@ -16,7 +16,6 @@ namespace TransportesDosGuri.Core.Application.Services.Jwt
         private readonly IConfiguration _configuration;
         private readonly UserManager<ApplicationUser> _userManager;
 
-        // Injetamos o UserManager para buscar as Roles do banco de dados
         public JwtService(IConfiguration configuration, UserManager<ApplicationUser> userManager)
         {
             _configuration = configuration;
@@ -27,22 +26,22 @@ namespace TransportesDosGuri.Core.Application.Services.Jwt
         {
             DateTime expiration = DateTime.UtcNow.AddMinutes(Convert.ToDouble(_configuration["Jwt:EXPIRATION_MINUTES"]));
 
-            // 1. Criamos a lista base de claims
             var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 
-                // CORREÇÃO: O valor de 'iat' no JWT deve ser o Timestamp em Segundos (Epoch), não DateTime.ToString()
+
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
 
-                // CORREÇÃO: Usamos ClaimTypes.Email para o e-mail (em vez de NameIdentifier)
+
                 new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Email, user.Email!),
+                new Claim(JwtRegisteredClaimNames.Name, user.FullName ?? string.Empty),
                 new Claim(ClaimTypes.Name, user.FullName ?? string.Empty)
             };
 
-            // 2. Buscamos as Roles do Identity e adicionamos cada uma como ClaimTypes.Role
+
             var userRoles = await _userManager.GetRolesAsync(user);
             foreach (var role in userRoles)
             {
@@ -85,7 +84,7 @@ namespace TransportesDosGuri.Core.Application.Services.Jwt
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!)),
                 ValidateLifetime = false,
-                RoleClaimType = ClaimTypes.Role // Mapeia para garantir a extração do Principal
+                RoleClaimType = ClaimTypes.Role 
             };
 
             JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();

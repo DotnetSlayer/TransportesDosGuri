@@ -1,0 +1,239 @@
+﻿@page "/adminReservations"
+@rendermode InteractiveServer
+
+@inject IReservationService ReservationService
+@inject IUserService UserService
+@inject IFlightSeatService FlightSeatService
+@inject IPurchaseService PurchaseService
+
+@using TransportesDosGuri.Core.DTOs
+@using TransportesDosGuri.Core.Interfaces
+
+<div class="max-w-6xl mx-auto p-6 space-y-8 text-slate-200">
+
+    <h1 class="text-2xl font-semibold">Reservas</h1>
+
+    <EditForm Model="reservationForm" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <InputSelect class="input" @bind-Value="reservationForm.ApplicationUserId">
+                <option value="0">Usuário...</option>
+                @foreach (var user in userList)
+                {
+                    <option value="@user.Id">@user.Name</option>
+                }
+            </InputSelect>
+
+            <InputSelect class="input" @bind-Value="reservationForm.FlightSeatId">
+                <option value="0">Assento...</option>
+                @foreach (var seat in seatList)
+                {
+                    <option value="@seat.Id">Assento @seat.SeatNumber</option>
+                }
+            </InputSelect>
+
+            <InputSelect class="input" @bind-Value="reservationForm.PurchaseId">
+                <option value="0">Compra...</option>
+                @foreach (var purchase in purchaseList)
+                {
+                    <option value="@purchase.Id">Compra #@purchase.Id</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mt-3">
+            <InputDate Type="InputDateType.DateTimeLocal" class="input" @bind-Value="reservationForm.ReservationDate" />
+            <InputNumber class="input" @bind-Value="reservationForm.Price" step="0.01" placeholder="Preço (R$)" />
+            <InputSelect class="input" @bind-Value="reservationForm.Status">
+                @foreach (var status in Enum.GetValues<ReservationStatus>())
+                {
+                    <option value="@status">@status</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-3">
+            @if (reservationForm.Id != 0)
+            {
+                <button type="button" @onclick="ResetForm" class="btn-secondary">Cancelar</button>
+            }
+            <button type="submit" class="btn-primary">Salvar</button>
+        </div>
+    </EditForm>
+
+    @if (reservations == null)
+    {
+        <p class="text-slate-500 text-sm">Carregando...</p>
+    }
+    else if (!reservations.Any())
+    {
+        <p class="text-slate-500 text-sm">Nenhuma reserva registrada.</p>
+    }
+    else
+    {
+        <table class="w-full text-sm border-collapse">
+            <thead>
+                <tr class="text-left text-slate-400 border-b border-slate-700">
+                    <th class="py-2 pr-4">ID</th>
+                    <th class="py-2 pr-4">Usuário</th>
+                    <th class="py-2 pr-4">Assento</th>
+                    <th class="py-2 pr-4">Compra</th>
+                    <th class="py-2 pr-4">Data</th>
+                    <th class="py-2 pr-4">Preço</th>
+                    <th class="py-2 pr-4">Status</th>
+                    <th class="py-2 text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in reservations)
+                {
+                    <tr class="border-b border-slate-800">
+                        <td class="py-2 pr-4 text-slate-500">@item.Id</td>
+                        <td class="py-2 pr-4">@GetUserDisplay(item.ApplicationUserId)</td>
+                        <td class="py-2 pr-4 font-mono">@GetSeatDisplay(item.FlightSeatId)</td>
+                        <td class="py-2 pr-4 text-slate-400">#@item.PurchaseId</td>
+                        <td class="py-2 pr-4 font-mono text-xs text-slate-400">@item.ReservationDate.ToString("g")</td>
+                        <td class="py-2 pr-4 font-mono text-xs text-emerald-400">@item.Price.ToString("C")</td>
+                        <td class="py-2 pr-4">@item.Status</td>
+                        <td class="py-2 text-right space-x-2">
+                            <button @onclick="() => Edit(item)" class="link">Editar</button>
+                            <button @onclick="() => Delete(item.Id)" class="link-danger">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<style>
+    .input {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 6px;
+        color: #e2e8f0;
+        font-size: 0.875rem;
+        outline: none;
+    }
+
+        .input:focus {
+            border-color: #3b82f6;
+        }
+
+    .btn-primary {
+        padding: 0.5rem 1.25rem;
+        background: #2563eb;
+        color: white;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+    }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+    .btn-secondary {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        color: #94a3b8;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+
+        .btn-secondary:hover {
+            background: #1e293b;
+        }
+
+    .link {
+        color: #93c5fd;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+    .link-danger {
+        color: #fca5a5;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+        .link-danger:hover {
+            text-decoration: underline;
+        }
+</style>
+
+@code {
+    private List<ReservationDTO>? reservations;
+    private List<UserDTO> userList = new();
+    private List<FlightSeatDTO> seatList = new();
+    private List<PurchaseDTO> purchaseList = new();
+    private ReservationDTO reservationForm = new() { ReservationDate = DateTime.Now };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDropdowns();
+        await LoadReservations();
+    }
+
+    private async Task LoadDropdowns()
+    {
+        userList = await UserService.GetAllAsync() ?? new();
+        seatList = await FlightSeatService.GetAllAsync() ?? new();
+        purchaseList = await PurchaseService.GetAllAsync() ?? new();
+    }
+
+    private async Task LoadReservations() => reservations = await ReservationService.GetAllAsync();
+
+    private async Task Save()
+    {
+        if (reservationForm.Id == 0)
+            await ReservationService.CreateAsync(reservationForm);
+        else
+            await ReservationService.UpdateAsync(reservationForm.Id, reservationForm);
+
+        ResetForm();
+        await LoadReservations();
+    }
+
+    private void Edit(ReservationDTO item)
+    {
+        reservationForm = new ReservationDTO
+        {
+            Id = item.Id,
+            ApplicationUserId = item.ApplicationUserId,
+            FlightSeatId = item.FlightSeatId,
+            PurchaseId = item.PurchaseId,
+            ReservationDate = item.ReservationDate,
+            Status = item.Status,
+            Price = item.Price
+        };
+    }
+
+    private async Task Delete(long id)
+    {
+        await ReservationService.DeleteAsync(id);
+        await LoadReservations();
+    }
+
+    private void ResetForm() => reservationForm = new ReservationDTO { ReservationDate = DateTime.Now };
+
+    private string GetUserDisplay(long id) =>
+        userList.FirstOrDefault(u => u.Id == id)?.Name ?? id.ToString();
+
+    private string GetSeatDisplay(long id) =>
+        seatList.FirstOrDefault(s => s.Id == id)?.SeatNumber ?? id.ToString();
+}

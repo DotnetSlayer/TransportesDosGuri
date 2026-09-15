@@ -1,46 +1,59 @@
-﻿using System.Net;
-using System.Net.Http.Headers;
+﻿using System;
+using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
+using System.Threading;
+using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using TransportesDosGuri.Core.Common;
 using TransportesDosGuri.Core.Interfaces;
 
-namespace TransportesDosGuri.Infrastructure.Auth;
-
-public class JwtAuthorizationHandler : DelegatingHandler
+namespace TransportesDosGuri.Infrastructure.Auth
 {
-    private readonly ITokenStorageService _tokenStorage;
-    private readonly IServiceProvider _serviceProvider;
-
-    public JwtAuthorizationHandler(ITokenStorageService tokenStorage, IServiceProvider serviceProvider)
+    public class JwtAuthorizationHandler : DelegatingHandler
     {
-        _tokenStorage = tokenStorage;
-        _serviceProvider = serviceProvider;
-    }
+        private readonly ITokenStorageService _tokenStorage;
+        private readonly IServiceProvider _serviceProvider;
 
-    protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
-    {
-        var (accessToken, _) = await _tokenStorage.GetTokensAsync();
-
-        if (!string.IsNullOrEmpty(accessToken))
+        public JwtAuthorizationHandler(ITokenStorageService tokenStorage, IServiceProvider serviceProvider)
         {
-            request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            _tokenStorage = tokenStorage;
+            _serviceProvider = serviceProvider;
         }
 
-        var response = await base.SendAsync(request, cancellationToken);
-
-        if (response.StatusCode == HttpStatusCode.Unauthorized)
+        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
         {
-            var authService = _serviceProvider.GetRequiredService<IAuthService>();
-            var newToken = await authService.RefreshTokenAsync();
+            var path = request.RequestUri?.AbsolutePath ?? string.Empty;
 
-            if (!string.IsNullOrEmpty(newToken))
+            if (path.Contains("/Account/Login", StringComparison.OrdinalIgnoreCase) ||
+                path.Contains("/Account/Register", StringComparison.OrdinalIgnoreCase) ||
+                path.Contains("/Account/generate-new-jwt-token", StringComparison.OrdinalIgnoreCase))
             {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", newToken);
-                response = await base.SendAsync(request, cancellationToken);
+                return await base.SendAsync(request, cancellationToken);
             }
-        }
 
-        return response;
+            var (accessToken, _) = await _tokenStorage.GetTokensAsync();
+
+            if (!string.IsNullOrEmpty(accessToken))
+            {
+                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+            }
+
+            var response = await base.SendAsync(request, cancellationToken);
+
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                var authService = _serviceProvider.GetRequiredService<IAuthService>();
+                var newToken = await authService.RefreshTokenAsync();
+
+                if (!string.IsNullOrEmpty(newToken))
+                {
+                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", newToken);
+                    response = await base.SendAsync(request, cancellationToken);
+                }
+            }
+
+            return response;
+        }
     }
 }

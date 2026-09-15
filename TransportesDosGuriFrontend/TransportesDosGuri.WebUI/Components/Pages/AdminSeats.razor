@@ -1,0 +1,219 @@
+﻿@page "/adminSeats"
+@rendermode InteractiveServer
+
+@inject ISeatService SeatService
+@inject IAircraftService AircraftService
+
+@using TransportesDosGuri.Core.DTOs
+@using TransportesDosGuri.Core.Interfaces
+
+<div class="max-w-6xl mx-auto p-6 space-y-8 text-slate-200">
+
+    <h1 class="text-2xl font-semibold">Assentos</h1>
+
+    <EditForm Model="seatForm" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+            <InputSelect class="input" @bind-Value="seatForm.AircraftId">
+                <option value="0">Aeronave...</option>
+                @foreach (var aircraft in aircraftList)
+                {
+                    <option value="@aircraft.Id">@aircraft.Model</option>
+                }
+            </InputSelect>
+
+            <InputText class="input font-mono uppercase" @bind-Value="seatForm.SeatNumber" placeholder="Assento (ex: 1A)" />
+
+            <InputSelect class="input" @bind-Value="seatForm.Class">
+                @foreach (var seatClass in Enum.GetValues<SeatClass>())
+                {
+                    <option value="@seatClass">@seatClass</option>
+                }
+            </InputSelect>
+
+            <InputSelect class="input" @bind-Value="seatForm.Location">
+                @foreach (var location in Enum.GetValues<SeatLocation>())
+                {
+                    <option value="@location">@location</option>
+                }
+            </InputSelect>
+
+            <InputSelect class="input" @bind-Value="seatForm.Side">
+                @foreach (var side in Enum.GetValues<SeatSide>())
+                {
+                    <option value="@side">@side</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="flex justify-end gap-2 mt-3">
+            @if (seatForm.Id != 0)
+            {
+                <button type="button" @onclick="ResetForm" class="btn-secondary">Cancelar</button>
+            }
+            <button type="submit" class="btn-primary">Salvar</button>
+        </div>
+    </EditForm>
+
+    @if (seats == null)
+    {
+        <p class="text-slate-500 text-sm">Carregando...</p>
+    }
+    else if (!seats.Any())
+    {
+        <p class="text-slate-500 text-sm">Nenhum assento registrado.</p>
+    }
+    else
+    {
+        <table class="w-full text-sm border-collapse">
+            <thead>
+                <tr class="text-left text-slate-400 border-b border-slate-700">
+                    <th class="py-2 pr-4">ID</th>
+                    <th class="py-2 pr-4">Aeronave</th>
+                    <th class="py-2 pr-4">Assento</th>
+                    <th class="py-2 pr-4">Classe</th>
+                    <th class="py-2 pr-4">Localização</th>
+                    <th class="py-2 pr-4">Lado</th>
+                    <th class="py-2 text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in seats)
+                {
+                    <tr class="border-b border-slate-800">
+                        <td class="py-2 pr-4 text-slate-500">@item.Id</td>
+                        <td class="py-2 pr-4">@GetAircraftModel(item.AircraftId)</td>
+                        <td class="py-2 pr-4 font-mono">@item.SeatNumber</td>
+                        <td class="py-2 pr-4">@item.Class</td>
+                        <td class="py-2 pr-4 text-slate-400">@item.Location</td>
+                        <td class="py-2 pr-4 text-slate-400">@item.Side</td>
+                        <td class="py-2 text-right space-x-2">
+                            <button @onclick="() => Edit(item)" class="link">Editar</button>
+                            <button @onclick="() => Delete(item.Id)" class="link-danger">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<style>
+    .input {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 6px;
+        color: #e2e8f0;
+        font-size: 0.875rem;
+        outline: none;
+    }
+
+        .input:focus {
+            border-color: #3b82f6;
+        }
+
+    .btn-primary {
+        padding: 0.5rem 1.25rem;
+        background: #2563eb;
+        color: white;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+    }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+    .btn-secondary {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        color: #94a3b8;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+
+        .btn-secondary:hover {
+            background: #1e293b;
+        }
+
+    .link {
+        color: #93c5fd;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+    .link-danger {
+        color: #fca5a5;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+        .link-danger:hover {
+            text-decoration: underline;
+        }
+</style>
+
+@code {
+    private List<SeatDTO>? seats;
+    private List<AircraftDTO> aircraftList = new();
+    private SeatDTO seatForm = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAircrafts();
+        await LoadSeats();
+    }
+
+    private async Task LoadAircrafts() => aircraftList = await AircraftService.GetAllAsync() ?? new();
+    private async Task LoadSeats() => seats = await SeatService.GetAllAsync();
+
+    private async Task Save()
+    {
+        if (seatForm.Id == 0)
+            await SeatService.CreateAsync(seatForm);
+        else
+            await SeatService.UpdateAsync(seatForm.Id, seatForm);
+
+        ResetForm();
+        await LoadSeats();
+    }
+
+    private void Edit(SeatDTO item)
+    {
+        seatForm = new SeatDTO
+        {
+            Id = item.Id,
+            AircraftId = item.AircraftId,
+            SeatNumber = item.SeatNumber,
+            Class = item.Class,
+            Location = item.Location,
+            Side = item.Side
+        };
+    }
+
+    private async Task Delete(long id)
+    {
+        await SeatService.DeleteAsync(id);
+        await LoadSeats();
+    }
+
+    private void ResetForm() => seatForm = new SeatDTO();
+
+    private string GetAircraftModel(long id) =>
+        aircraftList.FirstOrDefault(a => a.Id == id)?.Model ?? id.ToString();
+}

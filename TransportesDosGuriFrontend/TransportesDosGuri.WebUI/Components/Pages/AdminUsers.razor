@@ -1,0 +1,235 @@
+﻿@page "/adminUsers"
+@rendermode InteractiveServer
+
+@inject IUserService UserService
+
+@using TransportesDosGuri.Core.DTOs
+@using TransportesDosGuri.Core.Interfaces
+
+<div class="max-w-6xl mx-auto p-6 space-y-8 text-slate-200">
+
+    <h1 class="text-2xl font-semibold">Usuários</h1>
+
+    @if (isEditing)
+    {
+        <EditForm Model="updateForm" OnValidSubmit="SaveUpdate">
+            <DataAnnotationsValidator />
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <InputText class="input" @bind-Value="updateForm.Name" placeholder="Nome" />
+                <InputText class="input" @bind-Value="updateForm.LastName" placeholder="Sobrenome" />
+                <InputText class="input" @bind-Value="updateForm.PhoneNumber" placeholder="Telefone" />
+                <InputText class="input" @bind-Value="updateForm.IdentityNumber" placeholder="CPF / Documento" />
+                <InputText class="input" @bind-Value="updateForm.ZipCode" placeholder="CEP" />
+                <InputText class="input" @bind-Value="updateForm.District" placeholder="Bairro" />
+                <InputText class="input sm:col-span-2" @bind-Value="updateForm.Address" placeholder="Logradouro" />
+                <InputNumber class="input" @bind-Value="updateForm.AddressNumber" placeholder="Número" />
+                <InputText class="input" @bind-Value="updateForm.City" placeholder="Cidade" />
+                <InputText class="input" @bind-Value="updateForm.State" placeholder="UF" />
+            </div>
+            <div class="flex justify-end gap-2 mt-3">
+                <button type="button" @onclick="ResetForm" class="btn-secondary">Cancelar</button>
+                <button type="submit" class="btn-primary">Atualizar</button>
+            </div>
+        </EditForm>
+    }
+    else
+    {
+        <EditForm Model="registerForm" OnValidSubmit="SaveRegister">
+            <DataAnnotationsValidator />
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                <InputText class="input" @bind-Value="registerForm.Name" placeholder="Nome" />
+                <InputText class="input" @bind-Value="registerForm.LastName" placeholder="Sobrenome" />
+                <InputText class="input" @bind-Value="registerForm.IdentityNumber" placeholder="CPF / Documento" />
+                <InputText class="input" @bind-Value="registerForm.Email" type="email" placeholder="E-mail" />
+                <InputText class="input" @bind-Value="registerForm.Password" type="password" placeholder="Senha" />
+                <InputText class="input" @bind-Value="registerForm.ZipCode" placeholder="CEP" />
+                <InputText class="input sm:col-span-2" @bind-Value="registerForm.Address" placeholder="Logradouro" />
+                <InputNumber class="input" @bind-Value="registerForm.AddressNumber" placeholder="Número" />
+                <InputText class="input" @bind-Value="registerForm.District" placeholder="Bairro" />
+                <InputText class="input" @bind-Value="registerForm.City" placeholder="Cidade" />
+                <InputText class="input" @bind-Value="registerForm.State" placeholder="UF" />
+            </div>
+            <div class="flex justify-end mt-3">
+                <button type="submit" class="btn-primary">Cadastrar</button>
+            </div>
+        </EditForm>
+    }
+
+    @if (users == null)
+    {
+        <p class="text-slate-500 text-sm">Carregando...</p>
+    }
+    else if (!users.Any())
+    {
+        <p class="text-slate-500 text-sm">Nenhum usuário cadastrado.</p>
+    }
+    else
+    {
+        <table class="w-full text-sm border-collapse">
+            <thead>
+                <tr class="text-left text-slate-400 border-b border-slate-700">
+                    <th class="py-2 pr-4">ID</th>
+                    <th class="py-2 pr-4">Nome</th>
+                    <th class="py-2 pr-4">E-mail</th>
+                    <th class="py-2 pr-4">Documento</th>
+                    <th class="py-2 pr-4">Cidade/UF</th>
+                    <th class="py-2 text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var user in users)
+                {
+                    <tr class="border-b border-slate-800">
+                        <td class="py-2 pr-4 text-slate-500">@user.Id</td>
+                        <td class="py-2 pr-4">@user.FullName</td>
+                        <td class="py-2 pr-4 text-slate-400">@user.Email</td>
+                        <td class="py-2 pr-4 text-slate-400">@(string.IsNullOrEmpty(user.IdentityNumber) ? "-" : user.IdentityNumber)</td>
+                        <td class="py-2 pr-4 text-slate-400">@($"{user.City}/{user.State}")</td>
+                        <td class="py-2 text-right space-x-2">
+                            <button @onclick="() => StartEdit(user)" class="link">Editar</button>
+                            <button @onclick="() => Delete(user.Id)" class="link-danger">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<style>
+    .input {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 6px;
+        color: #e2e8f0;
+        font-size: 0.875rem;
+        outline: none;
+    }
+
+        .input:focus {
+            border-color: #3b82f6;
+        }
+
+    .btn-primary {
+        padding: 0.5rem 1.25rem;
+        background: #2563eb;
+        color: white;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+    }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+    .btn-secondary {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        color: #94a3b8;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+
+        .btn-secondary:hover {
+            background: #1e293b;
+        }
+
+    .link {
+        color: #93c5fd;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+    .link-danger {
+        color: #fca5a5;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+        .link-danger:hover {
+            text-decoration: underline;
+        }
+</style>
+
+@code {
+    private List<UserDTO>? users;
+
+    private RegisterDTO registerForm = new();
+    private UpdateUserDTO updateForm = new();
+
+    private bool isEditing = false;
+    private long selectedUserId;
+
+    protected override async Task OnInitializedAsync() => await LoadUsers();
+
+    private async Task LoadUsers() => users = await UserService.GetAllAsync();
+
+    private async Task SaveRegister()
+    {
+        var success = await UserService.CreateAsync(registerForm);
+        if (success)
+        {
+            ResetForm();
+            await LoadUsers();
+        }
+    }
+
+    private async Task SaveUpdate()
+    {
+        var success = await UserService.UpdateAsync(selectedUserId, updateForm);
+        if (success)
+        {
+            ResetForm();
+            await LoadUsers();
+        }
+    }
+
+    private void StartEdit(UserDTO user)
+    {
+        isEditing = true;
+        selectedUserId = user.Id;
+
+        updateForm = new UpdateUserDTO
+        {
+            Name = user.Name,
+            LastName = user.LastName,
+            PhoneNumber = user.PhoneNumber,
+            IdentityNumber = user.IdentityNumber,
+            ZipCode = user.ZipCode,
+            Address = user.Address,
+            AddressNumber = user.AddressNumber,
+            District = user.District,
+            City = user.City,
+            State = user.State
+        };
+    }
+
+    private async Task Delete(long id)
+    {
+        var success = await UserService.DeleteAsync(id);
+        if (success) await LoadUsers();
+    }
+
+    private void ResetForm()
+    {
+        isEditing = false;
+        selectedUserId = 0;
+        registerForm = new RegisterDTO();
+        updateForm = new UpdateUserDTO();
+    }
+}

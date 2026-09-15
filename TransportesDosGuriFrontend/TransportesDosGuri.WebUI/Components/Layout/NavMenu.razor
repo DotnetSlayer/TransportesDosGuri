@@ -1,73 +1,98 @@
 ﻿@rendermode InteractiveServer
-@inject IAuthService AuthService
-@inject NavigationManager NavigationManager
+
+@using System.Security.Claims
+@using Microsoft.AspNetCore.Components.Authorization
 @using TransportesDosGuri.Core.Interfaces
 
-<div class="top-row ps-3 navbar navbar-dark">
-    <div class="container-fluid">
-        <a class="navbar-brand" href="">TransportesDosGuri</a>
+@inject IAuthService AuthService
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthStateProvider
+
+<aside class="hidden lg:flex flex-col w-56 shrink-0 h-screen sticky top-0 border-r border-slate-800/60">
+
+    <div class="h-14 px-4 flex items-center text-sm font-semibold text-white">
+        Dos Guri · Air Ops
     </div>
-</div>
 
-<div class="nav-scrollable">
-    <nav class="nav flex-column">
-        <!-- Home -->
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
-                <span class="bi bi-house-door-fill" aria-hidden="true"></span> Home
-            </NavLink>
-        </div>
+    <nav class="flex-1 overflow-y-auto px-2 py-4 space-y-1 text-sm">
 
-        <!-- Módulos do Sistema -->
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="aeronaves">
-                <span class="bi bi-airplane-engines" aria-hidden="true"></span> Aeronaves
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="aeroportos">
-                <span class="bi bi-geo-alt" aria-hidden="true"></span> Aeroportos
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="voos">
-                <span class="bi bi-send" aria-hidden="true"></span> Voos
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="viagens">
-                <span class="bi bi-journal-bookmark" aria-hidden="true"></span> Viagens
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="usuarios">
-                <span class="bi bi-people" aria-hidden="true"></span> Usuários
-            </NavLink>
-        </div>
+        <p class="px-3 pt-2 text-xs text-slate-600">Operações</p>
+        <NavLink href="adminHome" Match="NavLinkMatch.All" class="nav-item">Dashboard</NavLink>
+        <NavLink href="adminAircrafts" class="nav-item">Aeronaves</NavLink>
+        <NavLink href="adminFlights" class="nav-item">Voos</NavLink>
+        <NavLink href="adminAirports" class="nav-item">Aeroportos</NavLink>
+        <NavLink href="adminSchedules" class="nav-item">Escalas</NavLink>
+        <NavLink href="adminTrips" class="nav-item">Viagens</NavLink>
+        <NavLink href="adminSeats" class="nav-item">Assentos</NavLink>
+        <NavLink href="adminFlightSeats" class="nav-item">Assentos de Voos</NavLink>
 
-        <!-- Autenticação -->
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="account/login">
-                <span class="bi bi-person-badge" aria-hidden="true"></span> Login
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="account/register">
-                <span class="bi bi-person-plus" aria-hidden="true"></span> Registrar-se
-            </NavLink>
-        </div>
-        <div class="nav-item px-3">
-            <button class="nav-link btn btn-link text-start w-100" @onclick="Logout">
-                <span class="bi bi-box-arrow-right" aria-hidden="true"></span> Sair
-            </button>
-        </div>
+        <p class="px-3 pt-4 text-xs text-slate-600">Comercial</p>
+        <NavLink href="adminPurchases" class="nav-item">Compras</NavLink>
+        <NavLink href="adminReservations" class="nav-item">Reservas</NavLink>
+
+        <p class="px-3 pt-4 text-xs text-slate-600">Sistema</p>
+        <NavLink href="adminUsers" class="nav-item">Usuários</NavLink>
+        <NavLink href="adminUserRequests" class="nav-item">Solicitações</NavLink>
+        <NavLink href="adminAsaasIntegrations" class="nav-item">Integrações Asaas</NavLink>
+
+        <p class="px-3 pt-4 text-xs text-slate-600">Conta</p>
+        @if (!isAuthenticated)
+        {
+            <NavLink href="account/login" class="nav-item">Login</NavLink>
+            <NavLink href="account/register" class="nav-item">Registrar-se</NavLink>
+        }
+        else
+        {
+            <button type="button" @onclick="Logout" class="nav-item text-left w-full">Sair</button>
+        }
     </nav>
-</div>
+
+    <div class="p-3 border-t border-slate-800/60 text-xs text-slate-500 truncate">
+        @userName
+    </div>
+</aside>
+
+<style>
+    .nav-item {
+        display: block;
+        padding: 0.4rem 0.75rem;
+        border-radius: 6px;
+        color: #94a3b8;
+    }
+
+        .nav-item:hover {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+
+        .nav-item.active {
+            background: #1e293b;
+            color: #e2e8f0;
+        }
+</style>
 
 @code {
+    private bool isAuthenticated = false;
+    private string userName = "Visitante";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity != null && user.Identity.IsAuthenticated)
+        {
+            isAuthenticated = true;
+            userName = user.FindFirst("name")?.Value
+                     ?? user.FindFirst(ClaimTypes.Name)?.Value
+                     ?? user.FindFirst("given_name")?.Value
+                     ?? "Operador";
+        }
+    }
+
     private async Task Logout()
     {
         await AuthService.LogoutAsync();
-        NavigationManager.NavigateTo("account/login", forceLoad: true);
+        NavigationManager.NavigateTo("/", forceLoad: true);
     }
 }

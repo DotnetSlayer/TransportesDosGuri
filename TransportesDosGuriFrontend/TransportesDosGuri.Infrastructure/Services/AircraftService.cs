@@ -13,27 +13,27 @@ public class AircraftService : IAircraftService
         _http = http;
     }
 
-    public async Task<List<AircraftDto>> GetAllAsync() =>
-        await _http.GetFromJsonAsync<List<AircraftDto>>("") ?? new();
+    public async Task<List<AircraftDTO>> GetAllAsync() =>
+        await _http.GetFromJsonAsync<List<AircraftDTO>>("/api/v1/Aircraft") ?? new();
 
-    public async Task<AircraftDto?> GetByIdAsync(long id) =>
-        await _http.GetFromJsonAsync<AircraftDto>($"");
+    public async Task<AircraftDTO?> GetByIdAsync(long id) =>
+        await _http.GetFromJsonAsync<AircraftDTO>($"/api/v1/Aircraft/{id}");
 
-    public async Task<bool> CreateAsync(AircraftDto dto)
+    public async Task<bool> CreateAsync(AircraftDTO dto)
     {
-        var response = await _http.PostAsJsonAsync("", dto);
+        var response = await _http.PostAsJsonAsync("/api/v1/Aircraft", dto);
         return response.IsSuccessStatusCode;
     }
 
-    public async Task<bool> UpdateAsync(long id, AircraftDto dto)
+    public async Task<bool> UpdateAsync(long id, AircraftDTO dto)
     {
-        var response = await _http.PutAsJsonAsync($"", dto);
+        var response = await _http.PutAsJsonAsync($"/api/v1/Aircraft/{id}", dto);
         return response.IsSuccessStatusCode;
     }
 
     public async Task<bool> DeleteAsync(long id)
     {
-        var response = await _http.DeleteAsync($"");
+        var response = await _http.DeleteAsync($"/api/v1/Aircraft/{id}");
         return response.IsSuccessStatusCode;
     }
 }

@@ -7,10 +7,10 @@ namespace TransportesDosGuri.Core.Interfaces
 {
     public interface IAircraftService
     {
-        Task<List<AircraftDto>> GetAllAsync();
-        Task<AircraftDto?> GetByIdAsync(long id);
-        Task<bool> CreateAsync(AircraftDto dto);
-        Task<bool> UpdateAsync(long id, AircraftDto dto);
+        Task<List<AircraftDTO>> GetAllAsync();
+        Task<AircraftDTO?> GetByIdAsync(long id);
+        Task<bool> CreateAsync(AircraftDTO dto);
+        Task<bool> UpdateAsync(long id, AircraftDTO dto);
         Task<bool> DeleteAsync(long id);
     }
 }

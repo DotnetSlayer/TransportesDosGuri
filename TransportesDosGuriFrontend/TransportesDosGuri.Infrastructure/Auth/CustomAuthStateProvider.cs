@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text.Json;
+using System.Threading.Tasks;
 using TransportesDosGuri.Core.Common;
 
 namespace TransportesDosGuri.Infrastructure.Auth
@@ -26,9 +28,7 @@ namespace TransportesDosGuri.Infrastructure.Auth
 
                 var claims = ParseClaimsFromJwt(accessToken);
                 var identity = new ClaimsIdentity(claims, "jwt", ClaimTypes.Name, ClaimTypes.Role);
-                var user = new ClaimsPrincipal(identity);
-
-                return new AuthenticationState(user);
+                return new AuthenticationState(new ClaimsPrincipal(identity));
             }
             catch
             {
@@ -40,9 +40,7 @@ namespace TransportesDosGuri.Infrastructure.Auth
         {
             var claims = ParseClaimsFromJwt(token);
             var identity = new ClaimsIdentity(claims, "jwt", ClaimTypes.Name, ClaimTypes.Role);
-            var user = new ClaimsPrincipal(identity);
-
-            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(user)));
+            NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(new ClaimsPrincipal(identity))));
         }
 
         public void MarkUserAsLoggedOut()
@@ -50,35 +48,49 @@ namespace TransportesDosGuri.Infrastructure.Auth
             NotifyAuthenticationStateChanged(Task.FromResult(new AuthenticationState(_anonymous)));
         }
 
-        private static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
+        public static IEnumerable<Claim> ParseClaimsFromJwt(string jwt)
         {
-            var payload = jwt.Split('.')[1];
+            var claims = new List<Claim>();
+            var parts = jwt.Split('.');
+            if (parts.Length < 2) return claims;
+
+            var payload = parts[1];
             var jsonBytes = ParseBase64WithoutPadding(payload);
             var keyValuePairs = JsonSerializer.Deserialize<Dictionary<string, object>>(jsonBytes);
-
-            var claims = new List<Claim>();
 
             if (keyValuePairs == null) return claims;
 
             foreach (var kvp in keyValuePairs)
             {
-                var value = kvp.Value?.ToString() ?? "";
-
-                if (kvp.Key == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name" || kvp.Key == "unique_name" || kvp.Key == "sub")
+                var key = kvp.Key;
+                if (kvp.Value is JsonElement element)
                 {
-                    claims.Add(new Claim(ClaimTypes.Name, value));
-                }
-                else if (kvp.Key == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress" || kvp.Key == "email")
-                {
-                    claims.Add(new Claim(ClaimTypes.Email, value));
-                }
-                else if (kvp.Key == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role" || kvp.Key == "role")
-                {
-                    claims.Add(new Claim(ClaimTypes.Role, value));
-                }
-                else
-                {
-                    claims.Add(new Claim(kvp.Key, value));
+                    if (key == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name" || key == "unique_name" || key == "sub")
+                    {
+                        claims.Add(new Claim(ClaimTypes.Name, element.ToString()));
+                    }
+                    else if (key == "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress" || key == "email")
+                    {
+                        claims.Add(new Claim(ClaimTypes.Email, element.ToString()));
+                    }
+                    else if (key == "http://schemas.microsoft.com/ws/2008/06/identity/claims/role" || key == "role")
+                    {
+                        if (element.ValueKind == JsonValueKind.Array)
+                        {
+                            foreach (var item in element.EnumerateArray())
+                            {
+                                claims.Add(new Claim(ClaimTypes.Role, item.ToString()));
+                            }
+                        }
+                        else
+                        {
+                            claims.Add(new Claim(ClaimTypes.Role, element.ToString()));
+                        }
+                    }
+                    else
+                    {
+                        claims.Add(new Claim(key, element.ToString()));
+                    }
                 }
             }
 

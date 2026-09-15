@@ -1,0 +1,191 @@
+﻿@page "/adminHome"
+
+@inject IAircraftService AircraftService
+@inject IFlightService FlightService
+@inject IAirportService AirportService
+
+@using Microsoft.AspNetCore.Authorization
+@using TransportesDosGuri.Core.Interfaces
+@attribute [Authorize]
+<PageTitle>Air Ops · Dashboard</PageTitle>
+
+<div class="min-h-screen bg-[#070a13] text-slate-200 antialiased selection:bg-blue-500/30 selection:text-white">
+    <div class="flex min-h-screen">
+
+        <main class="flex-1 min-w-0 flex flex-col">
+
+            <div class="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
+                <div class="max-w-[1400px] mx-auto space-y-8">
+
+                    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
+                        <div>
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold tracking-widest uppercase bg-blue-500/10 text-blue-300 border border-blue-500/20">
+                                    <span class="w-1 h-1 rounded-full bg-blue-400"></span>
+                                    Visão Geral
+                                </span>
+                            </div>
+                            <h1 class="text-2xl lg:text-3xl font-semibold tracking-tight text-white">Centro de Operações</h1>
+                            <p class="mt-1 text-sm text-slate-500">Métricas em tempo real da frota, voos, aeroportos e tripulação registrada.</p>
+                        </div>
+
+                        <button @onclick="LoadDashboardData" class="h-9 px-3.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 hover:border-slate-700 text-xs font-medium inline-flex items-center gap-2 transition-all">
+                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            Atualizar Dados
+                        </button>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+                        <div class="relative rounded-xl overflow-hidden bg-gradient-to-br from-blue-950/50 to-slate-900/60 border border-blue-900/40 p-5">
+                            <div class="flex items-start justify-between">
+                                <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                                    </svg>
+                                </div>
+                                <a href="/aircrafts" class="text-[11px] text-blue-400 hover:underline">Ver frota →</a>
+                            </div>
+                            <div class="mt-4">
+                                <div class="text-[10px] uppercase tracking-widest text-slate-500 font-medium">Aeronaves Cadastradas</div>
+                                <div class="mt-1 text-3xl font-semibold text-white tabular-nums tracking-tight">
+                                    @if (isLoading)
+                                    {
+                                        <span class="animate-pulse text-slate-600">...</span>
+                                    }
+                                    else
+                                    {
+
+                                        @totalAircrafts
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative rounded-xl overflow-hidden bg-gradient-to-br from-indigo-950/50 to-slate-900/60 border border-indigo-900/40 p-5">
+                            <div class="flex items-start justify-between">
+                                <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <a href="/flights" class="text-[11px] text-indigo-400 hover:underline">Ver voos →</a>
+                            </div>
+                            <div class="mt-4">
+                                <div class="text-[10px] uppercase tracking-widest text-slate-500 font-medium">Total de Voos</div>
+                                <div class="mt-1 text-3xl font-semibold text-white tabular-nums tracking-tight">
+                                    @if (isLoading)
+                                    {
+                                        <span class="animate-pulse text-slate-600">...</span>
+                                    }
+                                    else
+                                    {
+
+                                        @totalFlights
+                                    }
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="relative rounded-xl overflow-hidden bg-gradient-to-br from-emerald-950/50 to-slate-900/60 border border-emerald-900/40 p-5">
+                            <div class="flex items-start justify-between">
+                                <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
+                                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                    </svg>
+                                </div>
+                                <a href="/airports" class="text-[11px] text-emerald-400 hover:underline">Ver base →</a>
+                            </div>
+                            <div class="mt-4">
+                                <div class="text-[10px] uppercase tracking-widest text-slate-500 font-medium">Aeroportos Conectados</div>
+                                <div class="mt-1 text-3xl font-semibold text-white tabular-nums tracking-tight">
+                                    @if (isLoading)
+                                    {
+                                        <span class="animate-pulse text-slate-600">...</span>
+                                    }
+                                    else
+                                    {
+
+                                        @totalAirports
+                                    }
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <section class="rounded-xl overflow-hidden bg-[#0b1020] border border-slate-800/70 p-6 shadow-2xl shadow-black/40">
+                        <h2 class="text-sm font-semibold text-white mb-1">Acesso Rápido aos Módulos</h2>
+                        <p class="text-xs text-slate-500 mb-6">Navegue diretamente para a gestão de dados das entidades da aplicação.</p>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                            <a href="/aircrafts" class="group p-4 rounded-lg bg-slate-900/80 border border-slate-800 hover:border-blue-500/40 hover:bg-slate-900 transition-all">
+                                <div class="text-sm font-medium text-slate-200 group-hover:text-blue-400 transition-colors">Gerenciar Frota</div>
+                                <div class="text-xs text-slate-500 mt-1">Cadastro, atualização e remoção de aeronaves.</div>
+                            </a>
+
+                            <a href="/flights" class="group p-4 rounded-lg bg-slate-900/80 border border-slate-800 hover:border-indigo-500/40 hover:bg-slate-900 transition-all">
+                                <div class="text-sm font-medium text-slate-200 group-hover:text-indigo-400 transition-colors">Painel de Voos</div>
+                                <div class="text-xs text-slate-500 mt-1">Agendamento e monitoramento de rotas.</div>
+                            </a>
+
+                            <a href="/airports" class="group p-4 rounded-lg bg-slate-900/80 border border-slate-800 hover:border-emerald-500/40 hover:bg-slate-900 transition-all">
+                                <div class="text-sm font-medium text-slate-200 group-hover:text-emerald-400 transition-colors">Aeroportos</div>
+                                <div class="text-xs text-slate-500 mt-1">Lista de bases de pouso e decolagem.</div>
+                            </a>
+
+                            <a href="/crew" class="group p-4 rounded-lg bg-slate-900/80 border border-slate-800 hover:border-violet-500/40 hover:bg-slate-900 transition-all">
+                                <div class="text-sm font-medium text-slate-200 group-hover:text-violet-400 transition-colors">Tripulação</div>
+                                <div class="text-xs text-slate-500 mt-1">Pilotos, co-pilotos e comissários de bordo.</div>
+                            </a>
+                        </div>
+                    </section>
+
+
+
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+@code {
+    private int totalAircrafts;
+    private int totalFlights;
+    private int totalAirports;
+    private int totalCrew;
+    private bool isLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDashboardData();
+    }
+
+    private async Task LoadDashboardData()
+    {
+        isLoading = true;
+
+        try
+        {
+            var aircrafts = await AircraftService.GetAllAsync();
+            totalAircrafts = aircrafts?.Count ?? 0;
+
+            var flights = await FlightService.GetAllAsync();
+            totalFlights = flights?.Count ?? 0;
+
+            var airports = await AirportService.GetAllAsync();
+            totalAirports = airports?.Count ?? 0;
+
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar dados do dashboard: {ex.Message}");
+        }
+        finally
+        {
+            isLoading = false;
+        }
+    }
+}

@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Components.Authorization;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Components.Authorization;
+using Microsoft.AspNetCore.Http;
+using System.Security.Claims;
 using System.Net.Http.Json;
-using System.Text;
 using TransportesDosGuri.Core.Common;
 using TransportesDosGuri.Core.DTOs;
 using TransportesDosGuri.Core.Interfaces;
@@ -15,20 +16,23 @@ namespace TransportesDosGuri.Infrastructure.Services
         private readonly HttpClient _httpClient;
         private readonly ITokenStorageService _tokenStorage;
         private readonly AuthenticationStateProvider _authStateProvider;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AuthService(
             HttpClient httpClient,
             ITokenStorageService tokenStorage,
-            AuthenticationStateProvider authStateProvider)
+            AuthenticationStateProvider authStateProvider,
+            IHttpContextAccessor httpContextAccessor)
         {
             _httpClient = httpClient;
             _tokenStorage = tokenStorage;
             _authStateProvider = authStateProvider;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         public async Task<bool> RegisterAsync(RegisterDTO registerDto)
         {
-            var response = await _httpClient.PostAsJsonAsync("", registerDto);
+            var response = await _httpClient.PostAsJsonAsync("/api/v1/Account/Register", registerDto);
             return response.IsSuccessStatusCode;
         }
 
@@ -36,30 +40,42 @@ namespace TransportesDosGuri.Infrastructure.Services
         {
             try
             {
-                var response = await _httpClient.PostAsJsonAsync("", loginDto);
-
-                if (!response.IsSuccessStatusCode)
-                    return false;
+                var response = await _httpClient.PostAsJsonAsync("/api/v1/Account/Login", loginDto);
+                if (!response.IsSuccessStatusCode) return false;
 
                 var result = await response.Content.ReadFromJsonAsync<AuthResponseDTO>();
-
                 var jwtToken = result?.TokenData?.JwtToken;
                 var refreshToken = result?.TokenData?.RefreshToken;
 
                 if (string.IsNullOrEmpty(jwtToken) || string.IsNullOrEmpty(refreshToken))
-                {
-                    Console.WriteLine("[LOGIN ERROR] Token JWT ou RefreshToken não foram encontrados no payload.");
                     return false;
-                }
 
                 await _tokenStorage.SetTokensAsync(jwtToken, refreshToken);
-                ((CustomAuthStateProvider)_authStateProvider).MarkUserAsAuthenticated(jwtToken);
 
+                var context = _httpContextAccessor.HttpContext;
+                if (context != null)
+                {
+                    var claims = CustomAuthStateProvider.ParseClaimsFromJwt(jwtToken);
+                    var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+
+                    var authProperties = new AuthenticationProperties();
+                    authProperties.StoreTokens(new[]
+                    {
+                        new AuthenticationToken { Name = "access_token", Value = jwtToken },
+                        new AuthenticationToken { Name = "refresh_token", Value = refreshToken }
+                    });
+
+                    await context.SignInAsync(
+                        CookieAuthenticationDefaults.AuthenticationScheme,
+                        new ClaimsPrincipal(identity),
+                        authProperties);
+                }
+
+                ((CustomAuthStateProvider)_authStateProvider).MarkUserAsAuthenticated(jwtToken);
                 return true;
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"[LOGIN EXCEPTION] Erro: {ex.Message}");
                 return false;
             }
         }
@@ -69,11 +85,10 @@ namespace TransportesDosGuri.Infrastructure.Services
             try
             {
                 var (accessToken, refreshToken) = await _tokenStorage.GetTokensAsync();
-
                 if (string.IsNullOrEmpty(accessToken) || string.IsNullOrEmpty(refreshToken))
                     return null;
 
-                var response = await _httpClient.PostAsJsonAsync("", new RefreshTokenDTO
+                var response = await _httpClient.PostAsJsonAsync("/api/v1/Account/generate-new-jwt-token", new RefreshTokenDTO
                 {
                     Token = accessToken,
                     RefreshToken = refreshToken
@@ -86,7 +101,6 @@ namespace TransportesDosGuri.Infrastructure.Services
                 }
 
                 var result = await response.Content.ReadFromJsonAsync<AuthResponseDTO>();
-
                 var newJwtToken = result?.TokenData?.JwtToken;
                 var newRefreshToken = result?.TokenData?.RefreshToken;
 
@@ -101,9 +115,8 @@ namespace TransportesDosGuri.Infrastructure.Services
 
                 return newJwtToken;
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"[REFRESH TOKEN EXCEPTION] Erro: {ex.Message}");
                 await LogoutAsync();
                 return null;
             }

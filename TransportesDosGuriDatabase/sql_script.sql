@@ -307,7 +307,7 @@ CREATE TABLE [dbo].[UserRequest] (
     [Price] DECIMAL(18, 2) NOT NULL,
     [DueDate] DATE NOT NULL,
     [ApplicationUserId] BIGINT NOT NULL,
-    [AsaasSubsciptionId] NVARCHAR(100) NULL,
+    [AsaasSubscriptionId] NVARCHAR(100) NULL,
 
     CONSTRAINT [PK_UserRequest] PRIMARY KEY CLUSTERED ([Id] ASC),
     CONSTRAINT [FK_UserRequest_AspNetUsers] FOREIGN KEY ([ApplicationUserId]) REFERENCES [dbo].[AspNetUsers] ([Id])

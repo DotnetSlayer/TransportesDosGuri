@@ -1,0 +1,217 @@
+﻿@page "/adminTrips"
+@rendermode InteractiveServer
+
+@inject ITripService TripService
+@inject IAirportService AirportService
+
+@using TransportesDosGuri.Core.DTOs
+@using TransportesDosGuri.Core.Interfaces
+
+<div class="max-w-6xl mx-auto p-6 space-y-8 text-slate-200">
+
+    <h1 class="text-2xl font-semibold">Viagens</h1>
+
+    <EditForm Model="tripForm" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <InputText class="input" @bind-Value="tripForm.TripName" placeholder="Nome da viagem" />
+            <InputNumber class="input" @bind-Value="tripForm.TotalPrice" step="0.01" placeholder="Preço total (R$)" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+            <InputSelect class="input" @bind-Value="tripForm.OriginAirportId">
+                <option value="0">Origem...</option>
+                @foreach (var airport in airportList)
+                {
+                    <option value="@airport.Id">@airport.Name</option>
+                }
+            </InputSelect>
+
+            <InputSelect class="input" @bind-Value="tripForm.DestinyAirportId">
+                <option value="0">Destino...</option>
+                @foreach (var airport in airportList)
+                {
+                    <option value="@airport.Id">@airport.Name</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+            <InputDate Type="InputDateType.DateTimeLocal" class="input" @bind-Value="tripForm.DepartureTime" />
+            <InputDate Type="InputDateType.DateTimeLocal" class="input" @bind-Value="tripForm.ArrivalTime" />
+        </div>
+
+        <div class="flex justify-end gap-2 mt-3">
+            @if (tripForm.Id != 0)
+            {
+                <button type="button" @onclick="ResetForm" class="btn-secondary">Cancelar</button>
+            }
+            <button type="submit" class="btn-primary">Salvar</button>
+        </div>
+    </EditForm>
+
+    @if (trips == null)
+    {
+        <p class="text-slate-500 text-sm">Carregando...</p>
+    }
+    else if (!trips.Any())
+    {
+        <p class="text-slate-500 text-sm">Nenhuma viagem registrada.</p>
+    }
+    else
+    {
+        <table class="w-full text-sm border-collapse">
+            <thead>
+                <tr class="text-left text-slate-400 border-b border-slate-700">
+                    <th class="py-2 pr-4">ID</th>
+                    <th class="py-2 pr-4">Nome</th>
+                    <th class="py-2 pr-4">Origem</th>
+                    <th class="py-2 pr-4">Destino</th>
+                    <th class="py-2 pr-4">Partida</th>
+                    <th class="py-2 pr-4">Chegada</th>
+                    <th class="py-2 pr-4">Preço</th>
+                    <th class="py-2 text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in trips)
+                {
+                    <tr class="border-b border-slate-800">
+                        <td class="py-2 pr-4 text-slate-500">@item.Id</td>
+                        <td class="py-2 pr-4">@item.TripName</td>
+                        <td class="py-2 pr-4 text-slate-300">@GetAirportName(item.OriginAirportId)</td>
+                        <td class="py-2 pr-4 text-slate-300">@GetAirportName(item.DestinyAirportId)</td>
+                        <td class="py-2 pr-4 font-mono text-xs text-slate-400">@item.DepartureTime.ToString("g")</td>
+                        <td class="py-2 pr-4 font-mono text-xs text-slate-400">@item.ArrivalTime.ToString("g")</td>
+                        <td class="py-2 pr-4 font-mono text-xs text-emerald-400">@item.TotalPrice.ToString("C")</td>
+                        <td class="py-2 text-right space-x-2">
+                            <button @onclick="() => Edit(item)" class="link">Editar</button>
+                            <button @onclick="() => Delete(item.Id)" class="link-danger">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<style>
+    .input {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 6px;
+        color: #e2e8f0;
+        font-size: 0.875rem;
+        outline: none;
+    }
+
+        .input:focus {
+            border-color: #3b82f6;
+        }
+
+    .btn-primary {
+        padding: 0.5rem 1.25rem;
+        background: #2563eb;
+        color: white;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+    }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+    .btn-secondary {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        color: #94a3b8;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+
+        .btn-secondary:hover {
+            background: #1e293b;
+        }
+
+    .link {
+        color: #93c5fd;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+    .link-danger {
+        color: #fca5a5;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+        .link-danger:hover {
+            text-decoration: underline;
+        }
+</style>
+
+@code {
+    private List<TripDTO>? trips;
+    private List<AirportDTO> airportList = new();
+    private TripDTO tripForm = new() { DepartureTime = DateTime.Now, ArrivalTime = DateTime.Now.AddDays(1) };
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAirports();
+        await LoadTrips();
+    }
+
+    private async Task LoadAirports() => airportList = await AirportService.GetAllAsync() ?? new();
+    private async Task LoadTrips() => trips = await TripService.GetAllAsync();
+
+    private async Task Save()
+    {
+        if (tripForm.Id == 0)
+            await TripService.CreateAsync(tripForm);
+        else
+            await TripService.UpdateAsync(tripForm.Id, tripForm);
+
+        ResetForm();
+        await LoadTrips();
+    }
+
+    private void Edit(TripDTO item)
+    {
+        tripForm = new TripDTO
+        {
+            Id = item.Id,
+            TripName = item.TripName,
+            OriginAirportId = item.OriginAirportId,
+            DestinyAirportId = item.DestinyAirportId,
+            DepartureTime = item.DepartureTime,
+            ArrivalTime = item.ArrivalTime,
+            TotalPrice = item.TotalPrice
+        };
+    }
+
+    private async Task Delete(long id)
+    {
+        await TripService.DeleteAsync(id);
+        await LoadTrips();
+    }
+
+    private void ResetForm() => tripForm = new TripDTO { DepartureTime = DateTime.Now, ArrivalTime = DateTime.Now.AddDays(1) };
+
+    private string GetAirportName(long id) =>
+        airportList.FirstOrDefault(a => a.Id == id)?.Name ?? id.ToString();
+}

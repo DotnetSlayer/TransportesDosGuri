@@ -1,0 +1,309 @@
+﻿@page "/"
+@page "/index"
+@page "/login"
+@page "/register"
+
+@rendermode InteractiveServer
+@layout EmptyLayout
+
+@using Microsoft.AspNetCore.Components.Forms
+@using TransportesDosGuri.Core.DTOs
+@using TransportesDosGuri.Core.Interfaces
+
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>@(showRegister ? "Registro" : "Login") - Transportes dos Guri</PageTitle>
+
+<div class="min-h-screen w-full flex bg-[#060810] text-slate-200 antialiased font-sans selection:bg-purple-500/30 selection:text-white overflow-hidden">
+
+    <div class="w-full lg:w-1/2 flex flex-col justify-between p-8 sm:p-12 xl:p-16 relative z-10 bg-[#060810]/95 backdrop-blur-md">
+
+        <div class="my-auto max-w-md w-full mx-auto py-8">
+
+            <div class="flex justify-center mb-8">
+                <img src="/images/logo.png"
+                     alt="Transportes dos Guri"
+                     class="w-64 sm:w-72 lg:w-80 h-auto object-contain brightness-0 invert drop-shadow-[0_0_25px_rgba(255,255,255,0.15)]" />
+            </div>
+
+            <div class="flex p-1 mb-8 rounded-xl bg-slate-950/80 border border-slate-800">
+
+                <button type="button"
+                        @onclick="() => showRegister = false"
+                        class="@(!showRegister
+                                                    ? "bg-gradient-to-r from-indigo-600 via-purple-600 to-purple-500 text-white shadow-lg"
+                                                    : "text-slate-500 hover:text-slate-300")
+                    flex-1 h-10 rounded-lg text-xs font-semibold transition-all duration-200">
+                    Entrar
+                </button>
+
+                <button type="button"
+                        @onclick="() => showRegister = true"
+                        class="@(showRegister
+                                                    ? "bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-500 text-white shadow-lg"
+                                                    : "text-slate-500 hover:text-slate-300")
+                    flex-1 h-10 rounded-lg text-xs font-semibold transition-all duration-200">
+                    Criar conta
+                </button>
+
+            </div>
+
+            @if (!showRegister)
+            {
+
+                <h1 class="text-3xl sm:text-4xl font-bold text-white tracking-tight text-center">
+                    Faça seu Login<span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500">.</span>
+                </h1>
+
+                <p class="mt-2 text-xs text-slate-400 text-center">
+                    Entre com suas credenciais para acessar o painel de operações.
+                </p>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="mt-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-xs text-red-400">
+                        <svg class="w-4 h-4 shrink-0"
+                             fill="none"
+                             stroke="currentColor"
+                             viewBox="0 0 24 24">
+                            <path stroke-linecap="round"
+                                  stroke-linejoin="round"
+                                  stroke-width="2"
+                                  d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+
+                        <span>@errorMessage</span>
+                    </div>
+                }
+
+                <form action="/api/auth/login" method="post" class="mt-8 space-y-5">
+
+                    <AntiforgeryToken />
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-2">
+                            Email
+                        </label>
+
+                        <input type="email"
+                               name="Email"
+                               value="@LoginModel.Email"
+                               placeholder="Seu email"
+                               required
+                               class="relative w-full h-12 px-4 rounded-xl bg-slate-950/90 border border-slate-800 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-purple-500/60 transition-all" />
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-2">
+                            Senha
+                        </label>
+
+                        <input type="password"
+                               name="Password"
+                               placeholder="Sua senha"
+                               required
+                               class="relative w-full h-12 px-4 rounded-xl bg-slate-950/90 border border-slate-800 text-sm text-slate-100 placeholder:text-slate-600 focus:outline-none focus:border-purple-500/60 transition-all" />
+                    </div>
+
+                    <div class="flex justify-end">
+                        <a href="#"
+                           class="text-xs text-slate-400 hover:text-slate-200 underline underline-offset-4">
+                            Esqueci minha senha
+                        </a>
+                    </div>
+
+                    <button type="submit"
+                            class="w-full h-12 mt-4 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-500 hover:opacity-90 active:scale-[0.99] text-white text-sm font-semibold tracking-wide shadow-lg shadow-purple-950/50 transition-all">
+                        Entrar
+                    </button>
+
+                </form>
+            }
+            else
+            {
+
+                <h1 class="text-3xl sm:text-4xl font-bold text-white tracking-tight text-center">
+                    Criar conta<span class="text-transparent bg-clip-text bg-gradient-to-r from-pink-500 via-purple-500 to-indigo-500">.</span>
+                </h1>
+
+                <p class="mt-2 text-xs text-slate-400 text-center">
+                    Cadastre-se para acessar o painel de operações.
+                </p>
+
+                @if (!string.IsNullOrEmpty(errorMessage))
+                {
+                    <div class="mt-6 p-3.5 rounded-xl bg-red-500/10 border border-red-500/20 flex items-center gap-3 text-xs text-red-400">
+                        <span>@errorMessage</span>
+                    </div>
+                }
+
+                <EditForm Model="RegisterModel"
+                          OnValidSubmit="HandleRegister"
+                          FormName="registerForm"
+                          class="mt-8 space-y-4">
+
+                    <DataAnnotationsValidator />
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                        <InputText @bind-Value="RegisterModel.Name"
+                                   class="input"
+                                   placeholder="Nome" />
+
+                        <InputText @bind-Value="RegisterModel.LastName"
+                                   class="input"
+                                   placeholder="Sobrenome" />
+
+                        <InputText @bind-Value="RegisterModel.Email"
+                                   type="email"
+                                   class="input sm:col-span-2"
+                                   placeholder="E-mail" />
+
+                        <InputText @bind-Value="RegisterModel.Password"
+                                   type="password"
+                                   class="input"
+                                   placeholder="Senha" />
+
+                        <InputText @bind-Value="RegisterModel.IdentityNumber"
+                                   class="input"
+                                   placeholder="CPF/CNPJ" />
+                    </div>
+
+                    <p class="text-xs text-slate-500 mt-4">
+                        Endereço
+                    </p>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+                        <InputText @bind-Value="RegisterModel.ZipCode"
+                                   class="input"
+                                   placeholder="CEP" />
+
+                        <InputNumber @bind-Value="RegisterModel.AddressNumber"
+                                     class="input"
+                                     placeholder="Número" />
+
+                        <InputText @bind-Value="RegisterModel.Address"
+                                   class="input sm:col-span-2"
+                                   placeholder="Rua / Logradouro" />
+
+                        <InputText @bind-Value="RegisterModel.District"
+                                   class="input"
+                                   placeholder="Bairro" />
+
+                        <InputText @bind-Value="RegisterModel.City"
+                                   class="input"
+                                   placeholder="Cidade" />
+
+                        <InputText @bind-Value="RegisterModel.State"
+                                   class="input"
+                                   maxlength="2"
+                                   placeholder="UF" />
+                    </div>
+
+                    <button type="submit"
+                            disabled="@isSubmitting"
+                            class="w-full h-12 mt-4 rounded-xl bg-gradient-to-r from-indigo-600 via-purple-600 to-amber-500 hover:opacity-90 text-white text-sm font-semibold shadow-lg shadow-purple-950/50 transition-all disabled:opacity-50">
+
+                        @(isSubmitting ? "Cadastrando..." : "Cadastrar")
+
+                    </button>
+
+                </EditForm>
+            }
+
+        </div>
+
+        <div class="text-center sm:text-left text-[20px] text-slate-600 font-mono">
+            @DateTime.Now.Year | Desenvolvido pelos
+            <span class="text-slate-500">Guris</span>
+        </div>
+
+    </div>
+
+    <div class="hidden lg:block lg:w-1/2 relative">
+
+        <img src="/images/plane.png"
+             alt="Aeronave em voo"
+             class="absolute inset-0 w-full h-full object-cover object-center" />
+
+        <div class="absolute inset-0 bg-gradient-to-r from-[#060810] via-[#060810]/40 to-transparent"></div>
+
+        <div class="absolute inset-0 bg-gradient-to-t from-[#060810] via-transparent to-transparent"></div>
+
+    </div>
+
+</div>
+
+<style>
+    .input {
+        width: 100%;
+        height: 3rem;
+        padding: 0 1rem;
+        background: rgba(2, 6, 23, 0.9);
+        border: 1px solid #1e293b;
+        border-radius: 0.75rem;
+        color: #e2e8f0;
+        font-size: 0.875rem;
+        outline: none;
+        transition: all 0.2s;
+    }
+
+        .input:focus {
+            border-color: rgba(168, 85, 247, 0.6);
+        }
+</style>
+
+@code {
+
+    [SupplyParameterFromQuery]
+    public string? Error { get; set; }
+
+    private bool showRegister = false;
+
+    private LoginDTO LoginModel { get; set; } = new();
+    private RegisterDTO RegisterModel { get; set; } = new();
+
+    private string? errorMessage;
+    private bool isSubmitting = false;
+
+    protected override void OnInitialized()
+    {
+        if (Error == "InvalidCredentials")
+        {
+            errorMessage = "E-mail ou senha inválidos.";
+        }
+        else if (Error == "InvalidToken")
+        {
+            errorMessage = "Erro ao processar a autenticação. Tente novamente.";
+        }
+    }
+
+    private async Task HandleRegister()
+    {
+        errorMessage = null;
+        isSubmitting = true;
+
+        try
+        {
+            var success = await AuthService.RegisterAsync(RegisterModel);
+
+            if (success)
+            {
+                showRegister = false;
+                LoginModel.Email = RegisterModel.Email;
+                RegisterModel = new();
+                errorMessage = "Conta criada com sucesso! Agora faça login.";
+            }
+            else
+            {
+                errorMessage = "Falha ao realizar o cadastro.";
+            }
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}

@@ -13,7 +13,7 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RoleManager<ApplicationRole> _roleManager; // Adicionado para gerenciar Roles se necessário
+        private readonly RoleManager<ApplicationRole> _roleManager; 
         private readonly IJwtService _jwtService;
 
         public IdentityService(
@@ -62,7 +62,6 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
                 return (false, null, new[] { "Invalid JWT Access Token!" });
             }
 
-            // AJUSTE: Buscando pelo ClaimTypes.Email (ou NameIdentifier/ID dependendo da sua convenção)
             string? email = principal.FindFirstValue(ClaimTypes.Email);
 
             if (string.IsNullOrEmpty(email))
@@ -77,7 +76,6 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
                 return (false, null, new[] { "Invalid Refresh Token!" });
             }
 
-            // AJUSTE: Uso de 'await'
             AuthenticationResponseDTO authenticationResponse = await _jwtService.CreateJwtToken(user);
 
             user.RefreshToken = authenticationResponse.RefreshToken;
@@ -123,7 +121,6 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
                 return (false, new[] { "Wrong Username or Password!" }, null, null);
             }
 
-            // AJUSTE: Uso de 'await'
             var authenticationResponse = await _jwtService.CreateJwtToken(user);
 
             user.RefreshToken = authenticationResponse.RefreshToken;
@@ -158,7 +155,6 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
                 return (false, result.Errors.Select(e => e.Description), null);
             }
 
-            // ATENÇÃO: Atribuindo Role padrão (ex: "User" ou "Admin") no cadastro do usuário
             const string defaultRole = "User";
             if (!await _roleManager.RoleExistsAsync(defaultRole))
             {
@@ -213,7 +209,6 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
                 return (false, new[] { "Invalid JWT Access Token!" });
             }
 
-            // AJUSTE: Buscando pelo ClaimTypes.Email
             string? email = principal.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email))
             {

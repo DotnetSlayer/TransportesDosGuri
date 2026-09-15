@@ -6,8 +6,8 @@ namespace TransportesDosGuri.Core.Common
 {
     public interface ITokenStorageService
     {
-        Task SetTokensAsync(string accessToken, string refreshToken);
-        Task<(string? AccessToken, string? RefreshToken)> GetTokensAsync();
-        Task ClearTokensAsync();
+        ValueTask SetTokensAsync(string accessToken, string refreshToken);
+        ValueTask<(string? AccessToken, string? RefreshToken)> GetTokensAsync();
+        ValueTask ClearTokensAsync();
     }
 }

@@ -21,4 +21,8 @@
     <ProjectReference Include="..\TransportesDosGuri.Infrastructure\TransportesDosGuri.Infrastructure.csproj" />
   </ItemGroup>
 
+  <Target Name="Tailwind" BeforeTargets="Build">
+    <Exec Command="npx @tailwindcss/cli -i ./Styles/app.css -o ./wwwroot/css/app.css --minify" />
+  </Target>
+
 </Project>

@@ -1,32 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
+using System.Threading.Tasks;
 using TransportesDosGuri.Core.Common;
 
 namespace TransportesDosGuri.Infrastructure.Auth
 {
     public class TokenStorageService : ITokenStorageService
     {
-        private string? _accessToken;
-        private string? _refreshToken;
+        private readonly IHttpContextAccessor _httpContextAccessor;
+        private static string? _cachedAccessToken;
+        private static string? _cachedRefreshToken;
 
-        public Task ClearTokensAsync()
+        public TokenStorageService(IHttpContextAccessor httpContextAccessor)
         {
-            _accessToken = null;
-            _refreshToken = null;
-            return Task.CompletedTask;
+            _httpContextAccessor = httpContextAccessor;
         }
 
-        public Task<(string? AccessToken, string? RefreshToken)> GetTokensAsync()
+        public ValueTask SetTokensAsync(string accessToken, string refreshToken)
         {
-            return Task.FromResult((_accessToken, _refreshToken));
+            _cachedAccessToken = accessToken;
+            _cachedRefreshToken = refreshToken;
+            return ValueTask.CompletedTask;
         }
 
-        public Task SetTokensAsync(string accessToken, string refreshToken)
+        public async ValueTask<(string? AccessToken, string? RefreshToken)> GetTokensAsync()
         {
-            _accessToken = accessToken;
-            _refreshToken = refreshToken;
-            return Task.CompletedTask;
+            var context = _httpContextAccessor.HttpContext;
+            if (context != null)
+            {
+                var token = await context.GetTokenAsync("access_token");
+                var refresh = await context.GetTokenAsync("refresh_token");
+                if (!string.IsNullOrEmpty(token))
+                    return (token, refresh);
+            }
+
+            return (_cachedAccessToken, _cachedRefreshToken);
+        }
+
+        public ValueTask ClearTokensAsync()
+        {
+            _cachedAccessToken = null;
+            _cachedRefreshToken = null;
+            return ValueTask.CompletedTask;
         }
     }
 }

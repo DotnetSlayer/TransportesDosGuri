@@ -1,0 +1,242 @@
+﻿@page "/adminFlights"
+@rendermode InteractiveServer
+
+@inject IFlightService FlightService
+@inject IAircraftService AircraftService
+@inject IAirportService AirportService
+@inject ITripService TripService
+
+@using TransportesDosGuri.Core.DTOs
+@using TransportesDosGuri.Core.Interfaces
+
+<div class="max-w-6xl mx-auto p-6 space-y-8 text-slate-200">
+
+    <h1 class="text-2xl font-semibold">Voos</h1>
+
+    <!-- Form -->
+    <EditForm Model="flightForm" OnValidSubmit="Save">
+        <DataAnnotationsValidator />
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            <InputSelect class="input" @bind-Value="flightForm.AircraftId">
+                <option value="0">Aeronave...</option>
+                @foreach (var aircraft in aircraftList)
+                {
+                    <option value="@aircraft.Id">@aircraft.Model</option>
+                }
+            </InputSelect>
+
+            <InputSelect class="input" @bind-Value="flightForm.TripId">
+                <option value="0">Viagem...</option>
+                @foreach (var trip in tripList)
+                {
+                    <option value="@trip.Id">Viagem #@trip.Id</option>
+                }
+            </InputSelect>
+
+            <InputNumber class="input" @bind-Value="flightForm.BasePrice" step="0.01" placeholder="Preço base (R$)" />
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+            <InputSelect class="input" @bind-Value="flightForm.OriginAirportId">
+                <option value="0">Origem...</option>
+                @foreach (var airport in airportList)
+                {
+                    <option value="@airport.Id">@airport.Name (@airport.City)</option>
+                }
+            </InputSelect>
+
+            <InputSelect class="input" @bind-Value="flightForm.DestinyAirportId">
+                <option value="0">Destino...</option>
+                @foreach (var airport in airportList)
+                {
+                    <option value="@airport.Id">@airport.Name (@airport.City)</option>
+                }
+            </InputSelect>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+            <InputDate Type="InputDateType.DateTimeLocal" class="input" @bind-Value="flightForm.DepartureTime" />
+            <InputDate Type="InputDateType.DateTimeLocal" class="input" @bind-Value="flightForm.ArrivalTime" />
+        </div>
+
+        <div class="flex justify-end gap-2 mt-3">
+            @if (flightForm.Id != 0)
+            {
+                <button type="button" @onclick="ResetForm" class="btn-secondary">Cancelar</button>
+            }
+            <button type="submit" class="btn-primary">Salvar</button>
+        </div>
+    </EditForm>
+
+    <!-- Table -->
+    @if (flights == null)
+    {
+        <p class="text-slate-500 text-sm">Carregando...</p>
+    }
+    else if (!flights.Any())
+    {
+        <p class="text-slate-500 text-sm">Nenhum voo agendado.</p>
+    }
+    else
+    {
+        <table class="w-full text-sm border-collapse">
+            <thead>
+                <tr class="text-left text-slate-400 border-b border-slate-700">
+                    <th class="py-2 pr-4">ID</th>
+                    <th class="py-2 pr-4">Aeronave</th>
+                    <th class="py-2 pr-4">Rota</th>
+                    <th class="py-2 pr-4">Partida</th>
+                    <th class="py-2 pr-4">Chegada</th>
+                    <th class="py-2 pr-4">Preço</th>
+                    <th class="py-2 text-right">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var item in flights)
+                {
+                    <tr class="border-b border-slate-800">
+                        <td class="py-2 pr-4 text-slate-500">@item.Id</td>
+                        <td class="py-2 pr-4">@(item.AircraftModel ?? item.AircraftId.ToString())</td>
+                        <td class="py-2 pr-4 text-slate-300">
+                            @(item.OriginAirportName ?? item.OriginAirportId.ToString())
+                            →
+                            @(item.DestinyAirportName ?? item.DestinyAirportId.ToString())
+                        </td>
+                        <td class="py-2 pr-4 font-mono text-xs text-slate-400">@item.DepartureTime.ToString("dd/MM/yy HH:mm")</td>
+                        <td class="py-2 pr-4 font-mono text-xs text-slate-400">@item.ArrivalTime.ToString("dd/MM/yy HH:mm")</td>
+                        <td class="py-2 pr-4 font-mono text-xs text-emerald-400">@item.BasePrice.ToString("C")</td>
+                        <td class="py-2 text-right space-x-2">
+                            <button @onclick="() => Edit(item)" class="link">Editar</button>
+                            <button @onclick="() => Delete(item.Id)" class="link-danger">Excluir</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>
+
+<style>
+    .input {
+        width: 100%;
+        padding: 0.5rem 0.75rem;
+        background: #0f172a;
+        border: 1px solid #1e293b;
+        border-radius: 6px;
+        color: #e2e8f0;
+        font-size: 0.875rem;
+        outline: none;
+    }
+
+        .input:focus {
+            border-color: #3b82f6;
+        }
+
+    .btn-primary {
+        padding: 0.5rem 1.25rem;
+        background: #2563eb;
+        color: white;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        font-weight: 500;
+        border: none;
+        cursor: pointer;
+    }
+
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+
+    .btn-secondary {
+        padding: 0.5rem 1rem;
+        background: transparent;
+        color: #94a3b8;
+        border: 1px solid #334155;
+        border-radius: 6px;
+        font-size: 0.875rem;
+        cursor: pointer;
+    }
+
+        .btn-secondary:hover {
+            background: #1e293b;
+        }
+
+    .link {
+        color: #93c5fd;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+        .link:hover {
+            text-decoration: underline;
+        }
+
+    .link-danger {
+        color: #fca5a5;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.8rem;
+    }
+
+        .link-danger:hover {
+            text-decoration: underline;
+        }
+</style>
+
+@code {
+    private List<FlightDTO>? flights;
+    private List<AircraftDTO> aircraftList = new();
+    private List<AirportDTO> airportList = new();
+    private List<TripDTO> tripList = new();
+    private FlightDTO flightForm = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDropdownData();
+        await LoadFlights();
+    }
+
+    private async Task LoadDropdownData()
+    {
+        aircraftList = await AircraftService.GetAllAsync() ?? new();
+        airportList = await AirportService.GetAllAsync() ?? new();
+        tripList = await TripService.GetAllAsync() ?? new();
+    }
+
+    private async Task LoadFlights() => flights = await FlightService.GetAllAsync();
+
+    private async Task Save()
+    {
+        if (flightForm.Id == 0) await FlightService.CreateAsync(flightForm);
+        else await FlightService.UpdateAsync(flightForm.Id, flightForm);
+
+        ResetForm();
+        await LoadFlights();
+    }
+
+    private void Edit(FlightDTO item)
+    {
+        flightForm = new FlightDTO
+        {
+            Id = item.Id,
+            AircraftId = item.AircraftId,
+            OriginAirportId = item.OriginAirportId,
+            DestinyAirportId = item.DestinyAirportId,
+            DepartureTime = item.DepartureTime,
+            ArrivalTime = item.ArrivalTime,
+            BasePrice = item.BasePrice,
+            TripId = item.TripId
+        };
+    }
+
+    private async Task Delete(long id)
+    {
+        await FlightService.DeleteAsync(id);
+        await LoadFlights();
+    }
+
+    private void ResetForm() => flightForm = new FlightDTO();
+}
