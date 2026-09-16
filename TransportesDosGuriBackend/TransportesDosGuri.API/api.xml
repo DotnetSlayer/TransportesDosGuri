@@ -164,6 +164,11 @@
             Endpoint to GENERATE a new and valid USER ACCESS TOKEN 
             </summary>
         </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.Logout(TransportesDosGuri.Core.Application.DTOs.Jwt.TokenModelDTO)">
+            <summary>
+            Endpoint to Logout a valid USER session 
+            </summary>
+        </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.GetAllAsync">
             <summary>
             Endpoint to GET ALL data stored in the Purchase Table

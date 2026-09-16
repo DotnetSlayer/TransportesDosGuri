@@ -1,1 +1,5 @@
 ﻿@import "tailwindcss";
+@config "../tailwind.config.js";
+@source "../**/*.razor";
+@source "../**/*.html";
+@source "../**/*.cshtml";

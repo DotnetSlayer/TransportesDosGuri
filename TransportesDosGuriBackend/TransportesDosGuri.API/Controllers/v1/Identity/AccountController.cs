@@ -67,7 +67,6 @@ namespace TransportesDosGuri.API.Controllers.v1.Identity
         /// Endpoint to GET USER BY ID in AspNetUsers Table
         /// </summary>
         [HttpGet("{id}")]
-        [AllowAnonymous]
         public async Task<IActionResult> GetById(long id)
         {
             var user = await _identityService.GetByIdAsync(id);
@@ -142,6 +141,23 @@ namespace TransportesDosGuri.API.Controllers.v1.Identity
             }
 
             return Ok(response);
+        }
+
+        /// <summary>
+        /// Endpoint to Logout a valid USER session 
+        /// </summary>
+        [HttpPost("Logout")]
+        [Authorize] // Garante que apenas usuários autenticados chamem ou passe os tokens via body
+        public async Task<IActionResult> Logout([FromBody] TokenModelDTO tokenModel)
+        {
+            var (success, errors) = await _identityService.LogoutAsync(tokenModel);
+
+            if (!success)
+            {
+                return BadRequest(new { Errors = errors });
+            }
+
+            return Ok(new { Message = "User Successfully Logged Out!" });
         }
     }
 }

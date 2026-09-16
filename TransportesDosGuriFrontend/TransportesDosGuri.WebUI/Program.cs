@@ -24,7 +24,8 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.Cookie.HttpOnly = true;
         options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
         options.Cookie.SameSite = SameSiteMode.Strict;
-        options.LoginPath = "/login";
+        options.LoginPath = "/error";
+        options.AccessDeniedPath = "/error";
     });
 
 builder.Services.AddCascadingAuthenticationState();

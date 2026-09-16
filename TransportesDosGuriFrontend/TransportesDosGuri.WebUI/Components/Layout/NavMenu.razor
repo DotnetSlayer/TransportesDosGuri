@@ -2,73 +2,428 @@
 
 @using System.Security.Claims
 @using Microsoft.AspNetCore.Components.Authorization
+@using Microsoft.EntityFrameworkCore.Metadata.Internal
 @using TransportesDosGuri.Core.Interfaces
 
 @inject IAuthService AuthService
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider AuthStateProvider
 
-<aside class="hidden lg:flex flex-col w-56 shrink-0 h-screen sticky top-0 border-r border-slate-800/60">
+<aside class="admin-sidebar hidden lg:flex flex-col w-60 shrink-0 h-screen sticky top-0">
 
-    <div class="h-14 px-4 flex items-center text-sm font-semibold text-white">
-        Dos Guri · Air Ops
+    <!-- BACKGROUND EFFECTS -->
+    <div class="sidebar-effects">
+        <div class="sidebar-orb sidebar-orb-indigo"></div>
+        <div class="sidebar-orb sidebar-orb-purple"></div>
+        <div class="sidebar-grid"></div>
     </div>
 
-    <nav class="flex-1 overflow-y-auto px-2 py-4 space-y-1 text-sm">
+    <!-- HEADER / LOGO -->
+    <div class="sidebar-header">
+        <div class="sidebar-logo">
+            <div class="logo-mark">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M2 12h20M12 2v20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+                </svg>
+            </div>
+            <div class="logo-text">
+                <strong>Transportes Dos Guri</strong>
+                <span>ADMIN</span>
+            </div>
+        </div>
+    </div>
 
-        <p class="px-3 pt-2 text-xs text-slate-600">Operações</p>
-        <NavLink href="adminHome" Match="NavLinkMatch.All" class="nav-item">Dashboard</NavLink>
-        <NavLink href="adminAircrafts" class="nav-item">Aeronaves</NavLink>
-        <NavLink href="adminFlights" class="nav-item">Voos</NavLink>
-        <NavLink href="adminAirports" class="nav-item">Aeroportos</NavLink>
-        <NavLink href="adminSchedules" class="nav-item">Escalas</NavLink>
-        <NavLink href="adminTrips" class="nav-item">Viagens</NavLink>
-        <NavLink href="adminSeats" class="nav-item">Assentos</NavLink>
-        <NavLink href="adminFlightSeats" class="nav-item">Assentos de Voos</NavLink>
+    <!-- NAV -->
+    <nav class="sidebar-nav">
 
-        <p class="px-3 pt-4 text-xs text-slate-600">Comercial</p>
-        <NavLink href="adminPurchases" class="nav-item">Compras</NavLink>
-        <NavLink href="adminReservations" class="nav-item">Reservas</NavLink>
+        <div class="nav-group">
+            <p class="nav-label">Operações</p>
+            <NavLink href="adminHome" Match="NavLinkMatch.All" class="nav-item">
+                <span class="nav-dot"></span>
+                <span class="nav-text">Dashboard</span>
+            </NavLink>
+            <NavLink href="adminAircrafts" class="nav-item">
+                <span class="nav-dot"></span><span class="nav-text">Aeronaves</span>
+            </NavLink>
+            <NavLink href="adminFlights" class="nav-item">
+                <span class="nav-dot"></span><span class="nav-text">Voos</span>
+            </NavLink>
+            <NavLink href="adminAirports" class="nav-item">
+                <span class="nav-dot"></span><span class="nav-text">Aeroportos</span>
+            </NavLink>
+            <NavLink href="adminSchedules" class="nav-item">
+                <span class="nav-dot"></span><span class="nav-text">Escalas</span>
+            </NavLink>
+            <NavLink href="adminTrips" class="nav-item">
+                <span class="nav-dot"></span><span class="nav-text">Viagens</span>
+            </NavLink>
+            <NavLink href="adminSeats" class="nav-item">
+                <span class="nav-dot"></span><span class="nav-text">Assentos</span>
+            </NavLink>
+            <NavLink href="adminFlightSeats" class="nav-item">
+                <span class="nav-dot"></span><span class="nav-text">Assentos de Voos</span>
+            </NavLink>
+        </div>
 
-        <p class="px-3 pt-4 text-xs text-slate-600">Sistema</p>
-        <NavLink href="adminUsers" class="nav-item">Usuários</NavLink>
-        <NavLink href="adminUserRequests" class="nav-item">Solicitações</NavLink>
-        <NavLink href="adminAsaasIntegrations" class="nav-item">Integrações Asaas</NavLink>
+        <div class="nav-group">
+            <p class="nav-label">Comercial</p>
+            <NavLink href="adminPurchases" class="nav-item">
+                <span class="nav-dot"></span><span class="nav-text">Compras</span>
+            </NavLink>
+            <NavLink href="adminReservations" class="nav-item">
+                <span class="nav-dot"></span><span class="nav-text">Reservas</span>
+            </NavLink>
+        </div>
 
-        <p class="px-3 pt-4 text-xs text-slate-600">Conta</p>
-        @if (!isAuthenticated)
-        {
-            <NavLink href="account/login" class="nav-item">Login</NavLink>
-            <NavLink href="account/register" class="nav-item">Registrar-se</NavLink>
-        }
-        else
-        {
-            <button type="button" @onclick="Logout" class="nav-item text-left w-full">Sair</button>
-        }
+        <div class="nav-group">
+            <p class="nav-label">Sistema</p>
+            <NavLink href="adminUsers" class="nav-item">
+                <span class="nav-dot"></span><span class="nav-text">Usuários</span>
+            </NavLink>
+            <NavLink href="adminUserRequests" class="nav-item">
+                <span class="nav-dot"></span><span class="nav-text">Solicitações</span>
+            </NavLink>
+            <NavLink href="adminAsaasIntegrations" class="nav-item">
+                <span class="nav-dot"></span><span class="nav-text">Integrações Asaas</span>
+            </NavLink>
+        </div>
+
+        <div class="nav-group">
+            <p class="nav-label">Conta</p>
+
+            @if (!isAuthenticated)
+            {
+                <NavLink href="account/login" class="nav-item">
+                    <span class="nav-dot"></span><span class="nav-text">Login</span>
+                </NavLink>
+                <NavLink href="account/register" class="nav-item">
+                    <span class="nav-dot"></span><span class="nav-text">Registrar-se</span>
+                </NavLink>
+            }
+            else
+            {
+                <button type="button" @onclick="Logout" class="nav-item nav-item-button">
+                    <span class="nav-dot"></span><span class="nav-text">Sair</span>
+                </button>
+            }
+        </div>
+
     </nav>
 
-    <div class="p-3 border-t border-slate-800/60 text-xs text-slate-500 truncate">
-        @userName
+    <!-- USER FOOTER -->
+    <div class="sidebar-user">
+        <div class="user-avatar">
+            @GetInitials(userName)
+        </div>
+        <div class="user-info">
+            <span class="user-status"></span>
+            <span class="user-name">@userName</span>
+        </div>
     </div>
+
 </aside>
 
 <style>
+    /* =========================================================
+           SIDEBAR SHELL
+        ========================================================= */
+    .admin-sidebar {
+        position: relative;
+        background: #03050b;
+        border-right: 1px solid rgba(255, 255, 255, 0.06);
+        color: #e2e8f0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        overflow: hidden;
+    }
+
+    /* =========================================================
+           BACKGROUND
+        ========================================================= */
+    .sidebar-effects {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        overflow: hidden;
+    }
+
+    .sidebar-orb {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(90px);
+        opacity: 0.28;
+        animation: sidebarFloat 14s ease-in-out infinite alternate;
+    }
+
+    .sidebar-orb-indigo {
+        width: 260px;
+        height: 260px;
+        background: #4f46e5;
+        left: -140px;
+        top: -100px;
+    }
+
+    .sidebar-orb-purple {
+        width: 280px;
+        height: 280px;
+        background: #9333ea;
+        right: -160px;
+        bottom: -120px;
+        animation-delay: -5s;
+    }
+
+    .sidebar-grid {
+        position: absolute;
+        inset: 0;
+        opacity: 0.03;
+        background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+        background-size: 42px 42px;
+    }
+
+    @@keyframes sidebarFloat {
+        from {
+            transform: translate3d(0,0,0) scale(1);
+        }
+
+        to {
+            transform: translate3d(30px,-25px,0) scale(1.08);
+        }
+    }
+
+    /* =========================================================
+           HEADER
+        ========================================================= */
+    .sidebar-header {
+        position: relative;
+        z-index: 1;
+        padding: 18px 16px 14px;
+        border-bottom: 1px solid rgba(255,255,255,.05);
+    }
+
+    .sidebar-logo {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+    }
+
+    .logo-mark {
+        width: 38px;
+        height: 38px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 12px;
+        color: #c4b5fd;
+        background: linear-gradient(135deg, rgba(79,70,229,.22), rgba(147,51,234,.18));
+        border: 1px solid rgba(139,92,246,.25);
+        box-shadow: inset 0 1px rgba(255,255,255,.08), 0 8px 22px rgba(99,102,241,.18);
+    }
+
+        .logo-mark svg {
+            width: 18px;
+            height: 18px;
+        }
+
+    .logo-text {
+        display: flex;
+        flex-direction: column;
+        line-height: 1.15;
+        min-width: 0;
+    }
+
+        .logo-text strong {
+            font-size: 13px;
+            font-weight: 800;
+            letter-spacing: -.015em;
+            color: #f8fafc;
+        }
+
+        .logo-text span {
+            font-size: 9.5px;
+            font-weight: 600;
+            letter-spacing: .14em;
+            text-transform: uppercase;
+            color: #64748b;
+            margin-top: 3px;
+        }
+
+    /* =========================================================
+           NAV
+        ========================================================= */
+    .sidebar-nav {
+        position: relative;
+        z-index: 1;
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px 10px 18px;
+        scrollbar-width: thin;
+        scrollbar-color: rgba(148,163,184,.2) transparent;
+    }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: rgba(148,163,184,.18);
+            border-radius: 999px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+    .nav-group + .nav-group {
+        margin-top: 14px;
+    }
+
+    .nav-label {
+        margin: 0;
+        padding: 6px 12px 7px;
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #475569;
+    }
+
+    /* =========================================================
+           NAV ITEM
+        ========================================================= */
     .nav-item {
-        display: block;
-        padding: 0.4rem 0.75rem;
-        border-radius: 6px;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        width: 100%;
+        padding: 9px 12px;
+        margin-bottom: 2px;
+        border-radius: 11px;
+        border: 1px solid transparent;
+        background: transparent;
         color: #94a3b8;
+        font-size: 12.5px;
+        font-weight: 600;
+        letter-spacing: .01em;
+        text-decoration: none;
+        cursor: pointer;
+        transition: all .22s ease;
     }
 
         .nav-item:hover {
-            background: #1e293b;
             color: #e2e8f0;
+            background: linear-gradient(135deg, rgba(255,255,255,.045), rgba(255,255,255,.015));
+            border-color: rgba(255,255,255,.06);
+            transform: translateX(2px);
         }
 
         .nav-item.active {
-            background: #1e293b;
-            color: #e2e8f0;
+            color: #ffffff;
+            background: linear-gradient(120deg, rgba(79,70,229,.75), rgba(147,51,234,.65) 60%, rgba(245,158,11,.35));
+            border-color: rgba(168,85,247,.35);
+            box-shadow: 0 10px 24px rgba(99,102,241,.22), inset 0 1px rgba(255,255,255,.15);
         }
+
+            .nav-item.active .nav-dot {
+                background: #ffffff;
+                box-shadow: 0 0 12px rgba(255,255,255,.9);
+            }
+
+            .nav-item.active .nav-text {
+                color: #ffffff;
+            }
+
+    /* dot indicador */
+    .nav-dot {
+        width: 6px;
+        height: 6px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: #334155;
+        transition: all .22s ease;
+    }
+
+    .nav-item:hover .nav-dot {
+        background: #a78bfa;
+        box-shadow: 0 0 10px rgba(167,139,250,.7);
+    }
+
+    .nav-text {
+        flex: 1;
+        text-align: left;
+    }
+
+    .nav-item-button {
+        font-family: inherit;
+    }
+
+    /* =========================================================
+           USER FOOTER
+        ========================================================= */
+    .sidebar-user {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 14px 16px;
+        border-top: 1px solid rgba(255,255,255,.06);
+        background: linear-gradient(180deg, transparent, rgba(2,6,23,.55));
+        backdrop-filter: blur(10px);
+    }
+
+    .user-avatar {
+        width: 36px;
+        height: 36px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px;
+        font-size: 12px;
+        font-weight: 800;
+        color: #ffffff;
+        letter-spacing: .02em;
+        background: linear-gradient(135deg, #4f46e5, #9333ea 60%, #f59e0b);
+        box-shadow: 0 8px 20px rgba(124,58,237,.30), inset 0 1px rgba(255,255,255,.20);
+    }
+
+    .user-info {
+        display: flex;
+        align-items: center;
+        gap: 7px;
+        min-width: 0;
+    }
+
+    .user-status {
+        width: 6px;
+        height: 6px;
+        flex-shrink: 0;
+        border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 10px #4ade80;
+        animation: statusPulse 2.4s ease-in-out infinite;
+    }
+
+    @@keyframes statusPulse {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: .45;
+        }
+    }
+
+    .user-name {
+        font-size: 11.5px;
+        font-weight: 700;
+        color: #cbd5e1;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 </style>
 
 @code {
@@ -90,9 +445,24 @@
         }
     }
 
+    private string GetInitials(string name)
+    {
+        if (string.IsNullOrWhiteSpace(name) || name == "Visitante")
+            return "?";
+
+        var parts = name.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1)
+            return parts[0].Substring(0, 1).ToUpperInvariant();
+
+        return (parts[0][0].ToString() + parts[^1][0].ToString()).ToUpperInvariant();
+    }
+
     private async Task Logout()
     {
+        // 1. Limpa o storage local e envia requisição de logout para a API de dados
         await AuthService.LogoutAsync();
-        NavigationManager.NavigateTo("/", forceLoad: true);
+
+        // 2. Redireciona para o Controller de autenticação do Blazor
+        NavigationManager.NavigateTo("api/auth/logout", forceLoad: true);
     }
 }

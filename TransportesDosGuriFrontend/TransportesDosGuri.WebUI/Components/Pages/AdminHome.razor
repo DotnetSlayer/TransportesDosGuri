@@ -1,161 +1,893 @@
 ﻿@page "/adminHome"
 
 @inject IAircraftService AircraftService
-@inject IFlightService FlightService
 @inject IAirportService AirportService
+@inject IAsaasIntegrationService AsaasIntegrationService
+@inject IFlightSeatService FlightSeatService
+@inject IFlightService FlightService
+@inject IPurchaseService PurchaseService
+@inject IReservationService ReservationService
+@inject IScheduleService ScheduleService
+@inject ISeatService SeatService
+@inject ITripService TripService
+@inject IUserRequestService UserRequestService
+@inject IUserService UserService
 
 @using Microsoft.AspNetCore.Authorization
 @using TransportesDosGuri.Core.Interfaces
+
 @attribute [Authorize]
-<PageTitle>Air Ops · Dashboard</PageTitle>
 
-<div class="min-h-screen bg-[#070a13] text-slate-200 antialiased selection:bg-blue-500/30 selection:text-white">
-    <div class="flex min-h-screen">
+<PageTitle>Dashboard</PageTitle>
 
-        <main class="flex-1 min-w-0 flex flex-col">
+<div class="dashboard-page">
 
-            <div class="flex-1 px-4 sm:px-6 lg:px-8 py-6 lg:py-8">
-                <div class="max-w-[1400px] mx-auto space-y-8">
-
-                    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
-                        <div>
-                            <div class="flex items-center gap-2 mb-2">
-                                <span class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[10px] font-semibold tracking-widest uppercase bg-blue-500/10 text-blue-300 border border-blue-500/20">
-                                    <span class="w-1 h-1 rounded-full bg-blue-400"></span>
-                                    Visão Geral
-                                </span>
-                            </div>
-                            <h1 class="text-2xl lg:text-3xl font-semibold tracking-tight text-white">Centro de Operações</h1>
-                            <p class="mt-1 text-sm text-slate-500">Métricas em tempo real da frota, voos, aeroportos e tripulação registrada.</p>
-                        </div>
-
-                        <button @onclick="LoadDashboardData" class="h-9 px-3.5 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-300 border border-slate-800 hover:border-slate-700 text-xs font-medium inline-flex items-center gap-2 transition-all">
-                            <svg class="w-3.5 h-3.5 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                            </svg>
-                            Atualizar Dados
-                        </button>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-
-                        <div class="relative rounded-xl overflow-hidden bg-gradient-to-br from-blue-950/50 to-slate-900/60 border border-blue-900/40 p-5">
-                            <div class="flex items-start justify-between">
-                                <div class="w-10 h-10 rounded-lg bg-blue-500/10 border border-blue-500/20 flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                                    </svg>
-                                </div>
-                                <a href="/aircrafts" class="text-[11px] text-blue-400 hover:underline">Ver frota →</a>
-                            </div>
-                            <div class="mt-4">
-                                <div class="text-[10px] uppercase tracking-widest text-slate-500 font-medium">Aeronaves Cadastradas</div>
-                                <div class="mt-1 text-3xl font-semibold text-white tabular-nums tracking-tight">
-                                    @if (isLoading)
-                                    {
-                                        <span class="animate-pulse text-slate-600">...</span>
-                                    }
-                                    else
-                                    {
-
-                                        @totalAircrafts
-                                    }
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="relative rounded-xl overflow-hidden bg-gradient-to-br from-indigo-950/50 to-slate-900/60 border border-indigo-900/40 p-5">
-                            <div class="flex items-start justify-between">
-                                <div class="w-10 h-10 rounded-lg bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                </div>
-                                <a href="/flights" class="text-[11px] text-indigo-400 hover:underline">Ver voos →</a>
-                            </div>
-                            <div class="mt-4">
-                                <div class="text-[10px] uppercase tracking-widest text-slate-500 font-medium">Total de Voos</div>
-                                <div class="mt-1 text-3xl font-semibold text-white tabular-nums tracking-tight">
-                                    @if (isLoading)
-                                    {
-                                        <span class="animate-pulse text-slate-600">...</span>
-                                    }
-                                    else
-                                    {
-
-                                        @totalFlights
-                                    }
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="relative rounded-xl overflow-hidden bg-gradient-to-br from-emerald-950/50 to-slate-900/60 border border-emerald-900/40 p-5">
-                            <div class="flex items-start justify-between">
-                                <div class="w-10 h-10 rounded-lg bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
-                                    <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                </div>
-                                <a href="/airports" class="text-[11px] text-emerald-400 hover:underline">Ver base →</a>
-                            </div>
-                            <div class="mt-4">
-                                <div class="text-[10px] uppercase tracking-widest text-slate-500 font-medium">Aeroportos Conectados</div>
-                                <div class="mt-1 text-3xl font-semibold text-white tabular-nums tracking-tight">
-                                    @if (isLoading)
-                                    {
-                                        <span class="animate-pulse text-slate-600">...</span>
-                                    }
-                                    else
-                                    {
-
-                                        @totalAirports
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <section class="rounded-xl overflow-hidden bg-[#0b1020] border border-slate-800/70 p-6 shadow-2xl shadow-black/40">
-                        <h2 class="text-sm font-semibold text-white mb-1">Acesso Rápido aos Módulos</h2>
-                        <p class="text-xs text-slate-500 mb-6">Navegue diretamente para a gestão de dados das entidades da aplicação.</p>
-
-                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                            <a href="/aircrafts" class="group p-4 rounded-lg bg-slate-900/80 border border-slate-800 hover:border-blue-500/40 hover:bg-slate-900 transition-all">
-                                <div class="text-sm font-medium text-slate-200 group-hover:text-blue-400 transition-colors">Gerenciar Frota</div>
-                                <div class="text-xs text-slate-500 mt-1">Cadastro, atualização e remoção de aeronaves.</div>
-                            </a>
-
-                            <a href="/flights" class="group p-4 rounded-lg bg-slate-900/80 border border-slate-800 hover:border-indigo-500/40 hover:bg-slate-900 transition-all">
-                                <div class="text-sm font-medium text-slate-200 group-hover:text-indigo-400 transition-colors">Painel de Voos</div>
-                                <div class="text-xs text-slate-500 mt-1">Agendamento e monitoramento de rotas.</div>
-                            </a>
-
-                            <a href="/airports" class="group p-4 rounded-lg bg-slate-900/80 border border-slate-800 hover:border-emerald-500/40 hover:bg-slate-900 transition-all">
-                                <div class="text-sm font-medium text-slate-200 group-hover:text-emerald-400 transition-colors">Aeroportos</div>
-                                <div class="text-xs text-slate-500 mt-1">Lista de bases de pouso e decolagem.</div>
-                            </a>
-
-                            <a href="/crew" class="group p-4 rounded-lg bg-slate-900/80 border border-slate-800 hover:border-violet-500/40 hover:bg-slate-900 transition-all">
-                                <div class="text-sm font-medium text-slate-200 group-hover:text-violet-400 transition-colors">Tripulação</div>
-                                <div class="text-xs text-slate-500 mt-1">Pilotos, co-pilotos e comissários de bordo.</div>
-                            </a>
-                        </div>
-                    </section>
-
-
-
-                </div>
-            </div>
-        </main>
+    <!-- BACKGROUND EFFECTS -->
+    <div class="background-effects">
+        <div class="orb orb-purple"></div>
+        <div class="orb orb-indigo"></div>
+        <div class="orb orb-amber"></div>
+        <div class="grid-overlay"></div>
     </div>
+
+    <main class="dashboard-main">
+
+        <div class="dashboard-container">
+
+            <!-- HEADER -->
+            <header class="dashboard-header">
+
+                <div class="header-text">
+                    <h1>
+                        Painel de
+                        <span>Administrador.</span>
+                    </h1>
+                    <p>
+                        Métricas em tempo real da frota, voos, aeroportos e tripulação registrada.
+                    </p>
+                </div>
+
+                <button type="button"
+                        @onclick="LoadDashboardData"
+                        disabled="@isLoading"
+                        class="refresh-button">
+
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round" />
+                    </svg>
+
+                    <span>@(isLoading ? "Carregando..." : "Atualizar Dados")</span>
+
+                </button>
+
+            </header>
+
+            <!-- STAT CARDS -->
+            <section class="stat-grid">
+
+                <!-- AERONAVES -->
+                <a href="/adminAircrafts" class="stat-card stat-card-indigo">
+                    <div class="stat-card-glow"></div>
+                    <div class="stat-top">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <span class="stat-link">Ver Base →</span>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Aeronaves Cadastradas</div>
+                        <div class="stat-value">
+                            @if (isLoading)
+                            {
+                                <span class="skeleton">...</span>
+                            }
+                            else
+                            {
+
+                                <span>@totalAircrafts</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+
+                <!-- AEROPORTOS -->
+                <a href="/adminAirports" class="stat-card stat-card-emerald">
+                    <div class="stat-card-glow"></div>
+                    <div class="stat-top">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                      stroke="currentColor"
+                                      stroke-width="1.8"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round" />
+                                <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                      stroke="currentColor"
+                                      stroke-width="1.8"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <span class="stat-link">Ver Base →</span>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Aeroportos Cadastrados</div>
+                        <div class="stat-value">
+                            @if (isLoading)
+                            {
+                                <span class="skeleton">...</span>
+                            }
+                            else
+                            {
+
+                                <span>@totalAirports</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+
+                <!-- ASAAS -->
+                <a href="/adminAsaasIntegrations" class="stat-card stat-card-emerald">
+                    <div class="stat-card-glow"></div>
+                    <div class="stat-top">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="2" y="5" width="20" height="14" rx="2"
+                                      stroke="currentColor" stroke-width="1.8" />
+                                <path d="M2 10h20" stroke="currentColor" stroke-width="1.8" />
+                                <path d="M6 15h4" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                <circle cx="17" cy="15" r="1.5" fill="currentColor" />
+                            </svg>
+                        </div>
+                        <span class="stat-link">Ver Base →</span>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Integrações Asaas Cadastradas</div>
+                        <div class="stat-value">
+                            @if (isLoading)
+                            {
+                                <span class="skeleton">...</span>
+                            }
+                            else
+                            {
+
+                                <span>@totalAsaasIntegrations</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+
+                <!-- ASSENTOS -->
+                <a href="/adminSeats" class="stat-card stat-card-purple">
+                    <div class="stat-card-glow"></div>
+                    <div class="stat-top">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M6 4v6a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V4"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                <path d="M6 10v6a4 4 0 0 0 4 4h8"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                <path d="M6 20H3M18 20h3"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            </svg>
+                        </div>
+                        <span class="stat-link">Ver Base →</span>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Assentos Cadastrados</div>
+                        <div class="stat-value">
+                            @if (isLoading)
+                            {
+                                <span class="skeleton">...</span>
+                            }
+                            else
+                            {
+
+                                <span>@totalSeats</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+
+                <!-- ASSENTOS DE VOOS -->
+                <a href="/adminFlightSeats" class="stat-card stat-card-emerald">
+                    <div class="stat-card-glow"></div>
+                    <div class="stat-top">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="3" y="4" width="18" height="16" rx="2"
+                                      stroke="currentColor" stroke-width="1.8" />
+                                <path d="M3 10h18M9 10v10M15 10v10"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                <circle cx="6" cy="7" r="1" fill="currentColor" />
+                                <circle cx="18" cy="7" r="1" fill="currentColor" />
+                            </svg>
+                        </div>
+                        <span class="stat-link">Ver Base →</span>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Assentos de Voos Cadastrados</div>
+                        <div class="stat-value">
+                            @if (isLoading)
+                            {
+                                <span class="skeleton">...</span>
+                            }
+                            else
+                            {
+
+                                <span>@totalFlightSeats</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+
+                <!-- VOOS -->
+                <a href="/adminFlights" class="stat-card stat-card-indigo">
+                    <div class="stat-card-glow"></div>
+                    <div class="stat-top">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M2 16l20-6-4 4-2 6-2-3-3 3 1-4-10-1z"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                                <path d="M22 10 12 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            </svg>
+                        </div>
+                        <span class="stat-link">Ver Base →</span>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Voos Cadastrados</div>
+                        <div class="stat-value">
+                            @if (isLoading)
+                            {
+                                <span class="skeleton">...</span>
+                            }
+                            else
+                            {
+
+                                <span>@totalFlights</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+
+                <!-- COMPRAS -->
+                <a href="/adminPurchases" class="stat-card stat-card-indigo">
+                    <div class="stat-card-glow"></div>
+                    <div class="stat-top">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <circle cx="9" cy="20" r="1.5" fill="currentColor" />
+                                <circle cx="18" cy="20" r="1.5" fill="currentColor" />
+                                <path d="M2 3h2l2.5 12.5a2 2 0 0 0 2 1.5h9a2 2 0 0 0 2-1.6L21 7H6"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <span class="stat-link">Ver Base →</span>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Compras Cadastradas</div>
+                        <div class="stat-value">
+                            @if (isLoading)
+                            {
+                                <span class="skeleton">...</span>
+                            }
+                            else
+                            {
+
+                                <span>@totalPurchases</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+
+                <!-- RESERVAS -->
+                <a href="/adminReservations" class="stat-card stat-card-indigo">
+                    <div class="stat-card-glow"></div>
+                    <div class="stat-top">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <rect x="3" y="4" width="18" height="18" rx="2"
+                                      stroke="currentColor" stroke-width="1.8" />
+                                <path d="M16 2v4M8 2v4M3 10h18"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                <path d="m9 15 2 2 4-4"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <span class="stat-link">Ver Base →</span>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Reservas Cadastradas</div>
+                        <div class="stat-value">
+                            @if (isLoading)
+                            {
+                                <span class="skeleton">...</span>
+                            }
+                            else
+                            {
+
+                                <span>@totalReservations</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+
+                <!-- ESCALAS -->
+                <a href="/adminSchedules" class="stat-card stat-card-indigo">
+                    <div class="stat-card-glow"></div>
+                    <div class="stat-top">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="12" r="9"
+                                        stroke="currentColor" stroke-width="1.8" />
+                                <path d="M12 7v5l3 2"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <span class="stat-link">Ver Base →</span>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Escalas cadastradas</div>
+                        <div class="stat-value">
+                            @if (isLoading)
+                            {
+                                <span class="skeleton">...</span>
+                            }
+                            else
+                            {
+
+                                <span>@totalSchedules</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+
+                <!-- VIAGENS -->
+                <a href="/adminTrips" class="stat-card stat-card-indigo">
+                    <div class="stat-card-glow"></div>
+                    <div class="stat-top">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M9 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h4"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                <path d="M12 8v8M9 13l3 3 3-3"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                        </div>
+                        <span class="stat-link">Ver Base →</span>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Viagens Cadastradas</div>
+                        <div class="stat-value">
+                            @if (isLoading)
+                            {
+                                <span class="skeleton">...</span>
+                            }
+                            else
+                            {
+
+                                <span>@totalTrips</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+
+                <!-- REQUISIÇÕES DE USUÁRIOS -->
+                <a href="/adminUserRequests" class="stat-card stat-card-indigo">
+                    <div class="stat-card-glow"></div>
+                    <div class="stat-top">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                                <path d="M14 2v6h6"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                                <path d="M9 13h6M9 17h4"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            </svg>
+                        </div>
+                        <span class="stat-link">Ver Base →</span>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Inscrições Cadastradas</div>
+                        <div class="stat-value">
+                            @if (isLoading)
+                            {
+                                <span class="skeleton">...</span>
+                            }
+                            else
+                            {
+
+                                <span>@totalUserRequests</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+
+                <!-- USUÁRIOS -->
+                <a href="/adminUsers" class="stat-card stat-card-indigo">
+                    <div class="stat-card-glow"></div>
+                    <div class="stat-top">
+                        <div class="stat-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <circle cx="12" cy="8" r="4"
+                                        stroke="currentColor" stroke-width="1.8" />
+                                <path d="M4 21a8 8 0 0 1 16 0"
+                                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            </svg>
+                        </div>
+                        <span class="stat-link">Ver Base →</span>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Usuários Cadastrados</div>
+                        <div class="stat-value">
+                            @if (isLoading)
+                            {
+                                <span class="skeleton">...</span>
+                            }
+                            else
+                            {
+
+                                <span>@totalUsers</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+
+            </section>
+
+        </div>
+
+    </main>
+
 </div>
+
+<style>
+
+    /* =========================================================
+           PAGE
+        ========================================================= */
+    .dashboard-page {
+        position: relative;
+        min-height: 100vh;
+        width: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, .13), transparent 30%), radial-gradient(circle at 85% 80%, rgba(168, 85, 247, .12), transparent 30%), #03050b;
+        color: #e2e8f0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* =========================================================
+           BACKGROUND
+        ========================================================= */
+    .background-effects {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .orb {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(100px);
+        opacity: .32;
+        animation: floatOrb 14s ease-in-out infinite alternate;
+    }
+
+    .orb-purple {
+        width: 420px;
+        height: 420px;
+        background: #9333ea;
+        left: -180px;
+        top: -140px;
+    }
+
+    .orb-indigo {
+        width: 500px;
+        height: 500px;
+        background: #4f46e5;
+        right: -220px;
+        bottom: -200px;
+        animation-delay: -4s;
+    }
+
+    .orb-amber {
+        width: 280px;
+        height: 280px;
+        background: #f59e0b;
+        left: 45%;
+        bottom: -180px;
+        opacity: .12;
+        animation-delay: -7s;
+    }
+
+    .grid-overlay {
+        position: absolute;
+        inset: 0;
+        opacity: .035;
+        background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+        background-size: 60px 60px;
+    }
+
+    @@keyframes floatOrb {
+        from {
+            transform: translate3d(0,0,0) scale(1);
+        }
+
+        to {
+            transform: translate3d(40px,-30px,0) scale(1.08);
+        }
+    }
+
+    /* =========================================================
+           LAYOUT
+        ========================================================= */
+    .dashboard-main {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .dashboard-container {
+        flex: 1;
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 32px clamp(20px, 4vw, 48px) 48px;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    /* =========================================================
+           HEADER
+        ========================================================= */
+    .dashboard-header {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+    .header-text {
+        max-width: 620px;
+    }
+
+    .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        margin-bottom: 14px;
+        border-radius: 999px;
+        background: rgba(99,102,241,.08);
+        border: 1px solid rgba(99,102,241,.18);
+        color: #a5b4fc;
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+    }
+
+    .eyebrow-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #818cf8;
+        box-shadow: 0 0 12px #818cf8;
+        animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: .45;
+        }
+    }
+
+    .dashboard-header h1 {
+        margin: 0;
+        color: #ffffff;
+        font-size: clamp(28px, 3.4vw, 42px);
+        line-height: 1.05;
+        letter-spacing: -.045em;
+        font-weight: 800;
+    }
+
+        .dashboard-header h1 span {
+            color: transparent;
+            background: linear-gradient(90deg, #f472b6, #a855f7, #6366f1);
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+    .dashboard-header p {
+        margin: 13px 0 0;
+        max-width: 520px;
+        color: #64748b;
+        font-size: 12.5px;
+        line-height: 1.7;
+    }
+
+    /* =========================================================
+           REFRESH BUTTON
+        ========================================================= */
+    .refresh-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 18px;
+        height: 42px;
+        border-radius: 13px;
+        cursor: pointer;
+        color: #cbd5e1;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: .02em;
+        background: linear-gradient(135deg, rgba(15,23,42,.76), rgba(2,6,23,.58));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 10px 25px rgba(0,0,0,.18);
+        transition: all .25s ease;
+    }
+
+        .refresh-button svg {
+            width: 15px;
+            height: 15px;
+            color: #94a3b8;
+            transition: transform .4s ease, color .2s ease;
+        }
+
+        .refresh-button:hover:not(:disabled) {
+            color: #ffffff;
+            border-color: rgba(168,85,247,.35);
+            background: linear-gradient(135deg, rgba(79,70,229,.20), rgba(147,51,234,.14));
+            box-shadow: 0 12px 30px rgba(99,102,241,.22), inset 0 1px rgba(255,255,255,.08);
+        }
+
+            .refresh-button:hover:not(:disabled) svg {
+                color: #c4b5fd;
+                transform: rotate(180deg);
+            }
+
+        .refresh-button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+    /* =========================================================
+           STAT GRID
+        ========================================================= */
+    .stat-grid {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    @@media (min-width: 640px) {
+        .stat-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (min-width: 1100px) {
+        .stat-grid {
+            grid-template-columns: repeat(4, minmax(0, 1fr));
+        }
+    }
+
+    /* =========================================================
+           STAT CARD
+        ========================================================= */
+    .stat-card {
+        position: relative;
+        display: block;
+        padding: 22px;
+        border-radius: 20px;
+        overflow: hidden;
+        text-decoration: none;
+        color: inherit;
+        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease;
+    }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(168,85,247,.30);
+            box-shadow: inset 0 1px rgba(255,255,255,.06), 0 26px 55px rgba(99,102,241,.22);
+        }
+
+    .stat-card-glow {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        top: -110px;
+        right: -110px;
+        border-radius: 50%;
+        filter: blur(70px);
+        opacity: .5;
+        pointer-events: none;
+        transition: opacity .3s ease;
+    }
+
+    .stat-card:hover .stat-card-glow {
+        opacity: .8;
+    }
+
+    /* color variants */
+    .stat-card-indigo .stat-card-glow {
+        background: rgba(99,102,241,.55);
+    }
+
+    .stat-card-purple .stat-card-glow {
+        background: rgba(168,85,247,.55);
+    }
+
+    .stat-card-emerald .stat-card-glow {
+        background: rgba(16,185,129,.45);
+    }
+
+    .stat-card-amber .stat-card-glow {
+        background: rgba(245,158,11,.45);
+    }
+
+    .stat-card-indigo .stat-icon {
+        color: #a5b4fc;
+        background: rgba(99,102,241,.12);
+        border-color: rgba(99,102,241,.22);
+    }
+
+    .stat-card-purple .stat-icon {
+        color: #d8b4fe;
+        background: rgba(168,85,247,.12);
+        border-color: rgba(168,85,247,.22);
+    }
+
+    .stat-card-emerald .stat-icon {
+        color: #6ee7b7;
+        background: rgba(16,185,129,.12);
+        border-color: rgba(16,185,129,.22);
+    }
+
+    .stat-card-amber .stat-icon {
+        color: #fcd34d;
+        background: rgba(245,158,11,.12);
+        border-color: rgba(245,158,11,.22);
+    }
+
+    .stat-card-indigo .stat-link {
+        color: #a5b4fc;
+    }
+
+    .stat-card-purple .stat-link {
+        color: #d8b4fe;
+    }
+
+    .stat-card-emerald .stat-link {
+        color: #6ee7b7;
+    }
+
+    .stat-card-amber .stat-link {
+        color: #fcd34d;
+    }
+
+    /* top row */
+    .stat-top {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .stat-icon {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        border: 1px solid transparent;
+        box-shadow: inset 0 1px rgba(255,255,255,.06);
+    }
+
+        .stat-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+    .stat-link {
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: .04em;
+        text-decoration: none;
+        opacity: .75;
+        transition: opacity .2s ease, transform .2s ease;
+    }
+
+    .stat-card:hover .stat-link {
+        opacity: 1;
+        transform: translateX(2px);
+    }
+
+    /* body */
+    .stat-body {
+        position: relative;
+        z-index: 1;
+        margin-top: 22px;
+    }
+
+    .stat-label {
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .stat-value {
+        margin-top: 8px;
+        font-size: 34px;
+        font-weight: 800;
+        letter-spacing: -.045em;
+        color: #ffffff;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .skeleton {
+        display: inline-block;
+        color: #334155;
+        animation: skeletonPulse 1.4s ease-in-out infinite;
+    }
+
+    @@keyframes skeletonPulse {
+        0%, 100% {
+            opacity: .35;
+        }
+
+        50% {
+            opacity: .9;
+        }
+    }
+
+</style>
 
 @code {
     private int totalAircrafts;
-    private int totalFlights;
     private int totalAirports;
-    private int totalCrew;
+    private int totalAsaasIntegrations;
+    private int totalFlightSeats;
+    private int totalFlights;
+    private int totalPurchases;
+    private int totalReservations;
+    private int totalSchedules;
+    private int totalSeats;
+    private int totalTrips;
+    private int totalUserRequests;
+    private int totalUsers;
+
     private bool isLoading = true;
 
     protected override async Task OnInitializedAsync()
@@ -172,12 +904,38 @@
             var aircrafts = await AircraftService.GetAllAsync();
             totalAircrafts = aircrafts?.Count ?? 0;
 
-            var flights = await FlightService.GetAllAsync();
-            totalFlights = flights?.Count ?? 0;
-
             var airports = await AirportService.GetAllAsync();
             totalAirports = airports?.Count ?? 0;
 
+            var asaasIntegrations = await AsaasIntegrationService.GetAllAsync();
+            totalAsaasIntegrations = asaasIntegrations?.Count ?? 0;
+
+            var flightSeats = await FlightSeatService.GetAllAsync();
+            totalFlightSeats = flightSeats?.Count ?? 0;
+
+            var flights = await FlightService.GetAllAsync();
+            totalFlights = flights?.Count ?? 0;
+
+            var purchases = await PurchaseService.GetAllAsync();
+            totalPurchases = purchases?.Count ?? 0;
+
+            var reservations = await ReservationService.GetAllAsync();
+            totalReservations = reservations?.Count ?? 0;
+
+            var schedules = await ScheduleService.GetAllAsync();
+            totalSchedules = schedules?.Count ?? 0;
+
+            var seats = await SeatService.GetAllAsync();
+            totalSeats = seats?.Count ?? 0;
+
+            var trips = await TripService.GetAllAsync();
+            totalTrips = trips?.Count ?? 0;
+
+            var userRequests = await UserRequestService.GetAllAsync();
+            totalUserRequests = userRequests?.Count ?? 0;
+
+            var users = await UserService.GetAllAsync();
+            totalUsers = users?.Count ?? 0;
         }
         catch (Exception ex)
         {

@@ -28,11 +28,17 @@ public class AuthController : ControllerBase
         return Redirect("/adminHome");
     }
 
+    [HttpGet("logout")]
     [HttpPost("logout")]
     public async Task<IActionResult> Logout()
     {
-        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+        // 1. Invalida tokens na API remota e limpa LocalStorage
         await _authService.LogoutAsync();
+
+        // 2. Destrói o Cookie local enviando o Set-Cookie de expiração nos cabeçalhos
+        await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+
+        // 3. Redireciona para a tela inicial
         return Redirect("/");
     }
 }

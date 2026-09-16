@@ -3,13 +3,9 @@
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(Layout.MainLayout)">
                 <NotAuthorized>
-                    <div class="p-4">
-                        <p class="text-danger">Acesso não autorizado.</p>
-                        <a href="account/login" class="btn btn-primary">Fazer Login</a>
-                    </div>
+                    <RedirectToError/>
                 </NotAuthorized>
             </AuthorizeRouteView>
-            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
         </Found>
         <NotFound>
             <LayoutView Layout="@typeof(Layout.MainLayout)">

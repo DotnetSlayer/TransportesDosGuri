@@ -6,164 +6,1533 @@
 @using TransportesDosGuri.Core.DTOs
 @using TransportesDosGuri.Core.Interfaces
 
-<div class="max-w-6xl mx-auto p-6 space-y-8 text-slate-200">
+<PageTitle>Transportes Dos Guri · Usuários</PageTitle>
 
-    <h1 class="text-2xl font-semibold">Usuários</h1>
+<div class="users-page">
 
-    @if (isEditing)
-    {
-        <EditForm Model="updateForm" OnValidSubmit="SaveUpdate">
-            <DataAnnotationsValidator />
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <InputText class="input" @bind-Value="updateForm.Name" placeholder="Nome" />
-                <InputText class="input" @bind-Value="updateForm.LastName" placeholder="Sobrenome" />
-                <InputText class="input" @bind-Value="updateForm.PhoneNumber" placeholder="Telefone" />
-                <InputText class="input" @bind-Value="updateForm.IdentityNumber" placeholder="CPF / Documento" />
-                <InputText class="input" @bind-Value="updateForm.ZipCode" placeholder="CEP" />
-                <InputText class="input" @bind-Value="updateForm.District" placeholder="Bairro" />
-                <InputText class="input sm:col-span-2" @bind-Value="updateForm.Address" placeholder="Logradouro" />
-                <InputNumber class="input" @bind-Value="updateForm.AddressNumber" placeholder="Número" />
-                <InputText class="input" @bind-Value="updateForm.City" placeholder="Cidade" />
-                <InputText class="input" @bind-Value="updateForm.State" placeholder="UF" />
-            </div>
-            <div class="flex justify-end gap-2 mt-3">
-                <button type="button" @onclick="ResetForm" class="btn-secondary">Cancelar</button>
-                <button type="submit" class="btn-primary">Atualizar</button>
-            </div>
-        </EditForm>
-    }
-    else
-    {
-        <EditForm Model="registerForm" OnValidSubmit="SaveRegister">
-            <DataAnnotationsValidator />
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                <InputText class="input" @bind-Value="registerForm.Name" placeholder="Nome" />
-                <InputText class="input" @bind-Value="registerForm.LastName" placeholder="Sobrenome" />
-                <InputText class="input" @bind-Value="registerForm.IdentityNumber" placeholder="CPF / Documento" />
-                <InputText class="input" @bind-Value="registerForm.Email" type="email" placeholder="E-mail" />
-                <InputText class="input" @bind-Value="registerForm.Password" type="password" placeholder="Senha" />
-                <InputText class="input" @bind-Value="registerForm.ZipCode" placeholder="CEP" />
-                <InputText class="input sm:col-span-2" @bind-Value="registerForm.Address" placeholder="Logradouro" />
-                <InputNumber class="input" @bind-Value="registerForm.AddressNumber" placeholder="Número" />
-                <InputText class="input" @bind-Value="registerForm.District" placeholder="Bairro" />
-                <InputText class="input" @bind-Value="registerForm.City" placeholder="Cidade" />
-                <InputText class="input" @bind-Value="registerForm.State" placeholder="UF" />
-            </div>
-            <div class="flex justify-end mt-3">
-                <button type="submit" class="btn-primary">Cadastrar</button>
-            </div>
-        </EditForm>
-    }
+    <!-- BACKGROUND EFFECTS -->
+    <div class="background-effects">
+        <div class="orb orb-purple"></div>
+        <div class="orb orb-indigo"></div>
+        <div class="orb orb-amber"></div>
+        <div class="grid-overlay"></div>
+    </div>
 
-    @if (users == null)
-    {
-        <p class="text-slate-500 text-sm">Carregando...</p>
-    }
-    else if (!users.Any())
-    {
-        <p class="text-slate-500 text-sm">Nenhum usuário cadastrado.</p>
-    }
-    else
-    {
-        <table class="w-full text-sm border-collapse">
-            <thead>
-                <tr class="text-left text-slate-400 border-b border-slate-700">
-                    <th class="py-2 pr-4">ID</th>
-                    <th class="py-2 pr-4">Nome</th>
-                    <th class="py-2 pr-4">E-mail</th>
-                    <th class="py-2 pr-4">Documento</th>
-                    <th class="py-2 pr-4">Cidade/UF</th>
-                    <th class="py-2 text-right">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var user in users)
+    <main class="users-main">
+
+        <div class="users-container">
+
+            <!-- HEADER -->
+            <header class="page-header">
+
+                <div class="header-text">
+                    <div class="eyebrow">
+                        <span class="eyebrow-dot"></span>
+                        Sistema · Usuários
+                    </div>
+                    <h1>
+                        Gestão de
+                        <span>usuários.</span>
+                    </h1>
+                    <p>
+                        Cadastre, edite e gerencie as contas da plataforma Transportes dos Guri.
+                    </p>
+                </div>
+
+                <div class="header-counter">
+                    <span class="counter-value">@(users?.Count ?? 0)</span>
+                    <span class="counter-label">Usuários</span>
+                </div>
+
+            </header>
+
+            <!-- FORM CARD -->
+            <section class="form-card @(isEditing ? "form-card-editing" : "")">
+
+                <div class="form-card-glow"></div>
+
+                <div class="form-header">
+
+                    <div class="section-label">
+                        <span>@(isEditing ? "02" : "01")</span>
+                        @(isEditing ? "Editando usuário" : "Novo usuário")
+                    </div>
+
+                    @if (isEditing)
+                    {
+                        <div class="editing-badge">
+                            <span class="editing-dot"></span>
+                            Editando <strong>#@selectedUserId</strong>
+                        </div>
+                    }
+
+                </div>
+
+                @if (isEditing)
                 {
-                    <tr class="border-b border-slate-800">
-                        <td class="py-2 pr-4 text-slate-500">@user.Id</td>
-                        <td class="py-2 pr-4">@user.FullName</td>
-                        <td class="py-2 pr-4 text-slate-400">@user.Email</td>
-                        <td class="py-2 pr-4 text-slate-400">@(string.IsNullOrEmpty(user.IdentityNumber) ? "-" : user.IdentityNumber)</td>
-                        <td class="py-2 pr-4 text-slate-400">@($"{user.City}/{user.State}")</td>
-                        <td class="py-2 text-right space-x-2">
-                            <button @onclick="() => StartEdit(user)" class="link">Editar</button>
-                            <button @onclick="() => Delete(user.Id)" class="link-danger">Excluir</button>
-                        </td>
-                    </tr>
+                    <EditForm Model="updateForm" OnValidSubmit="SaveUpdate">
+                        <DataAnnotationsValidator />
+
+                        <!-- SECTION: DADOS PESSOAIS -->
+                        <div class="subsection">
+                            <div class="subsection-label">Dados pessoais</div>
+
+                            <div class="form-grid form-grid-3">
+
+                                <div class="field">
+                                    <label>Nome</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round" />
+                                                <circle cx="9" cy="7" r="4"
+                                                        stroke="currentColor"
+                                                        stroke-width="1.7" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input"
+                                                   @bind-Value="updateForm.Name"
+                                                   placeholder="Nome" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>Sobrenome</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round" />
+                                                <circle cx="9" cy="7" r="4"
+                                                        stroke="currentColor"
+                                                        stroke-width="1.7" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input"
+                                                   @bind-Value="updateForm.LastName"
+                                                   placeholder="Sobrenome" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>Telefone</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input input-mono"
+                                                   @bind-Value="updateForm.PhoneNumber"
+                                                   placeholder="(00) 00000-0000" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>CPF / Documento</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <rect x="3" y="5" width="18" height="14" rx="2"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7" />
+                                                <path d="M3 10h18M7 15h4"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input input-mono"
+                                                   @bind-Value="updateForm.IdentityNumber"
+                                                   placeholder="000.000.000-00" />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- SECTION: ENDEREÇO -->
+                        <div class="subsection">
+                            <div class="subsection-label">Endereço</div>
+
+                            <div class="form-grid form-grid-3">
+
+                                <div class="field">
+                                    <label>CEP</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M3 9l9-6 9 6v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                                <path d="M9 21V12h6v9"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input input-mono"
+                                                   @bind-Value="updateForm.ZipCode"
+                                                   placeholder="00000-000" />
+                                    </div>
+                                </div>
+
+                                <div class="field field-full">
+                                    <label>Logradouro</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M4 21V8l8-5 8 5v13M4 21h16"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input"
+                                                   @bind-Value="updateForm.Address"
+                                                   placeholder="Rua / Avenida" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>Número</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round" />
+                                            </svg>
+                                        </span>
+                                        <InputNumber class="input input-mono"
+                                                     @bind-Value="updateForm.AddressNumber"
+                                                     placeholder="123" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>Bairro</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input"
+                                                   @bind-Value="updateForm.District"
+                                                   placeholder="Bairro" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>Cidade</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                                <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input"
+                                                   @bind-Value="updateForm.City"
+                                                   placeholder="Cidade" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>UF</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                                <path d="M9 3v15M15 6v15"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input input-uppercase"
+                                                   @bind-Value="updateForm.State"
+                                                   maxlength="2"
+                                                   placeholder="SP" />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- ACTIONS -->
+                        <div class="form-actions">
+                            <button type="button" @onclick="ResetForm" class="btn-secondary">
+                                Cancelar
+                            </button>
+
+                            <button type="submit" class="btn-primary">
+                                <span>Atualizar usuário</span>
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M5 12h14M13 6l6 6-6 6"
+                                          stroke="currentColor"
+                                          stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                        </div>
+
+                    </EditForm>
                 }
-            </tbody>
-        </table>
-    }
+                else
+                {
+                    <EditForm Model="registerForm" OnValidSubmit="SaveRegister">
+                        <DataAnnotationsValidator />
+
+                        <!-- SECTION: DADOS PESSOAIS -->
+                        <div class="subsection">
+                            <div class="subsection-label">Dados pessoais</div>
+
+                            <div class="form-grid form-grid-3">
+
+                                <div class="field">
+                                    <label>Nome</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round" />
+                                                <circle cx="9" cy="7" r="4"
+                                                        stroke="currentColor"
+                                                        stroke-width="1.7" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input"
+                                                   @bind-Value="registerForm.Name"
+                                                   placeholder="Nome" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>Sobrenome</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round" />
+                                                <circle cx="9" cy="7" r="4"
+                                                        stroke="currentColor"
+                                                        stroke-width="1.7" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input"
+                                                   @bind-Value="registerForm.LastName"
+                                                   placeholder="Sobrenome" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>CPF / Documento</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <rect x="3" y="5" width="18" height="14" rx="2"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7" />
+                                                <path d="M3 10h18M7 15h4"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input input-mono"
+                                                   @bind-Value="registerForm.IdentityNumber"
+                                                   placeholder="000.000.000-00" />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- SECTION: ACESSO -->
+                        <div class="subsection">
+                            <div class="subsection-label">Acesso</div>
+
+                            <div class="form-grid form-grid-2">
+
+                                <div class="field">
+                                    <label>E-mail</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7" />
+                                                <path d="m3 7 9 6 9-6"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input"
+                                                   type="email"
+                                                   @bind-Value="registerForm.Email"
+                                                   placeholder="seu@email.com" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>Senha</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <rect x="4" y="10" width="16" height="11" rx="2"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7" />
+                                                <path d="M8 10V7a4 4 0 0 1 8 0v3"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input"
+                                                   type="password"
+                                                   @bind-Value="registerForm.Password"
+                                                   placeholder="Senha de acesso" />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- SECTION: ENDEREÇO -->
+                        <div class="subsection">
+                            <div class="subsection-label">Endereço</div>
+
+                            <div class="form-grid form-grid-3">
+
+                                <div class="field">
+                                    <label>CEP</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M3 9l9-6 9 6v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9z"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                                <path d="M9 21V12h6v9"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input input-mono"
+                                                   @bind-Value="registerForm.ZipCode"
+                                                   placeholder="00000-000" />
+                                    </div>
+                                </div>
+
+                                <div class="field field-full">
+                                    <label>Logradouro</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M4 21V8l8-5 8 5v13M4 21h16"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input"
+                                                   @bind-Value="registerForm.Address"
+                                                   placeholder="Rua / Avenida" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>Número</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M4 9h16M4 15h16M10 3L8 21M16 3l-2 18"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round" />
+                                            </svg>
+                                        </span>
+                                        <InputNumber class="input input-mono"
+                                                     @bind-Value="registerForm.AddressNumber"
+                                                     placeholder="123" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>Bairro</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M3 21h18M5 21V7l8-4v18M19 21V11l-6-4"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input"
+                                                   @bind-Value="registerForm.District"
+                                                   placeholder="Bairro" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>Cidade</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                                <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input"
+                                                   @bind-Value="registerForm.City"
+                                                   placeholder="Cidade" />
+                                    </div>
+                                </div>
+
+                                <div class="field">
+                                    <label>UF</label>
+                                    <div class="input-wrapper">
+                                        <span class="input-icon">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <path d="M3 6l6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round"
+                                                      stroke-linejoin="round" />
+                                                <path d="M9 3v15M15 6v15"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.7"
+                                                      stroke-linecap="round" />
+                                            </svg>
+                                        </span>
+                                        <InputText class="input input-uppercase"
+                                                   @bind-Value="registerForm.State"
+                                                   maxlength="2"
+                                                   placeholder="SP" />
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- ACTIONS -->
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary">
+                                <span>Cadastrar usuário</span>
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M5 12h14M13 6l6 6-6 6"
+                                          stroke="currentColor"
+                                          stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round" />
+                                </svg>
+                            </button>
+                        </div>
+
+                    </EditForm>
+                }
+
+            </section>
+
+            <!-- TABLE CARD -->
+            <section class="table-card">
+
+                <div class="table-card-glow"></div>
+
+                <div class="table-header">
+                    <div class="section-label">
+                        <span>03</span>
+                        Usuários cadastrados
+                    </div>
+                </div>
+
+                @if (users == null)
+                {
+                    <div class="state-empty">
+                        <div class="spinner"></div>
+                        <span>Carregando usuários...</span>
+                    </div>
+                }
+                else if (!users.Any())
+                {
+                    <div class="state-empty">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                                  stroke="currentColor"
+                                  stroke-width="1.6"
+                                  stroke-linecap="round" />
+                            <circle cx="9" cy="7" r="4"
+                                    stroke="currentColor"
+                                    stroke-width="1.6" />
+                            <path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+                                  stroke="currentColor"
+                                  stroke-width="1.6"
+                                  stroke-linecap="round" />
+                        </svg>
+                        <span>Nenhum usuário cadastrado.</span>
+                    </div>
+                }
+                else
+                {
+                    <div class="table-scroll">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th class="col-id">ID</th>
+                                    <th>Usuário</th>
+                                    <th>E-mail</th>
+                                    <th class="col-doc">Documento</th>
+                                    <th>Localização</th>
+                                    <th class="col-actions">Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var user in users)
+                                {
+                                    <tr>
+                                        <td class="col-id">
+                                            <span class="id-chip">#@user.Id</span>
+                                        </td>
+
+                                        <td>
+                                            <div class="user-cell">
+                                                <span class="user-avatar">
+                                                    @GetInitials(user.FullName)
+                                                </span>
+                                                <span class="user-name">@user.FullName</span>
+                                            </div>
+                                        </td>
+
+                                        <td>
+                                            <span class="email-value">@user.Email</span>
+                                        </td>
+
+                                        <td class="col-doc">
+                                            @if (string.IsNullOrEmpty(user.IdentityNumber))
+                                            {
+                                                <span class="doc-empty">—</span>
+                                            }
+                                            else
+                                            {
+                                                <span class="doc-chip">@user.IdentityNumber</span>
+                                            }
+                                        </td>
+
+                                        <td>
+                                            <span class="location-chip">
+                                                <svg viewBox="0 0 24 24" fill="none">
+                                                    <path d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
+                                                          stroke="currentColor"
+                                                          stroke-width="1.7"
+                                                          stroke-linecap="round"
+                                                          stroke-linejoin="round" />
+                                                    <path d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
+                                                          stroke="currentColor"
+                                                          stroke-width="1.7"
+                                                          stroke-linecap="round"
+                                                          stroke-linejoin="round" />
+                                                </svg>
+                                                @user.City/@user.State
+                                            </span>
+                                        </td>
+
+                                        <td class="col-actions">
+                                            <div class="row-actions">
+                                                <button @onclick="() => StartEdit(user)" class="action-link">
+                                                    <svg viewBox="0 0 24 24" fill="none">
+                                                        <path d="M12 20h9"
+                                                              stroke="currentColor"
+                                                              stroke-width="1.8"
+                                                              stroke-linecap="round" />
+                                                        <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
+                                                              stroke="currentColor"
+                                                              stroke-width="1.8"
+                                                              stroke-linecap="round"
+                                                              stroke-linejoin="round" />
+                                                    </svg>
+                                                    Editar
+                                                </button>
+                                                <button @onclick="() => Delete(user.Id)" class="action-link action-danger">
+                                                    <svg viewBox="0 0 24 24" fill="none">
+                                                        <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
+                                                              stroke="currentColor"
+                                                              stroke-width="1.8"
+                                                              stroke-linecap="round"
+                                                              stroke-linejoin="round" />
+                                                    </svg>
+                                                    Excluir
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                }
+
+            </section>
+
+        </div>
+
+    </main>
+
 </div>
 
 <style>
+
+    /* =========================================================
+           PAGE
+        ========================================================= */
+    .users-page {
+        position: relative;
+        min-height: 100vh;
+        width: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, .13), transparent 30%), radial-gradient(circle at 85% 80%, rgba(168, 85, 247, .12), transparent 30%), #03050b;
+        color: #e2e8f0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* =========================================================
+           BACKGROUND
+        ========================================================= */
+    .background-effects {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .orb {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(100px);
+        opacity: .32;
+        animation: floatOrb 14s ease-in-out infinite alternate;
+    }
+
+    .orb-purple {
+        width: 420px;
+        height: 420px;
+        background: #9333ea;
+        left: -180px;
+        top: -140px;
+    }
+
+    .orb-indigo {
+        width: 500px;
+        height: 500px;
+        background: #4f46e5;
+        right: -220px;
+        bottom: -200px;
+        animation-delay: -4s;
+    }
+
+    .orb-amber {
+        width: 280px;
+        height: 280px;
+        background: #f59e0b;
+        left: 45%;
+        bottom: -180px;
+        opacity: .12;
+        animation-delay: -7s;
+    }
+
+    .grid-overlay {
+        position: absolute;
+        inset: 0;
+        opacity: .035;
+        background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+        background-size: 60px 60px;
+    }
+
+    @@keyframes floatOrb {
+        from {
+            transform: translate3d(0,0,0) scale(1);
+        }
+
+        to {
+            transform: translate3d(40px,-30px,0) scale(1.08);
+        }
+    }
+
+    /* =========================================================
+           LAYOUT
+        ========================================================= */
+    .users-main {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .users-container {
+        flex: 1;
+        width: 100%;
+        max-width: 1300px;
+        margin: 0 auto;
+        padding: 32px clamp(20px, 4vw, 48px) 48px;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+    }
+
+    /* =========================================================
+           HEADER
+        ========================================================= */
+    .page-header {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+    @@media (min-width: 768px) {
+        .page-header {
+            flex-direction: row;
+            align-items: flex-end;
+        }
+    }
+
+    .header-text {
+        max-width: 620px;
+    }
+
+    .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        margin-bottom: 14px;
+        border-radius: 999px;
+        background: rgba(99,102,241,.08);
+        border: 1px solid rgba(99,102,241,.18);
+        color: #a5b4fc;
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+    }
+
+    .eyebrow-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #818cf8;
+        box-shadow: 0 0 12px #818cf8;
+        animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% {
+            opacity: 1;
+        }
+
+        50% {
+            opacity: .45;
+        }
+    }
+
+    .page-header h1 {
+        margin: 0;
+        color: #ffffff;
+        font-size: clamp(28px, 3.4vw, 42px);
+        line-height: 1.05;
+        letter-spacing: -.045em;
+        font-weight: 800;
+    }
+
+        .page-header h1 span {
+            color: transparent;
+            background: linear-gradient(90deg, #f472b6, #a855f7, #6366f1);
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+    .page-header p {
+        margin: 13px 0 0;
+        max-width: 520px;
+        color: #64748b;
+        font-size: 12.5px;
+        line-height: 1.7;
+    }
+
+    .header-counter {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 4px;
+        padding: 14px 20px;
+        border-radius: 16px;
+        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 12px 30px rgba(0,0,0,.18);
+        backdrop-filter: blur(22px);
+    }
+
+    .counter-value {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -.04em;
+        color: #ffffff;
+        line-height: 1;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .counter-label {
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    /* =========================================================
+           FORM CARD
+        ========================================================= */
+    .form-card {
+        position: relative;
+        padding: 24px;
+        border-radius: 22px;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        transition: border-color .3s ease, box-shadow .3s ease;
+    }
+
+    /* modo edição ganha borda âmbar e glow correspondente */
+    .form-card-editing {
+        border-color: rgba(245,158,11,.30);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22), 0 0 0 1px rgba(245,158,11,.08);
+    }
+
+    .form-card-glow {
+        position: absolute;
+        width: 340px;
+        height: 340px;
+        top: -190px;
+        right: -190px;
+        border-radius: 50%;
+        background: rgba(99,102,241,.35);
+        filter: blur(90px);
+        pointer-events: none;
+        transition: background .3s ease;
+    }
+
+    .form-card-editing .form-card-glow {
+        background: rgba(245,158,11,.28);
+    }
+
+    .form-header {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    @@media (min-width: 640px) {
+        .form-header {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+
+    .section-label {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: .16em;
+        text-transform: uppercase;
+    }
+
+        .section-label span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 7px;
+            color: #c4b5fd;
+            background: rgba(139,92,246,.10);
+            border: 1px solid rgba(139,92,246,.15);
+            font-size: 10px;
+            font-weight: 800;
+        }
+
+    /* editing badge */
+    .editing-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        background: rgba(245,158,11,.10);
+        border: 1px solid rgba(245,158,11,.25);
+        color: #fcd34d;
+        font-size: 10.5px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        text-transform: uppercase;
+    }
+
+        .editing-badge strong {
+            color: #ffffff;
+            font-weight: 800;
+            font-variant-numeric: tabular-nums;
+        }
+
+    .editing-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #fbbf24;
+        box-shadow: 0 0 10px #fbbf24;
+        animation: pulse 1.8s ease-in-out infinite;
+    }
+
+    /* =========================================================
+           SUBSECTIONS
+        ========================================================= */
+    .subsection {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 22px;
+    }
+
+        .subsection:last-of-type {
+            margin-bottom: 0;
+        }
+
+    .subsection-label {
+        display: inline-block;
+        margin-bottom: 12px;
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #475569;
+    }
+
+    /* =========================================================
+           FORM GRID
+        ========================================================= */
+    .form-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+    }
+
+    @@media (min-width: 640px) {
+        .form-grid-2 {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .form-grid-3 {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+
+        .field-full {
+            grid-column: 1 / -1;
+        }
+    }
+
+    /* =========================================================
+           FIELD
+        ========================================================= */
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+        .field label {
+            color: #94a3b8;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            text-transform: uppercase;
+        }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        width: 16px;
+        height: 16px;
+        transform: translateY(-50%);
+        color: #475569;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+        .input-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
     .input {
         width: 100%;
-        padding: 0.5rem 0.75rem;
-        background: #0f172a;
-        border: 1px solid #1e293b;
-        border-radius: 6px;
-        color: #e2e8f0;
-        font-size: 0.875rem;
+        height: 48px;
+        padding: 0 16px 0 44px;
+        border-radius: 13px;
         outline: none;
+        border: 1px solid rgba(255,255,255,.07);
+        color: #f1f5f9;
+        background: linear-gradient(135deg, rgba(15,23,42,.76), rgba(2,6,23,.58));
+        box-shadow: inset 0 1px rgba(255,255,255,.035), 0 8px 25px rgba(0,0,0,.10);
+        font-size: 13px;
+        font-family: inherit;
+        transition: all .25s ease;
+        appearance: none;
     }
 
-        .input:focus {
-            border-color: #3b82f6;
-        }
+    .input-mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 12.5px;
+    }
+
+    .input-uppercase {
+        text-transform: uppercase;
+        letter-spacing: .1em;
+        font-weight: 700;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    }
+
+    .input::placeholder {
+        color: #475569;
+        text-transform: none;
+        letter-spacing: normal;
+        font-weight: 400;
+        font-family: inherit;
+    }
+
+    .input:hover {
+        border-color: rgba(148,163,184,.16);
+    }
+
+    .input:focus {
+        border-color: rgba(168,85,247,.55);
+        background: rgba(15,23,42,.86);
+        box-shadow: 0 0 0 4px rgba(168,85,247,.07), 0 10px 35px rgba(0,0,0,.18);
+    }
+
+    input[type="number"].input::-webkit-outer-spin-button,
+    input[type="number"].input::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+    }
+
+    input[type="number"].input {
+        -moz-appearance: textfield;
+    }
+
+    /* =========================================================
+           FORM ACTIONS
+        ========================================================= */
+    .form-actions {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px;
+        margin-top: 24px;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,.05);
+    }
 
     .btn-primary {
-        padding: 0.5rem 1.25rem;
-        background: #2563eb;
-        color: white;
-        border-radius: 6px;
-        font-size: 0.875rem;
-        font-weight: 500;
-        border: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        height: 44px;
+        padding: 0 24px;
+        border: 0;
+        border-radius: 13px;
         cursor: pointer;
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .02em;
+        background: linear-gradient(110deg, #4f46e5, #9333ea 55%, #f59e0b);
+        box-shadow: 0 15px 40px rgba(124,58,237,.22), inset 0 1px rgba(255,255,255,.18);
+        transition: transform .2s ease, box-shadow .2s ease;
     }
 
-        .btn-primary:hover {
-            background: #1d4ed8;
+        .btn-primary svg {
+            width: 15px;
+            height: 15px;
+            transition: transform .25s ease;
         }
 
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 50px rgba(124,58,237,.32), inset 0 1px rgba(255,255,255,.20);
+        }
+
+            .btn-primary:hover svg {
+                transform: translateX(4px);
+            }
+
     .btn-secondary {
-        padding: 0.5rem 1rem;
-        background: transparent;
-        color: #94a3b8;
-        border: 1px solid #334155;
-        border-radius: 6px;
-        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 44px;
+        padding: 0 18px;
+        border-radius: 13px;
         cursor: pointer;
+        color: #94a3b8;
+        font-size: 12px;
+        font-weight: 700;
+        background: linear-gradient(135deg, rgba(15,23,42,.76), rgba(2,6,23,.58));
+        border: 1px solid rgba(255,255,255,.07);
+        transition: all .22s ease;
     }
 
         .btn-secondary:hover {
-            background: #1e293b;
+            color: #cbd5e1;
+            border-color: rgba(148,163,184,.25);
+            background: linear-gradient(135deg, rgba(30,41,59,.76), rgba(15,23,42,.58));
         }
 
-    .link {
-        color: #93c5fd;
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 0.8rem;
+    /* =========================================================
+           TABLE CARD
+        ========================================================= */
+    .table-card {
+        position: relative;
+        padding: 24px;
+        border-radius: 22px;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
     }
 
-        .link:hover {
-            text-decoration: underline;
-        }
-
-    .link-danger {
-        color: #fca5a5;
-        background: none;
-        border: none;
-        cursor: pointer;
-        font-size: 0.8rem;
+    .table-card-glow {
+        position: absolute;
+        width: 340px;
+        height: 340px;
+        bottom: -190px;
+        left: -190px;
+        border-radius: 50%;
+        background: rgba(147,51,234,.28);
+        filter: blur(90px);
+        pointer-events: none;
     }
 
-        .link-danger:hover {
-            text-decoration: underline;
+    .table-header {
+        position: relative;
+        z-index: 1;
+        margin-bottom: 18px;
+    }
+
+    /* =========================================================
+           DATA TABLE
+        ========================================================= */
+    .table-scroll {
+        position: relative;
+        z-index: 1;
+        overflow-x: auto;
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        font-size: 13px;
+    }
+
+        .data-table thead th {
+            text-align: left;
+            padding: 10px 14px;
+            font-size: 9.5px;
+            font-weight: 800;
+            letter-spacing: .16em;
+            text-transform: uppercase;
+            color: #64748b;
+            border-bottom: 1px solid rgba(255,255,255,.06);
+            white-space: nowrap;
         }
+
+        .data-table tbody tr {
+            transition: background .2s ease;
+        }
+
+            .data-table tbody tr:hover {
+                background: rgba(255,255,255,.025);
+            }
+
+        .data-table tbody td {
+            padding: 14px;
+            border-bottom: 1px solid rgba(255,255,255,.04);
+            color: #cbd5e1;
+            vertical-align: middle;
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: 0;
+        }
+
+    .col-id {
+        width: 80px;
+    }
+
+    .col-doc {
+        white-space: nowrap;
+    }
+
+    .col-actions {
+        text-align: right;
+        white-space: nowrap;
+    }
+
+    /* id chip */
+    .id-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 4px 9px;
+        border-radius: 7px;
+        font-size: 11px;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+        color: #a5b4fc;
+        background: rgba(99,102,241,.10);
+        border: 1px solid rgba(99,102,241,.18);
+    }
+
+    /* user cell */
+    .user-cell {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    .user-avatar {
+        width: 32px;
+        height: 32px;
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        font-size: 11px;
+        font-weight: 800;
+        letter-spacing: .02em;
+        color: #ffffff;
+        background: linear-gradient(135deg, #4f46e5, #9333ea 60%, #f59e0b);
+        box-shadow: 0 6px 16px rgba(124,58,237,.28), inset 0 1px rgba(255,255,255,.20);
+    }
+
+    .user-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #f1f5f9;
+        letter-spacing: -.005em;
+        white-space: nowrap;
+    }
+
+    /* email */
+    .email-value {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 11.5px;
+        color: #94a3b8;
+        white-space: nowrap;
+    }
+
+    /* document */
+    .doc-chip {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: .02em;
+        color: #c4b5fd;
+        background: rgba(139,92,246,.10);
+        border: 1px solid rgba(139,92,246,.20);
+        white-space: nowrap;
+    }
+
+    .doc-empty {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-size: 12px;
+        color: #475569;
+    }
+
+    /* location */
+    .location-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 5px 10px;
+        border-radius: 8px;
+        font-size: 12px;
+        font-weight: 600;
+        color: #cbd5e1;
+        background: rgba(148,163,184,.06);
+        border: 1px solid rgba(148,163,184,.14);
+        white-space: nowrap;
+    }
+
+        .location-chip svg {
+            width: 12px;
+            height: 12px;
+            color: #94a3b8;
+        }
+
+    /* row actions */
+    .row-actions {
+        display: inline-flex;
+        gap: 8px;
+        justify-content: flex-end;
+    }
+
+    .action-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 10px;
+        border-radius: 9px;
+        cursor: pointer;
+        color: #94a3b8;
+        background: rgba(255,255,255,.03);
+        border: 1px solid rgba(255,255,255,.06);
+        font-size: 11px;
+        font-weight: 700;
+        font-family: inherit;
+        transition: all .2s ease;
+    }
+
+        .action-link svg {
+            width: 13px;
+            height: 13px;
+        }
+
+        .action-link:hover {
+            color: #c4b5fd;
+            border-color: rgba(168,85,247,.30);
+            background: rgba(139,92,246,.08);
+        }
+
+    .action-danger:hover {
+        color: #fda4af;
+        border-color: rgba(244,63,94,.28);
+        background: rgba(244,63,94,.08);
+    }
+
+    /* =========================================================
+           EMPTY / LOADING STATES
+        ========================================================= */
+    .state-empty {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        padding: 48px 20px;
+        color: #475569;
+        font-size: 12.5px;
+        text-align: center;
+    }
+
+        .state-empty svg {
+            width: 34px;
+            height: 34px;
+            color: #334155;
+        }
+
+    .spinner {
+        width: 22px;
+        height: 22px;
+        border-radius: 50%;
+        border: 2px solid rgba(148,163,184,.15);
+        border-top-color: #a855f7;
+        animation: spin .8s linear infinite;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
 </style>
 
 @code {
@@ -231,5 +1600,17 @@
         selectedUserId = 0;
         registerForm = new RegisterDTO();
         updateForm = new UpdateUserDTO();
+    }
+
+    private string GetInitials(string fullName)
+    {
+        if (string.IsNullOrWhiteSpace(fullName))
+            return "?";
+
+        var parts = fullName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length == 1)
+            return parts[0].Substring(0, 1).ToUpperInvariant();
+
+        return (parts[0][0].ToString() + parts[^1][0].ToString()).ToUpperInvariant();
     }
 }

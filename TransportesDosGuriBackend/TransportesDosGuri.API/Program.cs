@@ -1,8 +1,10 @@
 using Asp.Versioning;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using TransportesDosGuri.Core.Application.ServiceContracts;
@@ -26,9 +28,9 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(new ProducesAttribute("application/json"));
     options.Filters.Add(new ConsumesAttribute("application/json"));
 
-    /*var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
 
-    options.Filters.Add(new AuthorizeFilter(policy));*/
+    options.Filters.Add(new AuthorizeFilter(policy));
 });
 
 builder.Services.AddApiVersioning(config =>
