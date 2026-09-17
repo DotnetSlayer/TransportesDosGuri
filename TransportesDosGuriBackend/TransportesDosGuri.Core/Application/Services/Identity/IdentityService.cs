@@ -34,7 +34,7 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
 
             if (user == null)
             {
-                return (false, new[] { "User Not Found!" });
+                return (false, new[] { "Requisição Inválida!" });
             }
 
             var result = await _userManager.DeleteAsync(user);
@@ -51,7 +51,7 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
         {
             if (tokenModel == null)
             {
-                return (false, null, new[] { "Invalid Client Request!" });
+                return (false, null, new[] { "Requisição Inválida!" });
             }
 
             string? jwtToken = tokenModel.Token;
@@ -59,21 +59,21 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
 
             if (principal == null)
             {
-                return (false, null, new[] { "Invalid JWT Access Token!" });
+                return (false, null, new[] { "Requisição Inválida!" });
             }
 
             string? email = principal.FindFirstValue(ClaimTypes.Email);
 
             if (string.IsNullOrEmpty(email))
             {
-                return (false, null, new[] { "User identity not found in token!" });
+                return (false, null, new[] { "Requisição Inválida!" });
             }
 
             ApplicationUser? user = await _userManager.FindByEmailAsync(email);
 
             if (user == null || user.RefreshToken != tokenModel.RefreshToken || user.RefreshTokenExpirationDateTime <= DateTime.UtcNow)
             {
-                return (false, null, new[] { "Invalid Refresh Token!" });
+                return (false, null, new[] { "Requisição Inválida!" });
             }
 
             AuthenticationResponseDTO authenticationResponse = await _jwtService.CreateJwtToken(user);
@@ -111,14 +111,14 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
 
             if (user == null)
             {
-                return (false, new[] { "Wrong Username or Password!" }, null, null);
+                return (false, new[] { "Requisição Inválida!" }, null, null);
             }
 
             var result = await _signInManager.CheckPasswordSignInAsync(user, login.Password, lockoutOnFailure: false);
 
             if (!result.Succeeded)
             {
-                return (false, new[] { "Wrong Username or Password!" }, null, null);
+                return (false, new[] { "Requisição Inválida!" }, null, null);
             }
 
             var authenticationResponse = await _jwtService.CreateJwtToken(user);
@@ -171,7 +171,7 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
 
             if (existingUser == null)
             {
-                return (false, new[] { "User Not Found!" });
+                return (false, new[] { "Requisição Inválida!" });
             }
 
             existingUser.Name = update.Name;
@@ -199,27 +199,27 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
         {
             if (tokenModel == null || string.IsNullOrWhiteSpace(tokenModel.Token))
             {
-                return (false, new[] { "Invalid Client Request!" });
+                return (false, new[] { "Requisição Inválida!" });
             }
 
             ClaimsPrincipal? principal = _jwtService.GetPrincipalFromJwtToken(tokenModel.Token);
 
             if (principal == null)
             {
-                return (false, new[] { "Invalid JWT Access Token!" });
+                return (false, new[] { "Requisição Inválida!" });
             }
 
             string? email = principal.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(email))
             {
-                return (false, new[] { "User identity not found in token!" });
+                return (false, new[] { "Requisição Inválida!" });
             }
 
             ApplicationUser? user = await _userManager.FindByEmailAsync(email);
 
             if (user == null || user.RefreshToken != tokenModel.RefreshToken)
             {
-                return (false, new[] { "Invalid Refresh Token!" });
+                return (false, new[] { "Requisição Inválida!" });
             }
 
             user.RefreshToken = null;

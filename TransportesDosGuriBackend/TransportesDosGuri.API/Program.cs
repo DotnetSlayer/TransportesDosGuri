@@ -1,4 +1,5 @@
 using Asp.Versioning;
+using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
@@ -7,9 +8,11 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Data;
 using TransportesDosGuri.Core.Application.ServiceContracts;
 using TransportesDosGuri.Core.Application.ServiceContracts.Identity;
 using TransportesDosGuri.Core.Application.ServiceContracts.Jwt;
+using TransportesDosGuri.Core.Application.ServiceContracts.QuestPDF;
 using TransportesDosGuri.Core.Application.Services;
 using TransportesDosGuri.Core.Application.Services.Identity;
 using TransportesDosGuri.Core.Application.Services.Jwt;
@@ -19,9 +22,12 @@ using TransportesDosGuri.Core.Domain.RepositoryContracts.Misc;
 using TransportesDosGuri.Infrastructure.Data;
 using TransportesDosGuri.Infrastructure.ExternalServices.Asaas;
 using TransportesDosGuri.Infrastructure.IdentityContext;
+using TransportesDosGuri.Infrastructure.QuestPDF;
 using TransportesDosGuri.Infrastructure.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
+
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 
 builder.Services.AddControllers(options =>
 {
@@ -35,15 +41,25 @@ builder.Services.AddControllers(options =>
 
 builder.Services.AddApiVersioning(config =>
 {
-    config.ApiVersionReader = new UrlSegmentApiVersionReader();
-    config.ApiVersionReader = new QueryStringApiVersionReader();
-    config.ApiVersionReader = new HeaderApiVersionReader("api-version");
+    config.ApiVersionReader = ApiVersionReader.Combine(
+        new UrlSegmentApiVersionReader(),
+        new QueryStringApiVersionReader("api-version"),
+        new HeaderApiVersionReader("api-version")
+    );
 
     config.DefaultApiVersion = new ApiVersion(1, 0);
     config.AssumeDefaultVersionWhenUnspecified = true;
+    config.ReportApiVersions = true;
+})
+.AddApiExplorer(options =>
+{
+    options.GroupNameFormat = "'v'VVV";
+    options.SubstituteApiVersionInUrl = true;
 });
 
 builder.Services.AddOpenApi();
+
+Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -80,17 +96,18 @@ builder.Services.AddScoped<ITripRepository, TripRepository>();
 builder.Services.AddScoped<IUserRequestService, UserRequestService>();
 builder.Services.AddScoped<IUserRequestRepository, UserRequestRepository>();
 
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 builder.Services.AddScoped<IIdentityService, IdentityService>();
 
 builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
 
-builder.Services.AddScoped<IAsaasIntegrationRepository, AsaasIntegrationRepository>();
-
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
 builder.Services.AddTransient<IJwtService, JwtService>();
+
+builder.Services.AddScoped<IReceiptPdfGenerator, ReceiptPdfGenerator>();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -117,12 +134,6 @@ builder.Services.AddSwaggerGen(options =>
 
 });
 
-builder.Services.AddApiVersioning().AddApiExplorer(options =>
-{
-    options.GroupNameFormat = "'v'VVV";
-    options.SubstituteApiVersionInUrl = true;
-});
-
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(policyBuilder =>
@@ -137,10 +148,6 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddDbContext<ApplicationUserDbContext>(options =>
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-
-
-builder.Services.AddOpenApi();
 
 builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
 {
@@ -191,7 +198,9 @@ builder.Services.AddAuthentication(options =>
             IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
 
 
-            RoleClaimType = System.Security.Claims.ClaimTypes.Role
+            RoleClaimType = System.Security.Claims.ClaimTypes.Role,
+
+            NameClaimType = System.Security.Claims.ClaimTypes.Name
         };
     });
 
@@ -205,14 +214,15 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+
+    app.UseSwagger();
+
+    app.UseSwaggerUI(options =>
+    {
+        options.SwaggerEndpoint("/swagger/v1/swagger.json", "1.0");
+    });
 }
 
-app.UseSwagger();
-
-app.UseSwaggerUI(options =>
-{
-    options.SwaggerEndpoint("/swagger/v1/swagger.json", "1.0");
-});
 
 app.UseRouting();
 
@@ -229,3 +239,17 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+
+public class DateOnlyTypeHandler : SqlMapper.TypeHandler<DateOnly>
+{
+    public override void SetValue(IDbDataParameter parameter, DateOnly value)
+    {
+        parameter.Value = value.ToDateTime(TimeOnly.MinValue);
+    }
+
+    public override DateOnly Parse(object value)
+    {
+        return DateOnly.FromDateTime((DateTime)value);
+    }
+}

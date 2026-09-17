@@ -3,6 +3,7 @@
 
 @inject IFlightSeatService FlightSeatService
 @inject IAircraftService AircraftService
+@inject IFlightService FlightService
 
 @using TransportesDosGuri.Core.DTOs
 @using TransportesDosGuri.Core.Interfaces
@@ -11,7 +12,10 @@
 
 <div class="seats-page">
 
-    <!-- BACKGROUND EFFECTS -->
+    <!-- =========================================================
+         BACKGROUND
+    ========================================================== -->
+
     <div class="background-effects">
         <div class="orb orb-purple"></div>
         <div class="orb orb-indigo"></div>
@@ -19,310 +23,739 @@
         <div class="grid-overlay"></div>
     </div>
 
+
     <main class="seats-main">
 
         <div class="seats-container">
 
-            <!-- HEADER -->
+            <!-- =================================================
+                 HEADER
+            ================================================== -->
+
             <header class="page-header">
 
                 <div class="header-text">
+
                     <h1>
                         <span>Assentos de Voos.</span>
                     </h1>
+
                     <p>
-                        Cadastre assentos, classes e posicionamento para cada aeronave da frota.
+                        Cadastre e gerencie os assentos disponíveis
+                        para cada voo e aeronave da frota.
                     </p>
+
                 </div>
 
+
                 <div class="header-counter">
-                    <span class="counter-value">@(seats?.Count ?? 0)</span>
-                    <span class="counter-label">Assentos</span>
+
+                    <span class="counter-value">
+                        @(seats?.Count ?? 0)
+                    </span>
+
+                    <span class="counter-label">
+                        Assentos
+                    </span>
+
                 </div>
 
             </header>
 
-            <!-- FORM CARD -->
+
+            <!-- =================================================
+                 FORM CARD
+            ================================================== -->
+
             <section class="form-card">
 
                 <div class="form-card-glow"></div>
 
+
                 <div class="form-header">
+
                     <div class="section-label">
-                        <span>@(seatForm.Id == 0 ? "01" : "02")</span>
-                        @(seatForm.Id == 0 ? "Novo assento" : "Editando assento")
+
+                        <span>
+                            @(seatForm.Id == 0 ? "01" : "02")
+                        </span>
+
+                        @(seatForm.Id == 0
+                            ? "Novo assento"
+                            : "Editando assento")
+
                     </div>
+
                 </div>
 
-                <EditForm Model="seatForm" OnValidSubmit="Save">
+
+                <EditForm Model="seatForm"
+                          OnValidSubmit="Save">
+
                     <DataAnnotationsValidator />
 
-                    <div class="form-grid form-grid-5">
 
-                        <!-- AERONAVE -->
+                    <div class="form-grid">
+
+
+                        <!-- =====================================
+                             VOO
+                        ====================================== -->
+
                         <div class="field">
-                            <label>Aeronave</label>
+
+                            <label>Voo</label>
+
                             <div class="input-wrapper">
+
                                 <span class="input-icon">
+
                                     <svg viewBox="0 0 24 24" fill="none">
+
                                         <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
                                               stroke="currentColor"
                                               stroke-width="1.8"
                                               stroke-linecap="round"
                                               stroke-linejoin="round" />
+
                                     </svg>
+
                                 </span>
-                                <InputSelect class="input" @bind-Value="seatForm.AircraftId">
-                                    <option value="0">Selecione...</option>
-                                    @foreach (var aircraft in aircraftList)
+
+
+                                <InputSelect class="input"
+                                             @bind-Value="seatForm.FlightId">
+
+                                    <option value="0">
+                                        Selecione o voo...
+                                    </option>
+
+
+                                    @foreach (var flight in flightList)
                                     {
-                                        <option value="@aircraft.Id">@aircraft.Model</option>
+                                        <option value="@flight.Id">
+                                            @GetFlightDescription(flight)
+                                        </option>
                                     }
+
                                 </InputSelect>
+
                             </div>
+
                         </div>
 
-                        <!-- SEAT NUMBER -->
+
+                        <!-- =====================================
+                             AERONAVE
+                        ====================================== -->
+
                         <div class="field">
-                            <label>Assento</label>
+
+                            <label>Aeronave</label>
+
                             <div class="input-wrapper">
+
                                 <span class="input-icon">
+
                                     <svg viewBox="0 0 24 24" fill="none">
+
+                                        <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                                              stroke="currentColor"
+                                              stroke-width="1.8"
+                                              stroke-linecap="round"
+                                              stroke-linejoin="round" />
+
+                                    </svg>
+
+                                </span>
+
+
+                                <InputSelect class="input"
+                                             @bind-Value="seatForm.AircraftId">
+
+                                    <option value="0">
+                                        Selecione a aeronave...
+                                    </option>
+
+
+                                    @foreach (var aircraft in aircraftList)
+                                    {
+                                        <option value="@aircraft.Id">
+                                            @aircraft.Model
+                                        </option>
+                                    }
+
+                                </InputSelect>
+
+                            </div>
+
+                        </div>
+
+
+                        <!-- =====================================
+                             ASSENTO
+                        ====================================== -->
+
+                        <div class="field">
+
+                            <label>Assento</label>
+
+                            <div class="input-wrapper">
+
+                                <span class="input-icon">
+
+                                    <svg viewBox="0 0 24 24" fill="none">
+
                                         <path d="M6 19v2M18 19v2M6 15h12M6 15V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8M6 11h12"
                                               stroke="currentColor"
                                               stroke-width="1.7"
                                               stroke-linecap="round"
                                               stroke-linejoin="round" />
+
                                     </svg>
+
                                 </span>
+
+
                                 <InputText class="input input-uppercase"
                                            @bind-Value="seatForm.SeatNumber"
                                            placeholder="Ex: 12A" />
+
                             </div>
+
                         </div>
 
-                        <!-- CLASS -->
+
+                        <!-- =====================================
+                             CLASSE
+                        ====================================== -->
+
                         <div class="field">
+
                             <label>Classe</label>
+
                             <div class="input-wrapper">
+
                                 <span class="input-icon">
+
                                     <svg viewBox="0 0 24 24" fill="none">
-                                        <path d="M12 2l2.09 6.26L20 9.27l-4.91 4.02L16.18 20 12 16.77 7.82 20l1.09-6.71L4 9.27l5.91-1.01L12 2z"
+
+                                        <path d="M12 2l2.09 6.26L20 9.27l-4.91 4.02L16.18 20 12 16.77 7.82 20l1.09-6.71L4 9.27 9.91 8.26 12 2z"
                                               stroke="currentColor"
                                               stroke-width="1.7"
                                               stroke-linecap="round"
                                               stroke-linejoin="round" />
+
                                     </svg>
+
                                 </span>
-                                <InputSelect class="input" @bind-Value="seatForm.Class">
+
+
+                                <InputSelect class="input"
+                                             @bind-Value="seatForm.Class">
+
                                     @foreach (var seatClass in Enum.GetValues<SeatClass>())
                                     {
-                                        <option value="@seatClass">@seatClass</option>
+                                        <option value="@seatClass">
+                                            @seatClass
+                                        </option>
                                     }
+
                                 </InputSelect>
+
                             </div>
+
                         </div>
 
-                        <!-- LOCATION -->
+
+                        <!-- =====================================
+                             LOCALIZAÇÃO
+                        ====================================== -->
+
                         <div class="field">
+
                             <label>Localização</label>
+
                             <div class="input-wrapper">
+
                                 <span class="input-icon">
+
                                     <svg viewBox="0 0 24 24" fill="none">
-                                        <circle cx="12" cy="12" r="9"
+
+                                        <circle cx="12"
+                                                cy="12"
+                                                r="9"
                                                 stroke="currentColor"
                                                 stroke-width="1.7" />
+
                                         <path d="M12 3v18M3 12h18"
                                               stroke="currentColor"
                                               stroke-width="1.7"
                                               stroke-linecap="round" />
+
                                     </svg>
+
                                 </span>
-                                <InputSelect class="input" @bind-Value="seatForm.Location">
+
+
+                                <InputSelect class="input"
+                                             @bind-Value="seatForm.Location">
+
                                     @foreach (var location in Enum.GetValues<SeatLocation>())
                                     {
-                                        <option value="@location">@location</option>
+                                        <option value="@location">
+                                            @location
+                                        </option>
                                     }
+
                                 </InputSelect>
+
                             </div>
+
                         </div>
 
-                        <!-- SIDE -->
+
+                        <!-- =====================================
+                             LADO
+                        ====================================== -->
+
                         <div class="field">
+
                             <label>Lado</label>
+
                             <div class="input-wrapper">
+
                                 <span class="input-icon">
+
                                     <svg viewBox="0 0 24 24" fill="none">
+
                                         <path d="M9 3v18M15 3v18"
                                               stroke="currentColor"
                                               stroke-width="1.7"
                                               stroke-linecap="round" />
+
                                         <path d="M3 12h18"
                                               stroke="currentColor"
                                               stroke-width="1.7"
                                               stroke-linecap="round" />
+
                                     </svg>
+
                                 </span>
-                                <InputSelect class="input" @bind-Value="seatForm.Side">
+
+
+                                <InputSelect class="input"
+                                             @bind-Value="seatForm.Side">
+
                                     @foreach (var side in Enum.GetValues<SeatSide>())
                                     {
-                                        <option value="@side">@side</option>
+                                        <option value="@side">
+                                            @side
+                                        </option>
                                     }
+
                                 </InputSelect>
+
                             </div>
+
+                        </div>
+
+
+                        <!-- =====================================
+                             STATUS
+                        ====================================== -->
+
+                        <div class="field">
+
+                            <label>Status</label>
+
+                            <div class="input-wrapper">
+
+                                <span class="input-icon">
+
+                                    <svg viewBox="0 0 24 24" fill="none">
+
+                                        <circle cx="12"
+                                                cy="12"
+                                                r="9"
+                                                stroke="currentColor"
+                                                stroke-width="1.7" />
+
+                                        <path d="M8 12l2.5 2.5L16 9"
+                                              stroke="currentColor"
+                                              stroke-width="1.7"
+                                              stroke-linecap="round"
+                                              stroke-linejoin="round" />
+
+                                    </svg>
+
+                                </span>
+
+
+                                <InputSelect class="input"
+                                             @bind-Value="seatForm.Status">
+
+                                    @foreach (var status in Enum.GetValues<FlightSeatStatus>())
+                                    {
+                                        <option value="@status">
+                                            @status
+                                        </option>
+                                    }
+
+                                </InputSelect>
+
+                            </div>
+
                         </div>
 
                     </div>
 
-                    <!-- ACTIONS -->
+
+                    <!-- =================================================
+                         ACTIONS
+                    ================================================== -->
+
                     <div class="form-actions">
+
                         @if (seatForm.Id != 0)
                         {
-                            <button type="button" @onclick="ResetForm" class="btn-secondary">
+                            <button type="button"
+                                    @onclick="ResetForm"
+                                    class="btn-secondary">
+
                                 Cancelar
+
                             </button>
                         }
 
-                        <button type="submit" class="btn-primary">
-                            <span>@(seatForm.Id == 0 ? "Criar assento" : "Atualizar assento")</span>
+
+                        <button type="submit"
+                                class="btn-primary">
+
+                            <span>
+                                @(seatForm.Id == 0
+                                    ? "Criar assento"
+                                    : "Atualizar assento")
+                            </span>
+
+
                             <svg viewBox="0 0 24 24" fill="none">
+
                                 <path d="M5 12h14M13 6l6 6-6 6"
                                       stroke="currentColor"
                                       stroke-width="2"
                                       stroke-linecap="round"
                                       stroke-linejoin="round" />
+
                             </svg>
+
                         </button>
+
                     </div>
 
                 </EditForm>
 
             </section>
 
-            <!-- TABLE CARD -->
+
+            <!-- =================================================
+                 TABLE CARD
+            ================================================== -->
+
             <section class="table-card">
 
                 <div class="table-card-glow"></div>
 
+
                 <div class="table-header">
+
                     <div class="section-label">
+
                         <span>03</span>
+
                         Assentos cadastrados
+
                     </div>
+
                 </div>
+
 
                 @if (seats == null)
                 {
                     <div class="state-empty">
+
                         <div class="spinner"></div>
-                        <span>Carregando assentos...</span>
+
+                        <span>
+                            Carregando assentos...
+                        </span>
+
                     </div>
                 }
                 else if (!seats.Any())
                 {
                     <div class="state-empty">
+
                         <svg viewBox="0 0 24 24" fill="none">
+
                             <path d="M6 19v2M18 19v2M6 15h12M6 15V7a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v8M6 11h12"
                                   stroke="currentColor"
                                   stroke-width="1.6"
                                   stroke-linecap="round"
                                   stroke-linejoin="round" />
+
                         </svg>
-                        <span>Nenhum assento registrado.</span>
+
+                        <span>
+                            Nenhum assento registrado.
+                        </span>
+
                     </div>
                 }
                 else
                 {
                     <div class="table-scroll">
+
                         <table class="data-table">
+
                             <thead>
+
                                 <tr>
-                                    <th class="col-id">ID</th>
-                                    <th>Aeronave</th>
-                                    <th class="col-seat">Assento</th>
-                                    <th>Classe</th>
-                                    <th>Localização</th>
-                                    <th>Lado</th>
-                                    <th class="col-actions">Ações</th>
+
+                                    <th class="col-id">
+                                        ID
+                                    </th>
+
+                                    <th>
+                                        Voo
+                                    </th>
+
+                                    <th>
+                                        Aeronave
+                                    </th>
+
+                                    <th class="col-seat">
+                                        Assento
+                                    </th>
+
+                                    <th>
+                                        Classe
+                                    </th>
+
+                                    <th>
+                                        Localização
+                                    </th>
+
+                                    <th>
+                                        Lado
+                                    </th>
+
+                                    <th>
+                                        Status
+                                    </th>
+
+                                    <th class="col-actions">
+                                        Ações
+                                    </th>
+
                                 </tr>
+
                             </thead>
+
+
                             <tbody>
+
                                 @foreach (var item in seats)
                                 {
                                     <tr>
+
+                                        <!-- ID -->
+
                                         <td class="col-id">
-                                            <span class="id-chip">#@item.Id</span>
+
+                                            <span class="id-chip">
+                                                #@item.Id
+                                            </span>
+
                                         </td>
 
+
+                                        <!-- VOO -->
+
                                         <td>
-                                            <div class="aircraft-cell">
-                                                <span class="aircraft-icon">
+
+                                            <div class="flight-cell">
+
+                                                <span class="flight-icon">
+
                                                     <svg viewBox="0 0 24 24" fill="none">
+
                                                         <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
                                                               stroke="currentColor"
                                                               stroke-width="1.8"
                                                               stroke-linecap="round"
                                                               stroke-linejoin="round" />
+
                                                     </svg>
+
                                                 </span>
-                                                <span class="aircraft-name">@GetAircraftModel(item.AircraftId)</span>
+
+
+                                                <div class="flight-info">
+
+                                                    <span class="flight-name">
+                                                        @GetFlightDescriptionById(item.FlightId)
+                                                    </span>
+
+                                                </div>
+
                                             </div>
+
                                         </td>
 
-                                        <td class="col-seat">
-                                            <span class="seat-badge">@item.SeatNumber</span>
-                                        </td>
+
+                                        <!-- AERONAVE -->
 
                                         <td>
+
+                                            <div class="aircraft-cell">
+
+                                                <span class="aircraft-icon">
+
+                                                    <svg viewBox="0 0 24 24" fill="none">
+
+                                                        <path d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8"
+                                                              stroke="currentColor"
+                                                              stroke-width="1.8"
+                                                              stroke-linecap="round"
+                                                              stroke-linejoin="round" />
+
+                                                    </svg>
+
+                                                </span>
+
+
+                                                <span class="aircraft-name">
+                                                    @GetAircraftModel(item.AircraftId)
+                                                </span>
+
+                                            </div>
+
+                                        </td>
+
+
+                                        <!-- ASSENTO -->
+
+                                        <td class="col-seat">
+
+                                            <span class="seat-badge">
+                                                @item.SeatNumber
+                                            </span>
+
+                                        </td>
+
+
+                                        <!-- CLASSE -->
+
+                                        <td>
+
                                             <span class="enum-chip @GetClassVariant(item.Class)">
                                                 @item.Class
                                             </span>
+
                                         </td>
 
+
+                                        <!-- LOCALIZAÇÃO -->
+
                                         <td>
+
                                             <span class="enum-chip @GetLocationVariant(item.Location)">
                                                 @item.Location
                                             </span>
+
                                         </td>
 
+
+                                        <!-- LADO -->
+
                                         <td>
+
                                             <span class="enum-chip @GetSideVariant(item.Side)">
                                                 @item.Side
                                             </span>
+
                                         </td>
 
+
+                                        <!-- STATUS -->
+
+                                        <td>
+
+                                            <span class="enum-chip @GetStatusVariant(item.Status)">
+                                                @item.Status
+                                            </span>
+
+                                        </td>
+
+
+                                        <!-- ACTIONS -->
+
                                         <td class="col-actions">
+
                                             <div class="row-actions">
-                                                <button @onclick="() => Edit(item)" class="action-link">
+
+                                                <button @onclick="() => Edit(item)"
+                                                        class="action-link">
+
                                                     <svg viewBox="0 0 24 24" fill="none">
+
                                                         <path d="M12 20h9"
                                                               stroke="currentColor"
                                                               stroke-width="1.8"
                                                               stroke-linecap="round" />
+
                                                         <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"
                                                               stroke="currentColor"
                                                               stroke-width="1.8"
                                                               stroke-linecap="round"
                                                               stroke-linejoin="round" />
+
                                                     </svg>
+
                                                     Editar
+
                                                 </button>
-                                                <button @onclick="() => Delete(item.Id)" class="action-link action-danger">
+
+
+                                                <button @onclick="() => Delete(item.Id)"
+                                                        class="action-link action-danger">
+
                                                     <svg viewBox="0 0 24 24" fill="none">
+
                                                         <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"
                                                               stroke="currentColor"
                                                               stroke-width="1.8"
                                                               stroke-linecap="round"
                                                               stroke-linejoin="round" />
+
                                                     </svg>
+
                                                     Excluir
+
                                                 </button>
+
                                             </div>
+
                                         </td>
+
                                     </tr>
                                 }
+
                             </tbody>
+
                         </table>
+
                     </div>
                 }
 
@@ -334,24 +767,49 @@
 
 </div>
 
+
 <style>
 
     /* =========================================================
-           PAGE
-        ========================================================= */
+       PAGE
+    ========================================================== */
+
     .seats-page {
         position: relative;
         min-height: 100vh;
         width: 100%;
         overflow: hidden;
-        background: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, .13), transparent 30%), radial-gradient(circle at 85% 80%, rgba(168, 85, 247, .12), transparent 30%), #03050b;
+
+        background:
+            radial-gradient(
+                circle at 15% 15%,
+                rgba(99, 102, 241, .13),
+                transparent 30%
+            ),
+            radial-gradient(
+                circle at 85% 80%,
+                rgba(168, 85, 247, .12),
+                transparent 30%
+            ),
+            #03050b;
+
         color: #e2e8f0;
-        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+        font-family:
+            Inter,
+            ui-sans-serif,
+            system-ui,
+            -apple-system,
+            BlinkMacSystemFont,
+            "Segoe UI",
+            sans-serif;
     }
 
+
     /* =========================================================
-           BACKGROUND
-        ========================================================= */
+       BACKGROUND
+    ========================================================== */
+
     .background-effects {
         position: fixed;
         inset: 0;
@@ -363,15 +821,21 @@
     .orb {
         position: absolute;
         border-radius: 999px;
+
         filter: blur(100px);
+
         opacity: .32;
-        animation: floatOrb 14s ease-in-out infinite alternate;
+
+        animation:
+            floatOrb 14s ease-in-out infinite alternate;
     }
 
     .orb-purple {
         width: 420px;
         height: 420px;
+
         background: #9333ea;
+
         left: -180px;
         top: -140px;
     }
@@ -379,270 +843,435 @@
     .orb-indigo {
         width: 500px;
         height: 500px;
+
         background: #4f46e5;
+
         right: -220px;
         bottom: -200px;
+
         animation-delay: -4s;
     }
 
     .orb-amber {
         width: 280px;
         height: 280px;
+
         background: #f59e0b;
+
         left: 45%;
         bottom: -180px;
+
         opacity: .12;
+
         animation-delay: -7s;
     }
 
     .grid-overlay {
         position: absolute;
         inset: 0;
+
         opacity: .035;
-        background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+
+        background-image:
+            linear-gradient(
+                rgba(255,255,255,.5) 1px,
+                transparent 1px
+            ),
+            linear-gradient(
+                90deg,
+                rgba(255,255,255,.5) 1px,
+                transparent 1px
+            );
+
         background-size: 60px 60px;
     }
 
     @@keyframes floatOrb {
+
         from {
-            transform: translate3d(0,0,0) scale(1);
+            transform:
+                translate3d(0,0,0)
+                scale(1);
         }
 
         to {
-            transform: translate3d(40px,-30px,0) scale(1.08);
+            transform:
+                translate3d(40px,-30px,0)
+                scale(1.08);
         }
+
     }
 
+
     /* =========================================================
-           LAYOUT
-        ========================================================= */
+       LAYOUT
+    ========================================================== */
+
     .seats-main {
         position: relative;
         z-index: 1;
+
         min-height: 100vh;
+
         display: flex;
         flex-direction: column;
     }
 
     .seats-container {
         flex: 1;
+
         width: 100%;
-        max-width: 1300px;
+        max-width: 1450px;
+
         margin: 0 auto;
-        padding: 32px clamp(20px, 4vw, 48px) 48px;
+
+        padding:
+            32px
+            clamp(20px, 4vw, 48px)
+            48px;
+
         display: flex;
         flex-direction: column;
+
         gap: 28px;
     }
 
+
     /* =========================================================
-           HEADER
-        ========================================================= */
+       HEADER
+    ========================================================== */
+
     .page-header {
         display: flex;
         flex-direction: column;
+
         gap: 20px;
+
         align-items: flex-start;
         justify-content: space-between;
     }
 
     @@media (min-width: 768px) {
+
         .page-header {
             flex-direction: row;
             align-items: flex-end;
         }
+
     }
 
     .header-text {
-        max-width: 620px;
-    }
-
-    .eyebrow {
-        display: inline-flex;
-        align-items: center;
-        gap: 8px;
-        padding: 6px 12px;
-        margin-bottom: 14px;
-        border-radius: 999px;
-        background: rgba(99,102,241,.08);
-        border: 1px solid rgba(99,102,241,.18);
-        color: #a5b4fc;
-        font-size: 9.5px;
-        font-weight: 800;
-        letter-spacing: .14em;
-        text-transform: uppercase;
-    }
-
-    .eyebrow-dot {
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-        background: #818cf8;
-        box-shadow: 0 0 12px #818cf8;
-        animation: pulse 2.2s ease-in-out infinite;
-    }
-
-    @@keyframes pulse {
-        0%, 100% {
-            opacity: 1;
-        }
-
-        50% {
-            opacity: .45;
-        }
+        max-width: 680px;
     }
 
     .page-header h1 {
         margin: 0;
+
         color: #ffffff;
-        font-size: clamp(28px, 3.4vw, 42px);
+
+        font-size:
+            clamp(
+                28px,
+                3.4vw,
+                42px
+            );
+
         line-height: 1.05;
+
         letter-spacing: -.045em;
+
         font-weight: 800;
     }
 
-        .page-header h1 span {
-            color: transparent;
-            background: linear-gradient(90deg, #f472b6, #a855f7, #6366f1);
-            background-clip: text;
-            -webkit-background-clip: text;
-        }
+    .page-header h1 span {
+        color: transparent;
+
+        background:
+            linear-gradient(
+                90deg,
+                #f472b6,
+                #a855f7,
+                #6366f1
+            );
+
+        background-clip: text;
+        -webkit-background-clip: text;
+    }
 
     .page-header p {
         margin: 13px 0 0;
-        max-width: 520px;
+
+        max-width: 600px;
+
         color: #64748b;
+
         font-size: 12.5px;
+
         line-height: 1.7;
     }
 
     .header-counter {
         display: flex;
         flex-direction: column;
+
         align-items: flex-start;
+
         gap: 4px;
+
         padding: 14px 20px;
+
         border-radius: 16px;
-        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
-        border: 1px solid rgba(255,255,255,.07);
-        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 12px 30px rgba(0,0,0,.18);
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(15,23,42,.72),
+                rgba(2,6,23,.55)
+            );
+
+        border:
+            1px solid
+            rgba(255,255,255,.07);
+
+        box-shadow:
+            inset 0 1px rgba(255,255,255,.04),
+            0 12px 30px rgba(0,0,0,.18);
+
         backdrop-filter: blur(22px);
     }
 
     .counter-value {
         font-size: 26px;
+
         font-weight: 800;
+
         letter-spacing: -.04em;
+
         color: #ffffff;
+
         line-height: 1;
-        font-variant-numeric: tabular-nums;
+
+        font-variant-numeric:
+            tabular-nums;
     }
 
     .counter-label {
         font-size: 9px;
+
         font-weight: 800;
+
         letter-spacing: .18em;
+
         text-transform: uppercase;
+
         color: #64748b;
     }
 
+
     /* =========================================================
-           FORM CARD
-        ========================================================= */
-    .form-card {
+       CARDS
+    ========================================================== */
+
+    .form-card,
+    .table-card {
         position: relative;
+
         padding: 24px;
+
         border-radius: 22px;
+
         overflow: hidden;
-        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
-        border: 1px solid rgba(255,255,255,.07);
-        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(15,23,42,.72),
+                rgba(2,6,23,.55)
+            );
+
+        border:
+            1px solid
+            rgba(255,255,255,.07);
+
+        box-shadow:
+            inset 0 1px rgba(255,255,255,.04),
+            0 18px 40px rgba(0,0,0,.22);
+
         backdrop-filter: blur(22px);
+
         -webkit-backdrop-filter: blur(22px);
     }
 
     .form-card-glow {
         position: absolute;
+
         width: 340px;
         height: 340px;
+
         top: -190px;
         right: -190px;
+
         border-radius: 50%;
-        background: rgba(99,102,241,.35);
+
+        background:
+            rgba(99,102,241,.35);
+
         filter: blur(90px);
+
         pointer-events: none;
     }
 
-    .form-header {
+    .table-card-glow {
+        position: absolute;
+
+        width: 340px;
+        height: 340px;
+
+        bottom: -190px;
+        left: -190px;
+
+        border-radius: 50%;
+
+        background:
+            rgba(147,51,234,.28);
+
+        filter: blur(90px);
+
+        pointer-events: none;
+    }
+
+    .form-header,
+    .table-header {
         position: relative;
         z-index: 1;
+
         margin-bottom: 20px;
     }
 
+
+    /* =========================================================
+       SECTION LABEL
+    ========================================================== */
+
     .section-label {
         display: flex;
+
         align-items: center;
+
         gap: 9px;
+
         color: #64748b;
+
         font-size: 11px;
+
         font-weight: 700;
+
         letter-spacing: .16em;
+
         text-transform: uppercase;
     }
 
-        .section-label span {
-            display: inline-flex;
-            align-items: center;
-            justify-content: center;
-            width: 22px;
-            height: 22px;
-            border-radius: 7px;
-            color: #c4b5fd;
-            background: rgba(139,92,246,.10);
-            border: 1px solid rgba(139,92,246,.15);
-            font-size: 10px;
-            font-weight: 800;
-        }
+    .section-label span {
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        width: 22px;
+        height: 22px;
+
+        border-radius: 7px;
+
+        color: #c4b5fd;
+
+        background:
+            rgba(139,92,246,.10);
+
+        border:
+            1px solid
+            rgba(139,92,246,.15);
+
+        font-size: 10px;
+
+        font-weight: 800;
+    }
+
 
     /* =========================================================
-           FORM GRID
-        ========================================================= */
+       FORM
+    ========================================================== */
+
     .form-grid {
         position: relative;
         z-index: 1;
+
         display: grid;
+
         grid-template-columns: 1fr;
+
         gap: 14px;
     }
 
     @@media (min-width: 640px) {
-        .form-grid-5 {
-            grid-template-columns: repeat(2, minmax(0, 1fr));
+
+        .form-grid {
+            grid-template-columns:
+                repeat(
+                    2,
+                    minmax(0, 1fr)
+                );
         }
+
     }
 
-    @@media (min-width: 1024px) {
-        .form-grid-5 {
-            grid-template-columns: repeat(5, minmax(0, 1fr));
+    @@media (min-width: 1000px) {
+
+        .form-grid {
+            grid-template-columns:
+                repeat(
+                    4,
+                    minmax(0, 1fr)
+                );
         }
+
     }
+
+    @@media (min-width: 1400px) {
+
+        .form-grid {
+            grid-template-columns:
+                repeat(
+                    7,
+                    minmax(0, 1fr)
+                );
+        }
+
+    }
+
 
     /* =========================================================
-           FIELD
-        ========================================================= */
+       FIELD
+    ========================================================== */
+
     .field {
         display: flex;
+
         flex-direction: column;
+
         gap: 8px;
     }
 
-        .field label {
-            color: #94a3b8;
-            font-size: 11px;
-            font-weight: 700;
-            letter-spacing: .08em;
-            text-transform: uppercase;
-        }
+    .field label {
+        color: #94a3b8;
+
+        font-size: 11px;
+
+        font-weight: 700;
+
+        letter-spacing: .08em;
+
+        text-transform: uppercase;
+    }
 
     .input-wrapper {
         position: relative;
@@ -650,224 +1279,346 @@
 
     .input-icon {
         position: absolute;
+
         left: 16px;
         top: 50%;
+
         width: 16px;
         height: 16px;
-        transform: translateY(-50%);
+
+        transform:
+            translateY(-50%);
+
         color: #475569;
+
         pointer-events: none;
+
         z-index: 1;
     }
 
-        .input-icon svg {
-            width: 100%;
-            height: 100%;
-        }
+    .input-icon svg {
+        width: 100%;
+        height: 100%;
+    }
 
     .input {
         width: 100%;
         height: 48px;
-        padding: 0 16px 0 44px;
+
+        padding:
+            0
+            42px
+            0
+            44px;
+
         border-radius: 13px;
+
         outline: none;
-        border: 1px solid rgba(255,255,255,.07);
+
+        border:
+            1px solid
+            rgba(255,255,255,.07);
+
         color: #f1f5f9;
-        background: linear-gradient(135deg, rgba(15,23,42,.76), rgba(2,6,23,.58));
-        box-shadow: inset 0 1px rgba(255,255,255,.035), 0 8px 25px rgba(0,0,0,.10);
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(15,23,42,.76),
+                rgba(2,6,23,.58)
+            );
+
+        box-shadow:
+            inset 0 1px rgba(255,255,255,.035),
+            0 8px 25px rgba(0,0,0,.10);
+
         font-size: 13px;
+
         font-family: inherit;
+
         transition: all .25s ease;
+
         appearance: none;
     }
 
     .input-uppercase {
         text-transform: uppercase;
+
         letter-spacing: .1em;
+
         font-weight: 700;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+        font-family:
+            ui-monospace,
+            SFMono-Regular,
+            Menlo,
+            Monaco,
+            Consolas,
+            monospace;
     }
 
     .input::placeholder {
         color: #475569;
+
         text-transform: none;
+
         letter-spacing: normal;
+
         font-weight: 400;
+
         font-family: inherit;
     }
 
     .input:hover {
-        border-color: rgba(148,163,184,.16);
+        border-color:
+            rgba(148,163,184,.16);
     }
 
     .input:focus {
-        border-color: rgba(168,85,247,.55);
-        background: rgba(15,23,42,.86);
-        box-shadow: 0 0 0 4px rgba(168,85,247,.07), 0 10px 35px rgba(0,0,0,.18);
+        border-color:
+            rgba(168,85,247,.55);
+
+        background:
+            rgba(15,23,42,.86);
+
+        box-shadow:
+            0 0 0 4px rgba(168,85,247,.07),
+            0 10px 35px rgba(0,0,0,.18);
     }
 
     select.input {
-        background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+        background-image:
+            url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+
         background-repeat: no-repeat;
-        background-position: right 14px center;
+
+        background-position:
+            right 14px center;
+
         background-size: 16px;
+
         padding-right: 42px;
     }
 
-        select.input option {
-            background: #0f172a;
-            color: #e2e8f0;
-        }
+    select.input option {
+        background: #0f172a;
+
+        color: #e2e8f0;
+    }
+
 
     /* =========================================================
-           FORM ACTIONS
-        ========================================================= */
+       ACTIONS
+    ========================================================== */
+
     .form-actions {
         position: relative;
+
         z-index: 1;
+
         display: flex;
+
         justify-content: flex-end;
+
         gap: 10px;
+
         margin-top: 24px;
+
         padding-top: 20px;
-        border-top: 1px solid rgba(255,255,255,.05);
+
+        border-top:
+            1px solid
+            rgba(255,255,255,.05);
     }
 
     .btn-primary {
         display: inline-flex;
+
         align-items: center;
+
         justify-content: center;
+
         gap: 10px;
+
         height: 44px;
+
         padding: 0 24px;
+
         border: 0;
+
         border-radius: 13px;
+
         cursor: pointer;
+
         color: white;
+
         font-size: 12px;
+
         font-weight: 800;
+
         letter-spacing: .02em;
-        background: linear-gradient(110deg, #4f46e5, #9333ea 55%, #f59e0b);
-        box-shadow: 0 15px 40px rgba(124,58,237,.22), inset 0 1px rgba(255,255,255,.18);
-        transition: transform .2s ease, box-shadow .2s ease;
+
+        background:
+            linear-gradient(
+                110deg,
+                #4f46e5,
+                #9333ea 55%,
+                #f59e0b
+            );
+
+        box-shadow:
+            0 15px 40px rgba(124,58,237,.22),
+            inset 0 1px rgba(255,255,255,.18);
+
+        transition:
+            transform .2s ease,
+            box-shadow .2s ease;
     }
 
-        .btn-primary svg {
-            width: 15px;
-            height: 15px;
-            transition: transform .25s ease;
-        }
+    .btn-primary svg {
+        width: 15px;
+        height: 15px;
 
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 20px 50px rgba(124,58,237,.32), inset 0 1px rgba(255,255,255,.20);
-        }
+        transition:
+            transform .25s ease;
+    }
 
-            .btn-primary:hover svg {
-                transform: translateX(4px);
-            }
+    .btn-primary:hover {
+        transform:
+            translateY(-2px);
+
+        box-shadow:
+            0 20px 50px rgba(124,58,237,.32),
+            inset 0 1px rgba(255,255,255,.20);
+    }
+
+    .btn-primary:hover svg {
+        transform:
+            translateX(4px);
+    }
 
     .btn-secondary {
         display: inline-flex;
+
         align-items: center;
+
         justify-content: center;
+
         height: 44px;
+
         padding: 0 18px;
+
         border-radius: 13px;
+
         cursor: pointer;
+
         color: #94a3b8;
+
         font-size: 12px;
+
         font-weight: 700;
-        background: linear-gradient(135deg, rgba(15,23,42,.76), rgba(2,6,23,.58));
-        border: 1px solid rgba(255,255,255,.07);
-        transition: all .22s ease;
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(15,23,42,.76),
+                rgba(2,6,23,.58)
+            );
+
+        border:
+            1px solid
+            rgba(255,255,255,.07);
+
+        transition:
+            all .22s ease;
     }
 
-        .btn-secondary:hover {
-            color: #cbd5e1;
-            border-color: rgba(148,163,184,.25);
-            background: linear-gradient(135deg, rgba(30,41,59,.76), rgba(15,23,42,.58));
-        }
+    .btn-secondary:hover {
+        color: #cbd5e1;
+
+        border-color:
+            rgba(148,163,184,.25);
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(30,41,59,.76),
+                rgba(15,23,42,.58)
+            );
+    }
+
 
     /* =========================================================
-           TABLE CARD
-        ========================================================= */
-    .table-card {
-        position: relative;
-        padding: 24px;
-        border-radius: 22px;
-        overflow: hidden;
-        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
-        border: 1px solid rgba(255,255,255,.07);
-        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
-        backdrop-filter: blur(22px);
-        -webkit-backdrop-filter: blur(22px);
-    }
+       TABLE
+    ========================================================== */
 
-    .table-card-glow {
-        position: absolute;
-        width: 340px;
-        height: 340px;
-        bottom: -190px;
-        left: -190px;
-        border-radius: 50%;
-        background: rgba(147,51,234,.28);
-        filter: blur(90px);
-        pointer-events: none;
-    }
-
-    .table-header {
-        position: relative;
-        z-index: 1;
-        margin-bottom: 18px;
-    }
-
-    /* =========================================================
-           DATA TABLE
-        ========================================================= */
     .table-scroll {
         position: relative;
+
         z-index: 1;
+
         overflow-x: auto;
     }
 
     .data-table {
         width: 100%;
+
+        min-width: 1100px;
+
         border-collapse: separate;
+
         border-spacing: 0;
+
         font-size: 13px;
     }
 
-        .data-table thead th {
-            text-align: left;
-            padding: 10px 14px;
-            font-size: 9.5px;
-            font-weight: 800;
-            letter-spacing: .16em;
-            text-transform: uppercase;
-            color: #64748b;
-            border-bottom: 1px solid rgba(255,255,255,.06);
-            white-space: nowrap;
-        }
+    .data-table thead th {
+        text-align: left;
 
-        .data-table tbody tr {
-            transition: background .2s ease;
-        }
+        padding: 10px 14px;
 
-            .data-table tbody tr:hover {
-                background: rgba(255,255,255,.025);
-            }
+        font-size: 9.5px;
 
-        .data-table tbody td {
-            padding: 14px;
-            border-bottom: 1px solid rgba(255,255,255,.04);
-            color: #cbd5e1;
-            vertical-align: middle;
-        }
+        font-weight: 800;
 
-        .data-table tbody tr:last-child td {
-            border-bottom: 0;
-        }
+        letter-spacing: .16em;
+
+        text-transform: uppercase;
+
+        color: #64748b;
+
+        border-bottom:
+            1px solid
+            rgba(255,255,255,.06);
+
+        white-space: nowrap;
+    }
+
+    .data-table tbody tr {
+        transition:
+            background .2s ease;
+    }
+
+    .data-table tbody tr:hover {
+        background:
+            rgba(255,255,255,.025);
+    }
+
+    .data-table tbody td {
+        padding: 14px;
+
+        border-bottom:
+            1px solid
+            rgba(255,255,255,.04);
+
+        color: #cbd5e1;
+
+        vertical-align: middle;
+    }
+
+    .data-table tbody tr:last-child td {
+        border-bottom: 0;
+    }
 
     .col-id {
         width: 80px;
@@ -879,303 +1630,922 @@
 
     .col-actions {
         text-align: right;
+
         white-space: nowrap;
     }
 
-    /* id chip */
+
+    /* =========================================================
+       ID
+    ========================================================== */
+
     .id-chip {
         display: inline-flex;
+
         align-items: center;
+
         padding: 4px 9px;
+
         border-radius: 7px;
+
         font-size: 11px;
+
         font-weight: 700;
-        font-variant-numeric: tabular-nums;
+
+        font-variant-numeric:
+            tabular-nums;
+
         color: #a5b4fc;
-        background: rgba(99,102,241,.10);
-        border: 1px solid rgba(99,102,241,.18);
+
+        background:
+            rgba(99,102,241,.10);
+
+        border:
+            1px solid
+            rgba(99,102,241,.18);
     }
 
-    /* aircraft cell */
+
+    /* =========================================================
+       FLIGHT
+    ========================================================== */
+
+    .flight-cell {
+        display: flex;
+
+        align-items: center;
+
+        gap: 10px;
+    }
+
+    .flight-icon {
+        width: 30px;
+        height: 30px;
+
+        flex-shrink: 0;
+
+        display: inline-flex;
+
+        align-items: center;
+        justify-content: center;
+
+        border-radius: 9px;
+
+        color: #67e8f9;
+
+        background:
+            rgba(6,182,212,.10);
+
+        border:
+            1px solid
+            rgba(6,182,212,.18);
+    }
+
+    .flight-icon svg {
+        width: 15px;
+        height: 15px;
+    }
+
+    .flight-info {
+        display: flex;
+
+        flex-direction: column;
+
+        gap: 3px;
+    }
+
+    .flight-name {
+        font-family:
+            ui-monospace,
+            SFMono-Regular,
+            Menlo,
+            Monaco,
+            Consolas,
+            monospace;
+
+        font-size: 12px;
+
+        font-weight: 700;
+
+        color: #f1f5f9;
+
+        white-space: nowrap;
+    }
+
+
+    /* =========================================================
+       AIRCRAFT
+    ========================================================== */
+
     .aircraft-cell {
         display: flex;
+
         align-items: center;
+
         gap: 10px;
     }
 
     .aircraft-icon {
         width: 30px;
         height: 30px;
+
         flex-shrink: 0;
+
         display: inline-flex;
+
         align-items: center;
         justify-content: center;
+
         border-radius: 9px;
+
         color: #c4b5fd;
-        background: rgba(139,92,246,.10);
-        border: 1px solid rgba(139,92,246,.15);
+
+        background:
+            rgba(139,92,246,.10);
+
+        border:
+            1px solid
+            rgba(139,92,246,.15);
     }
 
-        .aircraft-icon svg {
-            width: 15px;
-            height: 15px;
-        }
+    .aircraft-icon svg {
+        width: 15px;
+        height: 15px;
+    }
 
     .aircraft-name {
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+        font-family:
+            ui-monospace,
+            SFMono-Regular,
+            Menlo,
+            Monaco,
+            Consolas,
+            monospace;
+
         font-size: 12.5px;
+
         font-weight: 600;
+
         color: #f1f5f9;
+
         letter-spacing: -.005em;
     }
 
-    /* seat badge — principal destaque */
+
+    /* =========================================================
+       SEAT
+    ========================================================== */
+
     .seat-badge {
         display: inline-flex;
+
         align-items: center;
+
         justify-content: center;
+
         min-width: 58px;
+
         padding: 7px 12px;
+
         border-radius: 10px;
-        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+
+        font-family:
+            ui-monospace,
+            SFMono-Regular,
+            Menlo,
+            Monaco,
+            Consolas,
+            monospace;
+
         font-size: 13px;
+
         font-weight: 800;
+
         letter-spacing: .12em;
+
         text-transform: uppercase;
+
         color: #ffffff;
-        background: linear-gradient(135deg, rgba(79,70,229,.85), rgba(147,51,234,.75));
-        border: 1px solid rgba(168,85,247,.40);
-        box-shadow: 0 6px 18px rgba(124,58,237,.30), inset 0 1px rgba(255,255,255,.20);
+
+        background:
+            linear-gradient(
+                135deg,
+                rgba(79,70,229,.85),
+                rgba(147,51,234,.75)
+            );
+
+        border:
+            1px solid
+            rgba(168,85,247,.40);
+
+        box-shadow:
+            0 6px 18px rgba(124,58,237,.30),
+            inset 0 1px rgba(255,255,255,.20);
     }
 
-    /* generic enum chip */
+
+    /* =========================================================
+       ENUM
+    ========================================================== */
+
     .enum-chip {
         display: inline-flex;
+
         align-items: center;
+
         padding: 5px 11px;
+
         border-radius: 999px;
+
         font-size: 10.5px;
+
         font-weight: 800;
+
         letter-spacing: .08em;
+
         text-transform: uppercase;
+
         white-space: nowrap;
     }
 
-    /* class variants */
+
+    /* =========================================================
+       CLASS
+    ========================================================== */
+
     .class-economy {
         color: #cbd5e1;
-        background: rgba(148,163,184,.08);
-        border: 1px solid rgba(148,163,184,.18);
+
+        background:
+            rgba(148,163,184,.08);
+
+        border:
+            1px solid
+            rgba(148,163,184,.18);
     }
 
     .class-business {
         color: #c4b5fd;
-        background: rgba(139,92,246,.10);
-        border: 1px solid rgba(139,92,246,.22);
+
+        background:
+            rgba(139,92,246,.10);
+
+        border:
+            1px solid
+            rgba(139,92,246,.22);
     }
 
     .class-first {
         color: #fcd34d;
-        background: rgba(245,158,11,.10);
-        border: 1px solid rgba(245,158,11,.22);
+
+        background:
+            rgba(245,158,11,.10);
+
+        border:
+            1px solid
+            rgba(245,158,11,.22);
     }
 
     .class-default {
         color: #a5b4fc;
-        background: rgba(99,102,241,.10);
-        border: 1px solid rgba(99,102,241,.20);
+
+        background:
+            rgba(99,102,241,.10);
+
+        border:
+            1px solid
+            rgba(99,102,241,.20);
     }
 
-    /* location variants */
+
+    /* =========================================================
+       LOCATION
+    ========================================================== */
+
     .location-window {
         color: #7dd3fc;
-        background: rgba(14,165,233,.10);
-        border: 1px solid rgba(14,165,233,.22);
+
+        background:
+            rgba(14,165,233,.10);
+
+        border:
+            1px solid
+            rgba(14,165,233,.22);
     }
 
     .location-middle {
         color: #94a3b8;
-        background: rgba(148,163,184,.08);
-        border: 1px solid rgba(148,163,184,.16);
+
+        background:
+            rgba(148,163,184,.08);
+
+        border:
+            1px solid
+            rgba(148,163,184,.16);
     }
 
     .location-aisle {
         color: #6ee7b7;
-        background: rgba(16,185,129,.10);
-        border: 1px solid rgba(16,185,129,.22);
+
+        background:
+            rgba(16,185,129,.10);
+
+        border:
+            1px solid
+            rgba(16,185,129,.22);
     }
 
-    /* side variants */
+
+    /* =========================================================
+       SIDE
+    ========================================================== */
+
     .side-left {
         color: #c4b5fd;
-        background: rgba(139,92,246,.10);
-        border: 1px solid rgba(139,92,246,.22);
+
+        background:
+            rgba(139,92,246,.10);
+
+        border:
+            1px solid
+            rgba(139,92,246,.22);
     }
 
     .side-right {
         color: #fcd34d;
-        background: rgba(245,158,11,.10);
-        border: 1px solid rgba(245,158,11,.22);
+
+        background:
+            rgba(245,158,11,.10);
+
+        border:
+            1px solid
+            rgba(245,158,11,.22);
     }
 
     .side-default {
         color: #94a3b8;
-        background: rgba(148,163,184,.08);
-        border: 1px solid rgba(148,163,184,.16);
+
+        background:
+            rgba(148,163,184,.08);
+
+        border:
+            1px solid
+            rgba(148,163,184,.16);
     }
 
-    /* row actions */
+
+    /* =========================================================
+       STATUS
+    ========================================================== */
+
+    .status-available {
+        color: #6ee7b7;
+
+        background:
+            rgba(16,185,129,.10);
+
+        border:
+            1px solid
+            rgba(16,185,129,.22);
+    }
+
+    .status-occupied {
+        color: #fda4af;
+
+        background:
+            rgba(244,63,94,.10);
+
+        border:
+            1px solid
+            rgba(244,63,94,.22);
+    }
+
+    .status-reserved {
+        color: #fcd34d;
+
+        background:
+            rgba(245,158,11,.10);
+
+        border:
+            1px solid
+            rgba(245,158,11,.22);
+    }
+
+    .status-blocked {
+        color: #94a3b8;
+
+        background:
+            rgba(148,163,184,.08);
+
+        border:
+            1px solid
+            rgba(148,163,184,.18);
+    }
+
+    .status-default {
+        color: #a5b4fc;
+
+        background:
+            rgba(99,102,241,.10);
+
+        border:
+            1px solid
+            rgba(99,102,241,.20);
+    }
+
+
+    /* =========================================================
+       ACTIONS
+    ========================================================== */
+
     .row-actions {
         display: inline-flex;
+
         gap: 8px;
+
         justify-content: flex-end;
     }
 
     .action-link {
         display: inline-flex;
+
         align-items: center;
+
         gap: 6px;
+
         padding: 6px 10px;
+
         border-radius: 9px;
+
         cursor: pointer;
+
         color: #94a3b8;
-        background: rgba(255,255,255,.03);
-        border: 1px solid rgba(255,255,255,.06);
+
+        background:
+            rgba(255,255,255,.03);
+
+        border:
+            1px solid
+            rgba(255,255,255,.06);
+
         font-size: 11px;
+
         font-weight: 700;
+
         font-family: inherit;
-        transition: all .2s ease;
+
+        transition:
+            all .2s ease;
     }
 
-        .action-link svg {
-            width: 13px;
-            height: 13px;
-        }
+    .action-link svg {
+        width: 13px;
+        height: 13px;
+    }
 
-        .action-link:hover {
-            color: #c4b5fd;
-            border-color: rgba(168,85,247,.30);
-            background: rgba(139,92,246,.08);
-        }
+    .action-link:hover {
+        color: #c4b5fd;
+
+        border-color:
+            rgba(168,85,247,.30);
+
+        background:
+            rgba(139,92,246,.08);
+    }
 
     .action-danger:hover {
         color: #fda4af;
-        border-color: rgba(244,63,94,.28);
-        background: rgba(244,63,94,.08);
+
+        border-color:
+            rgba(244,63,94,.28);
+
+        background:
+            rgba(244,63,94,.08);
     }
 
+
     /* =========================================================
-           EMPTY / LOADING STATES
-        ========================================================= */
+       EMPTY / LOADING
+    ========================================================== */
+
     .state-empty {
         position: relative;
+
         z-index: 1;
+
         display: flex;
+
         flex-direction: column;
+
         align-items: center;
+
         justify-content: center;
+
         gap: 12px;
+
         padding: 48px 20px;
+
         color: #475569;
+
         font-size: 12.5px;
+
         text-align: center;
     }
 
-        .state-empty svg {
-            width: 34px;
-            height: 34px;
-            color: #334155;
-        }
+    .state-empty svg {
+        width: 34px;
+        height: 34px;
+
+        color: #334155;
+    }
 
     .spinner {
         width: 22px;
         height: 22px;
+
         border-radius: 50%;
-        border: 2px solid rgba(148,163,184,.15);
-        border-top-color: #a855f7;
-        animation: spin .8s linear infinite;
+
+        border:
+            2px solid
+            rgba(148,163,184,.15);
+
+        border-top-color:
+            #a855f7;
+
+        animation:
+            spin .8s linear infinite;
     }
 
     @@keyframes spin {
+
         to {
-            transform: rotate(360deg);
+            transform:
+                rotate(360deg);
         }
+
+    }
+
+
+    /* =========================================================
+       RESPONSIVE
+    ========================================================== */
+
+    @@media (max-width: 767px) {
+
+        .seats-container {
+            padding:
+                24px
+                16px
+                32px;
+        }
+
+        .form-card,
+        .table-card {
+            padding: 18px;
+
+            border-radius: 18px;
+        }
+
+        .form-actions {
+            flex-direction: column-reverse;
+        }
+
+        .btn-primary,
+        .btn-secondary {
+            width: 100%;
+        }
+
+        .header-counter {
+            width: 100%;
+        }
+
     }
 
 </style>
 
+
 @code {
+
+    /* =========================================================
+       DATA
+    ========================================================== */
+
     private List<FlightSeatDTO>? seats;
+
     private List<AircraftDTO> aircraftList = new();
+
+    private List<FlightDTO> flightList = new();
+
     private FlightSeatDTO seatForm = new();
+
+
+    /* =========================================================
+       INITIALIZATION
+    ========================================================== */
 
     protected override async Task OnInitializedAsync()
     {
+        await LoadFlights();
+
         await LoadAircrafts();
+
         await LoadSeats();
     }
 
-    private async Task LoadAircrafts() => aircraftList = await AircraftService.GetAllAsync() ?? new();
-    private async Task LoadSeats() => seats = await FlightSeatService.GetAllAsync();
+
+    /* =========================================================
+       LOAD FLIGHTS
+    ========================================================== */
+
+    private async Task LoadFlights()
+    {
+        flightList =
+            (await FlightService.GetAllAsync())?.ToList()
+            ?? new();
+    }
+
+
+    /* =========================================================
+       LOAD AIRCRAFTS
+    ========================================================== */
+
+    private async Task LoadAircrafts()
+    {
+        aircraftList =
+            (await AircraftService.GetAllAsync())?.ToList()
+            ?? new();
+    }
+
+
+    /* =========================================================
+       LOAD SEATS
+    ========================================================== */
+
+    private async Task LoadSeats()
+    {
+        seats =
+            (await FlightSeatService.GetAllAsync())?.ToList();
+    }
+
+
+    /* =========================================================
+       SAVE
+    ========================================================== */
 
     private async Task Save()
     {
-        if (seatForm.Id == 0)
-            await FlightSeatService.CreateAsync(seatForm);
-        else
-            await FlightSeatService.UpdateAsync(seatForm.Id, seatForm);
+        // =====================================================
+        // VALIDAÇÃO CRUCIAL PARA EVITAR ERRO DE FOREIGN KEY
+        // =====================================================
 
-        ResetForm();
-        await LoadSeats();
+        if (seatForm.FlightId <= 0)
+        {
+            Console.WriteLine("Erro: Selecione um voo válido.");
+            return;
+        }
+
+        if (seatForm.AircraftId <= 0)
+        {
+            Console.WriteLine("Erro: Selecione uma aeronave válida.");
+            return;
+        }
+
+        if (string.IsNullOrWhiteSpace(seatForm.SeatNumber))
+        {
+            Console.WriteLine("Erro: Informe o número do assento.");
+            return;
+        }
+
+        try
+        {
+            if (seatForm.Id == 0)
+            {
+                await FlightSeatService.CreateAsync(seatForm);
+            }
+            else
+            {
+                await FlightSeatService.UpdateAsync(
+                    seatForm.Id,
+                    seatForm
+                );
+            }
+
+            ResetForm();
+
+            await LoadSeats();
+        }
+        catch (Exception ex)
+        {
+            // Isso vai te mostrar o erro real no console do Visual Studio
+            Console.WriteLine($"Erro ao salvar assento: {ex.Message}");
+            // Se quiser, pode relançar a exceção para o Blazor tratar
+            // throw; 
+        }
     }
+
+
+    /* =========================================================
+       EDIT
+    ========================================================== */
 
     private void Edit(FlightSeatDTO item)
     {
         seatForm = new FlightSeatDTO
         {
             Id = item.Id,
+
+            FlightId = item.FlightId,
+
             AircraftId = item.AircraftId,
+
             SeatNumber = item.SeatNumber,
+
             Class = item.Class,
+
             Location = item.Location,
-            Side = item.Side
+
+            Side = item.Side,
+
+            Status = item.Status
         };
     }
+
+
+    /* =========================================================
+       DELETE
+    ========================================================== */
 
     private async Task Delete(long id)
     {
         await FlightSeatService.DeleteAsync(id);
+
         await LoadSeats();
     }
 
-    private void ResetForm() => seatForm = new FlightSeatDTO();
-
-    private string GetAircraftModel(long aircraftId)
-        => aircraftList.FirstOrDefault(a => a.Id == aircraftId)?.Model ?? aircraftId.ToString();
 
     /* =========================================================
-       VARIANT HELPERS
-    ========================================================= */
-    private string GetClassVariant(SeatClass seatClass) => seatClass.ToString().ToLowerInvariant() switch
-    {
-        "economy" => "class-economy",
-        "business" => "class-business",
-        "first" => "class-first",
-        _ => "class-default"
-    };
+       RESET FORM
+    ========================================================== */
 
-    private string GetLocationVariant(SeatLocation location) => location.ToString().ToLowerInvariant() switch
+    private void ResetForm()
     {
-        "window" => "location-window",
-        "middle" => "location-middle",
-        "aisle" => "location-aisle",
-        _ => "location-middle"
-    };
+        seatForm = new FlightSeatDTO();
+    }
 
-    private string GetSideVariant(SeatSide side) => side.ToString().ToLowerInvariant() switch
+
+    /* =========================================================
+       FLIGHT DESCRIPTION
+       
+       Não utiliza FlightNumber.
+       Utiliza somente propriedades existentes
+       no seu modelo Flight.
+    ========================================================== */
+
+    private string GetFlightDescription(FlightDTO flight)
     {
-        "left" => "side-left",
-        "right" => "side-right",
-        _ => "side-default"
-    };
+        return
+            $"Voo #{flight.Id} · " +
+            $"{flight.DepartureTime:dd/MM/yyyy HH:mm}";
+    }
+
+
+    private string GetFlightDescriptionById(long flightId)
+    {
+        var flight =
+            flightList.FirstOrDefault(
+                f => f.Id == flightId
+            );
+
+        if (flight == null)
+        {
+            return $"Voo #{flightId}";
+        }
+
+        return GetFlightDescription(flight);
+    }
+
+
+    /* =========================================================
+       AIRCRAFT DESCRIPTION
+    ========================================================== */
+
+    private string GetAircraftModel(long aircraftId)
+    {
+        return
+            aircraftList
+                .FirstOrDefault(
+                    a => a.Id == aircraftId
+                )?
+                .Model
+            ?? aircraftId.ToString();
+    }
+
+
+    /* =========================================================
+       CLASS VARIANT
+    ========================================================== */
+
+    private string GetClassVariant(
+        SeatClass seatClass)
+    {
+        return seatClass
+            .ToString()
+            .ToLowerInvariant()
+            switch
+            {
+                "economy" =>
+                    "class-economy",
+
+                "business" =>
+                    "class-business",
+
+                "first" =>
+                    "class-first",
+
+                _ =>
+                    "class-default"
+            };
+    }
+
+
+    /* =========================================================
+       LOCATION VARIANT
+    ========================================================== */
+
+    private string GetLocationVariant(
+        SeatLocation location)
+    {
+        return location
+            .ToString()
+            .ToLowerInvariant()
+            switch
+            {
+                "window" =>
+                    "location-window",
+
+                "middle" =>
+                    "location-middle",
+
+                "aisle" =>
+                    "location-aisle",
+
+                _ =>
+                    "location-middle"
+            };
+    }
+
+
+    /* =========================================================
+       SIDE VARIANT
+    ========================================================== */
+
+    private string GetSideVariant(
+        SeatSide side)
+    {
+        return side
+            .ToString()
+            .ToLowerInvariant()
+            switch
+            {
+                "left" =>
+                    "side-left",
+
+                "right" =>
+                    "side-right",
+
+                _ =>
+                    "side-default"
+            };
+    }
+
+
+    /* =========================================================
+       STATUS VARIANT
+    ========================================================== */
+
+    private string GetStatusVariant(
+        FlightSeatStatus status)
+    {
+        return status
+            .ToString()
+            .ToLowerInvariant()
+            switch
+            {
+                "available" =>
+                    "status-available",
+
+                "occupied" =>
+                    "status-occupied",
+
+                "reserved" =>
+                    "status-reserved",
+
+                "blocked" =>
+                    "status-blocked",
+
+                _ =>
+                    "status-default"
+            };
+    }
+
 }

@@ -1,4 +1,5 @@
-﻿using TransportesDosGuri.Core.Domain.Entities;
+﻿using TransportesDosGuri.Core.Application.DTOs;
+using TransportesDosGuri.Core.Domain.Entities;
 
 namespace TransportesDosGuri.Core.Domain.RepositoryContracts
 {
@@ -13,5 +14,9 @@ namespace TransportesDosGuri.Core.Domain.RepositoryContracts
         Task UpdateAsync(Trip trip);
 
         Task DeleteAsync(long id);
+
+        Task<IEnumerable<Trip>> SearchAsync(string? searchTerm);
+
+        Task<TripDetailsDTO?> GetDetailsAsync(long id);
     }
 }

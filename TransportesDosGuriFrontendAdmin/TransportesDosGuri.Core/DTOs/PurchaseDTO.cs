@@ -10,6 +10,8 @@ namespace TransportesDosGuri.Core.DTOs
 
         public long ApplicationUserId { get; set; }
 
+        public long TripId { get; set; }
+
         public DateTime PurchaseDate { get; set; }
 
         public decimal PurchasePrice { get; set; }

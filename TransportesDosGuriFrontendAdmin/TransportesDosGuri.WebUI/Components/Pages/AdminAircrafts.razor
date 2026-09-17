@@ -1,10 +1,13 @@
 ﻿@page "/adminAircrafts"
+@rendermode InteractiveServer
 @attribute [Authorize]
 
 @using Microsoft.AspNetCore.Authorization
 @using System.Net
 @using TransportesDosGuri.Core.DTOs
 @using TransportesDosGuri.Core.Interfaces
+
+@inject IAircraftService AircraftService
 
 @inject IAircraftService AircraftService
 

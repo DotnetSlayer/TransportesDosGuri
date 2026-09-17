@@ -43,63 +43,14 @@
                          class="w-64 sm:w-72 lg:w-80 h-auto object-contain brightness-0 invert drop-shadow-[0_0_25px_rgba(255,255,255,0.15)]" />
                 </div>
 
-                <!-- SWITCH -->
-                <div class="mode-switch">
-
-                    <button type="button"
-                            @onclick="() => showRegister = false"
-                            class="mode-button @(!showRegister ? "active" : "")">
-
-                        <span class="mode-icon">
-                            <svg viewBox="0 0 24 24" fill="none">
-                                <path d="M15 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9"
-                                      stroke="currentColor"
-                                      stroke-width="1.8"
-                                      stroke-linecap="round" />
-                                <path d="M18 8l4 4-4 4M22 12H10"
-                                      stroke="currentColor"
-                                      stroke-width="1.8"
-                                      stroke-linecap="round"
-                                      stroke-linejoin="round" />
-                            </svg>
-                        </span>
-
-                        ENTRAR
-                    </button>
-
-                    <button type="button"
-                            @onclick="() => showRegister = true"
-                            class="mode-button @(showRegister ? "active register-active" : "")">
-
-                        <span class="mode-icon">
-                            <svg viewBox="0 0 24 24" fill="none">
-                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
-                                      stroke="currentColor"
-                                      stroke-width="1.8"
-                                      stroke-linecap="round" />
-                                <circle cx="9" cy="7" r="4"
-                                        stroke="currentColor"
-                                        stroke-width="1.8" />
-                                <path d="M19 8v6M16 11h6"
-                                      stroke="currentColor"
-                                      stroke-width="1.8"
-                                      stroke-linecap="round" />
-                            </svg>
-                        </span>
-
-                        CRIAR CONTA
-                    </button>
-
-                </div>
-
                 @if (!showRegister)
                 {
                     <!-- LOGIN -->
                     <div class="form-header">
 
                         <h1>
-                            Entre em sua
-                            <span>conta.</span>
+                            Entre em sua conta,
+                            <span>Administrador.</span>
                         </h1>
 
                     </div>

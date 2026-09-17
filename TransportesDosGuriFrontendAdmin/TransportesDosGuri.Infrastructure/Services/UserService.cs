@@ -39,13 +39,13 @@ namespace TransportesDosGuri.Infrastructure.Services
 
         public async Task<bool> UpdateAsync(long id, UpdateUserDTO updateDto)
         {
-            var response = await _httpClient.PutAsJsonAsync($"/api/v1/Account/Login", updateDto);
+            var response = await _httpClient.PutAsJsonAsync($"/api/v1/Account/{id}", updateDto);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> DeleteAsync(long id)
         {
-            var response = await _httpClient.DeleteAsync($"/api/v1/Account/Login");
+            var response = await _httpClient.DeleteAsync($"/api/v1/Account/{id}");
             return response.IsSuccessStatusCode;
         }
     }

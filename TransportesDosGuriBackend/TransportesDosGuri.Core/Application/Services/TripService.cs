@@ -58,7 +58,8 @@ namespace TransportesDosGuri.Core.Application.Services
                 DestinyAirportId = tripEntities.DestinyAirportId,
                 DepartureTime = tripEntities.DepartureTime,
                 ArrivalTime = tripEntities.ArrivalTime,
-                TotalPrice = tripEntities.TotalPrice
+                TotalPrice = tripEntities.TotalPrice,
+                TripName = tripEntities.TripName,
             });
 
         }
@@ -79,7 +80,8 @@ namespace TransportesDosGuri.Core.Application.Services
                 DestinyAirportId = tripEntity.DestinyAirportId,
                 DepartureTime = tripEntity.DepartureTime,
                 ArrivalTime = tripEntity.ArrivalTime,
-                TotalPrice = tripEntity.TotalPrice
+                TotalPrice = tripEntity.TotalPrice,
+                TripName= tripEntity.TripName
             };
         }
 
@@ -97,10 +99,32 @@ namespace TransportesDosGuri.Core.Application.Services
             existingTrip.DepartureTime = trip.DepartureTime;
             existingTrip.ArrivalTime = trip.ArrivalTime;
             existingTrip.TotalPrice = trip.TotalPrice;
+            existingTrip.TripName = trip.TripName;
 
             await _tripRepository.UpdateAsync(existingTrip);
 
             return true;
+        }
+
+        public async Task<IEnumerable<TripDTO>> SearchAsync(string? searchTerm)
+        {
+            var trips = await _tripRepository.SearchAsync(searchTerm);
+
+            return trips.Select(trip => new TripDTO
+            {
+                Id = trip.Id,
+                TripName = trip.TripName,
+                OriginAirportId = trip.OriginAirportId,
+                DestinyAirportId = trip.DestinyAirportId,
+                DepartureTime = trip.DepartureTime,
+                ArrivalTime = trip.ArrivalTime,
+                TotalPrice = trip.TotalPrice
+            });
+        }
+
+        public async Task<TripDetailsDTO?> GetDetailsAsync(long id)
+        {
+            return await _tripRepository.GetDetailsAsync(id);
         }
     }
 }

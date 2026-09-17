@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TransportesDosGuri.Core.Application.DTOs;
 using TransportesDosGuri.Core.Application.ServiceContracts;
@@ -18,9 +19,10 @@ namespace TransportesDosGuri.API.Controllers.v1
         }
 
         /// <summary>
-        /// Endpoint to GET ALL data stored in the FlightSeat Table
+        /// Endpoint para RETORNAR TODOS OS ASSENTOS DE VOOS presentes na tabela FlightSeat
         /// </summary>
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllAsync()
         {
             var getAll = await _flightSeatService.GetAllAsync();
@@ -29,9 +31,10 @@ namespace TransportesDosGuri.API.Controllers.v1
         }
 
         /// <summary>
-        /// Endpoint to GET BY ID a specific row stored in the FlightSeat Table
+        /// Endpoint para RETORNAR UM ASSENTO DE VOO POR ID presente na tabela FlightSeat
         /// </summary>
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetByIdAsync(long id)
         {
             var getById = await _flightSeatService.GetByIdAsync(id);
@@ -40,36 +43,39 @@ namespace TransportesDosGuri.API.Controllers.v1
         }
 
         /// <summary>
-        /// Endpoint to CREATE a row of information in the FlightSeat Table
+        /// Endpoint para CRIAR ASSENTO DE VOO na tabela FlightSeat
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAsync(FlightSeatDTO flightSeat)
         {
             var create = await _flightSeatService.CreateAsync(flightSeat);
 
-            return Ok("Data Saved");
+            return Ok("Base de Dados Atualizada!");
         }
 
         /// <summary>
-        /// Endpoint to UPDATE BY ID a row stored in the FlightSeat Table
+        /// Endpoint para ATUALIZAR UM ASSENTO DE VOO POR ID presente na tabela FligthSeat
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateAsync(long id, FlightSeatDTO flightSeat)
         {
             var update = await _flightSeatService.UpdateAsync(id, flightSeat);
 
-            return Ok("Data Updated");
+            return Ok("Base de Dados Atualizada!");
         }
 
         /// <summary>
-        /// Endpoint to DELETE BY ID a row stored in the FlightSeat Table
+        /// Endpoint para EXCLUIR PERMANENTEMENTE UM ASSENTO DE VOO POR ID presente na tabela FlightSeat
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
             var delete = await _flightSeatService.DeleteAsync(id);
 
-            return Ok("Data Deleted");
+            return Ok("Base de Dados Atualizada!");
         }
     }
 }

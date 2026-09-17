@@ -20,7 +20,7 @@ namespace TransportesDosGuri.API.Controllers.v1.Identity
         }
 
         /// <summary>
-        /// Endpoint to REGISTER USER in AspNetUsers Table
+        /// Endpoint para REGISTRAR USUÁRIO na tabela AspNetUsers
         /// </summary>
         [HttpPost("Register")]
         [AllowAnonymous]
@@ -38,11 +38,11 @@ namespace TransportesDosGuri.API.Controllers.v1.Identity
                 return BadRequest(new { Errors = errors });
             }
 
-            return Ok(new { Message = "User Successfully Registered!", UserId = userId, register.Email });
+            return Ok(new { Message = "Usuário Registrado com Sucesso!", UserId = userId, register.Email });
         }
 
         /// <summary>
-        /// Endpoint to LOGIN USER in AspNetUsers Table
+        /// Endpoint para LOGAR USUÁRIO presente na tabela AspNetUsers
         /// </summary>
         [HttpPost("Login")]
         [AllowAnonymous]
@@ -60,29 +60,31 @@ namespace TransportesDosGuri.API.Controllers.v1.Identity
                 return Unauthorized(new { Errors = errors });
             }
 
-            return Ok(new { Message = "User Successfully Logged In!", UserId = userId, Email = login.Email, Token = jwt });
+            return Ok(new { Message = "Usuário Logado com Sucesso!", UserId = userId, Email = login.Email, Token = jwt });
         }
 
         /// <summary>
-        /// Endpoint to GET USER BY ID in AspNetUsers Table
+        /// Endpoint para RETORNAR UM USUÁRIO POR ID presente na tabela AspNetUsers
         /// </summary>
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetById(long id)
         {
             var user = await _identityService.GetByIdAsync(id);
 
             if (user == null)
             {
-                return NotFound(new { Message = "User Not Found!" });
+                return NotFound(new { Message = "Usuário Não Encontrado!" });
             }
 
             return Ok(user);
         }
 
         /// <summary>
-        /// Endpoint to GET ALL USERS in AspNetUsers Table
+        /// Endpoint para RETORNAR TODOS OS USUÁRIOS presentes na tabela AspNetUsers
         /// </summary>
         [HttpGet("GetAll")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAll()
         {
             var users = await _identityService.GetAllAsync();
@@ -91,11 +93,14 @@ namespace TransportesDosGuri.API.Controllers.v1.Identity
         }
 
         /// <summary>
-        /// Endpoint to UPDATE USER stored in AspNetUsers Table
+        /// Endpoint para ATUALIZAR UM USUÁRIO POR ID presente na tabela AspNetUsers
         /// </summary>
         [HttpPut("{id}")]
         public async Task<IActionResult> Edit(long id, [FromBody] UpdateDTO update)
         {
+            if (!TryGetCurrentUserId(out var userId))
+                return Unauthorized();
+
             if (!ModelState.IsValid)
             {
                 return BadRequest(ModelState);
@@ -108,15 +113,18 @@ namespace TransportesDosGuri.API.Controllers.v1.Identity
                 return BadRequest(new { Errors = errors });
             }
 
-            return Ok(new { Message = "User Successfully Updated!" });
+            return Ok(new { Message = "Usuário Atualizado com Sucesso!" });
         }
 
         /// <summary>
-        /// Endpoint to DELETE USER stored in AspNetUsers Table
+        /// Endpoint para EXCLUIR PERMANENTEMENTE UM USUÁRIO POR ID presente na tabela AspNetUsers
         /// </summary>
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(long id)
         {
+            if (!TryGetCurrentUserId(out var userId))
+                return Unauthorized();
+
             var (success, errors) = await _identityService.DeleteAsync(id);
 
             if (!success)
@@ -124,15 +132,18 @@ namespace TransportesDosGuri.API.Controllers.v1.Identity
                 return BadRequest(new { Errors = errors });
             }
 
-            return Ok(new { Message = "User Successfully Deleted!" });
+            return Ok(new { Message = "Usuário Excluído com Sucesso!" });
         }
 
         /// <summary>
-        /// Endpoint to GENERATE a new and valid USER ACCESS TOKEN 
+        /// Endpoint para GERAR UM NOVO TOKEN PARA VALIDAR ACESSOS DE USUÁRIOS  
         /// </summary>
         [HttpPost("generate-new-jwt-token")]
         public async Task<IActionResult> GenerateNewAccessToken([FromBody] TokenModelDTO tokenModel)
         {
+            if (!TryGetCurrentUserId(out var userId))
+                return Unauthorized();
+
             var (success, response, errors) = await _identityService.GenerateNewAccessTokenAsync(tokenModel);
 
             if (!success)
@@ -144,12 +155,14 @@ namespace TransportesDosGuri.API.Controllers.v1.Identity
         }
 
         /// <summary>
-        /// Endpoint to Logout a valid USER session 
+        /// Endpoint para FAZER LOGOUT DE USUÁRIO COM SESSÃO VÁLIDA 
         /// </summary>
         [HttpPost("Logout")]
-        [Authorize] // Garante que apenas usuários autenticados chamem ou passe os tokens via body
         public async Task<IActionResult> Logout([FromBody] TokenModelDTO tokenModel)
         {
+            if (!TryGetCurrentUserId(out var userId))
+                return Unauthorized();
+
             var (success, errors) = await _identityService.LogoutAsync(tokenModel);
 
             if (!success)
@@ -157,7 +170,7 @@ namespace TransportesDosGuri.API.Controllers.v1.Identity
                 return BadRequest(new { Errors = errors });
             }
 
-            return Ok(new { Message = "User Successfully Logged Out!" });
+            return Ok(new { Message = "Usuário Deslogado com Sucesso!" });
         }
     }
 }

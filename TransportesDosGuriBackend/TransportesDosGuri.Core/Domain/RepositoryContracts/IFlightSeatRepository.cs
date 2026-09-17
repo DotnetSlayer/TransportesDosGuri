@@ -13,5 +13,11 @@ namespace TransportesDosGuri.Core.Domain.RepositoryContracts
         Task UpdateAsync(FlightSeat flightSeat);
 
         Task DeleteAsync(long id);
+
+        Task<bool> TryReserveAsync(
+            long flightSeatId,
+            long flightId);
+
+        Task<IEnumerable<FlightSeat>> GetByFlightIdsAsync(IEnumerable<long> flightIds);
     }
 }

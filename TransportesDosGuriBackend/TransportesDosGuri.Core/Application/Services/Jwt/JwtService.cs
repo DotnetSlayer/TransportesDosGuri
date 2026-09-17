@@ -93,7 +93,7 @@ namespace TransportesDosGuri.Core.Application.Services.Jwt
 
             if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
-                throw new SecurityTokenException("Invalid Token!");
+                throw new SecurityTokenException("Requisição Inválida!");
             }
 
             return principal;

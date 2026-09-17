@@ -1,0 +1,1914 @@
+﻿@page "/"
+@page "/index"
+@page "/login"
+@page "/register"
+
+@rendermode InteractiveServer
+@layout EmptyLayout
+
+@using Microsoft.AspNetCore.Components.Forms
+@using TransportesDosGuri.Core.DTOs
+@using TransportesDosGuri.Core.Interfaces
+
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>@(showRegister ? "Criar conta" : "Login") - Transportes dos Guri</PageTitle>
+
+<div class="auth-page">
+
+    <!-- BACKGROUND -->
+    <div class="background-effects">
+        <div class="orb orb-purple"></div>
+        <div class="orb orb-indigo"></div>
+        <div class="orb orb-amber"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="auth-shell">
+
+        <!-- LEFT SIDE -->
+        <section class="auth-panel">
+
+            <div class="panel-glow"></div>
+
+            <div class="content-wrapper">
+
+                <!-- LOGO -->
+                <div class="flex justify-center mb-10">
+                    <img src="/images/logo.png"
+                         alt="Transportes dos Guri"
+                         class="w-64 sm:w-72 lg:w-80 h-auto object-contain brightness-0 invert drop-shadow-[0_0_25px_rgba(255,255,255,0.15)]" />
+                </div>
+
+                <!-- SWITCH -->
+                <div class="mode-switch">
+
+                    <button type="button"
+                            @onclick="() => showRegister = false"
+                            class="mode-button @(!showRegister ? "active" : "")">
+
+                        <span class="mode-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M15 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h9"
+                                      stroke="currentColor"
+                                      stroke-width="1.8"
+                                      stroke-linecap="round" />
+                                <path d="M18 8l4 4-4 4M22 12H10"
+                                      stroke="currentColor"
+                                      stroke-width="1.8"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round" />
+                            </svg>
+                        </span>
+
+                        ENTRAR
+                    </button>
+
+                    <button type="button"
+                            @onclick="() => showRegister = true"
+                            class="mode-button @(showRegister ? "active register-active" : "")">
+
+                        <span class="mode-icon">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+                                      stroke="currentColor"
+                                      stroke-width="1.8"
+                                      stroke-linecap="round" />
+                                <circle cx="9" cy="7" r="4"
+                                        stroke="currentColor"
+                                        stroke-width="1.8" />
+                                <path d="M19 8v6M16 11h6"
+                                      stroke="currentColor"
+                                      stroke-width="1.8"
+                                      stroke-linecap="round" />
+                            </svg>
+                        </span>
+
+                        CRIAR CONTA
+                    </button>
+
+                </div>
+
+                @if (!showRegister)
+                {
+                    <!-- LOGIN -->
+                    <div class="form-header">
+
+                        <h1>
+                            Entre em sua
+                            <span>conta.</span>
+                        </h1>
+
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-error">
+
+                            <div class="alert-icon">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 9v4"
+                                          stroke="currentColor"
+                                          stroke-width="2"
+                                          stroke-linecap="round" />
+                                    <path d="M12 17h.01"
+                                          stroke="currentColor"
+                                          stroke-width="2.5"
+                                          stroke-linecap="round" />
+                                    <circle cx="12" cy="12" r="9"
+                                            stroke="currentColor"
+                                            stroke-width="1.8" />
+                                </svg>
+                            </div>
+
+                            <span>@errorMessage</span>
+
+                        </div>
+                    }
+
+                    <form action="/api/auth/login"
+                          method="post"
+                          class="auth-form">
+
+                        <AntiforgeryToken />
+
+                        <!-- EMAIL -->
+                        <div class="field">
+
+                            <label>Email</label>
+
+                            <div class="input-wrapper">
+
+                                <span class="input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"
+                                              stroke="currentColor"
+                                              stroke-width="1.7" />
+                                        <path d="m3 7 9 6 9-6"
+                                              stroke="currentColor"
+                                              stroke-width="1.7"
+                                              stroke-linecap="round"
+                                              stroke-linejoin="round" />
+                                    </svg>
+                                </span>
+
+                                <input type="email"
+                                       name="Email"
+                                       value="@LoginModel.Email"
+                                       placeholder="seu@email.com"
+                                       required />
+
+                            </div>
+
+                        </div>
+
+                        <!-- PASSWORD -->
+                        <div class="field">
+
+                            <label>Senha</label>
+
+                            <div class="input-wrapper">
+
+                                <span class="input-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <rect x="4"
+                                              y="10"
+                                              width="16"
+                                              height="11"
+                                              rx="2"
+                                              stroke="currentColor"
+                                              stroke-width="1.7" />
+                                        <path d="M8 10V7a4 4 0 0 1 8 0v3"
+                                              stroke="currentColor"
+                                              stroke-width="1.7"
+                                              stroke-linecap="round" />
+                                    </svg>
+                                </span>
+
+                                <input type="password"
+                                       name="Password"
+                                       placeholder="Sua senha"
+                                       required />
+
+                            </div>
+
+                        </div>
+
+                        <div class="form-options">
+
+                            <label class="remember">
+                                <input type="checkbox" />
+                                <span></span>
+                                LEMBRAR DE MIM?
+                            </label>
+
+                        </div>
+
+                        <button type="submit" class="primary-button">
+
+                            <span>ENTRAR NA PLATAFORMA</span>
+
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M5 12h14M13 6l6 6-6 6"
+                                      stroke="currentColor"
+                                      stroke-width="2"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round" />
+                            </svg>
+
+                        </button>
+
+                    </form>
+                }
+                else
+                {
+                    <!-- REGISTER -->
+                    <div class="form-header register-header">
+
+
+                        <h1>
+                            Crie sua
+                            <span>conta.</span>
+                        </h1>
+
+
+                    </div>
+
+                    @if (!string.IsNullOrEmpty(errorMessage))
+                    {
+                        <div class="alert alert-success">
+
+                            <div class="alert-icon">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="m5 12 4 4L19 6"
+                                          stroke="currentColor"
+                                          stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round" />
+                                </svg>
+                            </div>
+
+                            <span>@errorMessage</span>
+
+                        </div>
+                    }
+
+                    <EditForm Model="RegisterModel"
+                              OnValidSubmit="HandleRegister"
+                              FormName="registerForm"
+                              class="auth-form register-form">
+
+                        <DataAnnotationsValidator />
+
+                        <!-- PERSONAL DATA -->
+                        <div class="section-label">
+                            <span>01</span>
+                            Dados pessoais
+                        </div>
+
+                        <div class="fields-grid">
+
+                            <div class="field">
+
+                                <label>Nome</label>
+
+                                <div class="input-wrapper">
+
+                                    <input @bind="RegisterModel.Name"
+                                           placeholder="Seu nome" />
+
+                                </div>
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>Sobrenome</label>
+
+                                <div class="input-wrapper">
+
+                                    <input @bind="RegisterModel.LastName"
+                                           placeholder="Seu sobrenome" />
+
+                                </div>
+
+                            </div>
+
+                            <div class="field full">
+
+                                <label>E-mail</label>
+
+                                <div class="input-wrapper">
+
+                                    <span class="input-icon">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M4 5h16a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"
+                                                  stroke="currentColor"
+                                                  stroke-width="1.7" />
+                                            <path d="m3 7 9 6 9-6"
+                                                  stroke="currentColor"
+                                                  stroke-width="1.7" />
+                                        </svg>
+                                    </span>
+
+                                    <input @bind="RegisterModel.Email"
+                                           type="email"
+                                           placeholder="seu@email.com" />
+
+                                </div>
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>Senha</label>
+
+                                <div class="input-wrapper">
+
+                                    <span class="input-icon">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <rect x="4"
+                                                  y="10"
+                                                  width="16"
+                                                  height="11"
+                                                  rx="2"
+                                                  stroke="currentColor"
+                                                  stroke-width="1.7" />
+                                            <path d="M8 10V7a4 4 0 0 1 8 0v3"
+                                                  stroke="currentColor"
+                                                  stroke-width="1.7" />
+                                        </svg>
+                                    </span>
+
+                                    <input @bind="RegisterModel.Password"
+                                           type="password"
+                                           placeholder="Crie uma senha" />
+
+                                </div>
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>CPF / CNPJ</label>
+
+                                <div class="input-wrapper">
+
+                                    <input @bind="RegisterModel.IdentityNumber"
+                                           placeholder="000.000.000-00" />
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <!-- ADDRESS -->
+                        <div class="section-label address-label">
+                            <span>02</span>
+                            Endereço
+                        </div>
+
+                        <div class="fields-grid">
+
+                            <div class="field">
+
+                                <label>CEP</label>
+
+                                <div class="input-wrapper">
+
+                                    <input @bind="RegisterModel.ZipCode"
+                                           placeholder="00000-000" />
+
+                                </div>
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>Número</label>
+
+                                <div class="input-wrapper">
+
+                                    <input type="number"
+                                           @bind="RegisterModel.AddressNumber"
+                                           placeholder="123" />
+
+                                </div>
+
+                            </div>
+
+                            <div class="field full">
+
+                                <label>Rua / Logradouro</label>
+
+                                <div class="input-wrapper">
+
+                                    <input @bind="RegisterModel.Address"
+                                           placeholder="Nome da rua" />
+
+                                </div>
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>Bairro</label>
+
+                                <div class="input-wrapper">
+
+                                    <input @bind="RegisterModel.District"
+                                           placeholder="Seu bairro" />
+
+                                </div>
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>Cidade</label>
+
+                                <div class="input-wrapper">
+
+                                    <input @bind="RegisterModel.City"
+                                           placeholder="Sua cidade" />
+
+                                </div>
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>Estado</label>
+
+                                <div class="input-wrapper">
+
+                                    <input @bind="RegisterModel.State"
+                                           maxlength="2"
+                                           placeholder="SC" />
+
+                                </div>
+
+                            </div>
+
+                        </div>
+
+                        <button type="submit"
+                                disabled="@isSubmitting"
+                                class="primary-button register-button">
+
+                            @if (isSubmitting)
+                            {
+                                <span class="spinner"></span>
+                                <span>Criando sua conta...</span>
+                            }
+                            else
+                            {
+                                <span>CRIAR MINHA CONTA</span>
+
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M5 12h14M13 6l6 6-6 6"
+                                          stroke="currentColor"
+                                          stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round" />
+                                </svg>
+                            }
+
+                        </button>
+
+                    </EditForm>
+                }
+
+            </div>
+
+            <!-- FOOTER -->
+            <footer class="footer">
+
+                <span>
+                    © @DateTime.Now.Year · Transportes dos Guri
+                </span>
+
+                <span class="footer-separator"></span>
+
+                <button type="button"
+                        @onclick="OpenTeamModal">
+                    Desenvolvido pelos
+                    <strong>Guris</strong>
+                </button>
+
+            </footer>
+
+        </section>
+
+        <!-- RIGHT SIDE -->
+        <section class="visual-panel">
+
+            <img src="/images/plane.png"
+                 alt="Aeronave em voo"
+                 class="visual-image" />
+
+            <div class="visual-overlay"></div>
+
+            <div class="visual-top-gradient"></div>
+
+
+
+        </section>
+
+    </main>
+
+</div>
+
+
+@if (isTeamModalOpen)
+{
+    <div class="modal-backdrop"
+         @onclick="CloseTeamModal">
+
+        <div class="team-modal"
+             @onclick:stopPropagation>
+
+            <button type="button"
+                    class="modal-close"
+                    @onclick="CloseTeamModal">
+
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M6 6l12 12M18 6 6 18"
+                          stroke="currentColor"
+                          stroke-width="2"
+                          stroke-linecap="round" />
+                </svg>
+
+            </button>
+
+            <div class="modal-header">
+
+
+
+                <h3>
+                    Equipe de desenvolvimento<span>.</span>
+                </h3>
+
+
+            </div>
+
+            <div class="team-list">
+
+                <!-- THIAGO WURSTER -->
+                <div class="team-card">
+
+                    <div class="member-photo">
+                        <img src="/images/team/thiagowb.png"
+                             alt="Thiago Wurster Balbinot" />
+                    </div>
+
+                    <div class="member-info">
+
+                        <div>
+                            <h4>Thiago Wurster Balbinot</h4>
+                            <span>Desenvolvedor</span>
+                        </div>
+
+                        <div class="social-links">
+
+                            <a href="https://www.instagram.com/thiago_balbinot/"
+                               target="_blank"
+                               rel="noopener">
+                                Instagram
+                            </a>
+
+                            <a href="https://www.linkedin.com/in/thiago-wurster-balbinot-3b1932306/"
+                               target="_blank"
+                               rel="noopener">
+                                LinkedIn
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- THIAGO THOMASI -->
+                <div class="team-card">
+
+                    <div class="member-photo">
+                        <img src="/images/team/thiagoth.png"
+                             alt="Thiago Thomasi" />
+                    </div>
+
+                    <div class="member-info">
+
+                        <div>
+                            <h4>Thiago Thomasi</h4>
+                            <span>Desenvolvedor</span>
+                        </div>
+
+                        <div class="social-links">
+
+                            <a href="https://www.instagram.com/thomasi_06/"
+                               target="_blank"
+                               rel="noopener">
+                                Instagram
+                            </a>
+
+                            <a href="https://www.linkedin.com/in/thiago-thomasi-808820357/"
+                               target="_blank"
+                               rel="noopener">
+                                LinkedIn
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- RHYAN -->
+                <div class="team-card">
+
+                    <div class="member-photo">
+                        <img src="/images/team/rhyan.png"
+                             alt="Rhyan Mezaroba" />
+                    </div>
+
+                    <div class="member-info">
+
+                        <div>
+                            <h4>Rhyan Mezaroba</h4>
+                            <span>Desenvolvedor</span>
+                        </div>
+
+                        <div class="social-links">
+
+                            <a href="https://www.instagram.com/rhyan_mezaroba/"
+                               target="_blank"
+                               rel="noopener">
+                                Instagram
+                            </a>
+
+                            <a href="https://www.linkedin.com/in/rhyan-willian-mezaroba-6a05612b9/"
+                               target="_blank"
+                               rel="noopener">
+                                LinkedIn
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+                <!-- MATEUS -->
+                <div class="team-card">
+
+                    <div class="member-photo">
+                        <img src="/images/team/mateus.png"
+                             alt="Mateus Ferreira da Silva" />
+                    </div>
+
+                    <div class="member-info">
+
+                        <div>
+                            <h4>Mateus Ferreira da Silva</h4>
+                            <span>Desenvolvedor</span>
+                        </div>
+
+                        <div class="social-links">
+
+                            <a href="https://www.instagram.com/mateusfe12/"
+                               target="_blank"
+                               rel="noopener">
+                                Instagram
+                            </a>
+
+                        </div>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+            <button type="button"
+                    class="modal-button"
+                    @onclick="CloseTeamModal">
+
+                FECHAR
+
+            </button>
+
+        </div>
+
+    </div>
+}
+
+
+<style>
+
+    /* =========================================================
+               GLOBAL
+            ========================================================= */
+
+    * {
+        box-sizing: border-box;
+    }
+
+    .auth-page {
+        min-height: 100vh;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        background: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, .13), transparent 30%), radial-gradient(circle at 85% 80%, rgba(168, 85, 247, .12), transparent 30%), #03050b;
+        color: #e2e8f0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* =========================================================
+               BACKGROUND
+            ========================================================= */
+
+    .background-effects {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+    }
+
+    .orb {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(100px);
+        opacity: .35;
+        animation: floatOrb 12s ease-in-out infinite alternate;
+    }
+
+    .orb-purple {
+        width: 420px;
+        height: 420px;
+        background: #9333ea;
+        left: -180px;
+        top: -140px;
+    }
+
+    .orb-indigo {
+        width: 500px;
+        height: 500px;
+        background: #4f46e5;
+        right: -220px;
+        bottom: -200px;
+        animation-delay: -4s;
+    }
+
+    .orb-amber {
+        width: 280px;
+        height: 280px;
+        background: #f59e0b;
+        left: 45%;
+        bottom: -180px;
+        opacity: .12;
+        animation-delay: -7s;
+    }
+
+    .grid-overlay {
+        position: absolute;
+        inset: 0;
+        opacity: .035;
+        background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+        background-size: 60px 60px;
+    }
+
+    @@keyframes floatOrb {
+        from {
+            transform: translate3d(0, 0, 0) scale(1);
+        }
+
+        to {
+            transform: translate3d(40px, -30px, 0) scale(1.08);
+        }
+    }
+
+    /* =========================================================
+               SHELL
+            ========================================================= */
+
+    .auth-shell {
+        min-height: 100vh;
+        width: 100%;
+        display: flex;
+        position: relative;
+        z-index: 1;
+    }
+
+    /* =========================================================
+               LEFT PANEL
+            ========================================================= */
+
+    .auth-panel {
+        width: 50%;
+        min-height: 100vh;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 42px clamp(32px, 6vw, 96px);
+        background: rgba(4, 7, 15, .72);
+        border-right: 1px solid rgba(255,255,255,.07);
+        backdrop-filter: blur(35px);
+        -webkit-backdrop-filter: blur(35px);
+        overflow: hidden;
+    }
+
+    .panel-glow {
+        position: absolute;
+        width: 500px;
+        height: 500px;
+        top: -300px;
+        left: -250px;
+        border-radius: 50%;
+        background: rgba(139, 92, 246, .10);
+        filter: blur(80px);
+        pointer-events: none;
+    }
+
+    .content-wrapper {
+        width: 100%;
+        max-width: 510px;
+        margin: auto;
+        position: relative;
+        z-index: 2;
+    }
+
+    /* =========================================================
+               LOGO
+            ========================================================= */
+
+    .logo-container {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 34px;
+    }
+
+    .logo-glass {
+        padding: 18px 26px;
+        border-radius: 24px;
+        background: linear-gradient( 135deg, rgba(255,255,255,.08), rgba(255,255,255,.025) );
+        border: 1px solid rgba(255,255,255,.10);
+        box-shadow: 0 25px 60px rgba(0,0,0,.30), inset 0 1px rgba(255,255,255,.08);
+        backdrop-filter: blur(20px);
+    }
+
+    .logo {
+        width: 230px;
+        max-width: 100%;
+        height: auto;
+        object-fit: contain;
+        filter: brightness(0) invert(1) drop-shadow(0 0 25px rgba(255,255,255,.16));
+    }
+
+    /* =========================================================
+               MODE SWITCH
+            ========================================================= */
+
+    .mode-switch {
+        display: flex;
+        gap: 5px;
+        padding: 5px;
+        margin-bottom: 38px;
+        border-radius: 18px;
+        background: rgba(2,6,23,.68);
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 15px 40px rgba(0,0,0,.18);
+        backdrop-filter: blur(20px);
+    }
+
+    .mode-button {
+        flex: 1;
+        height: 46px;
+        border: 0;
+        border-radius: 13px;
+        background: transparent;
+        color: #64748b;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 9px;
+        font-size: 12px;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all .3s ease;
+    }
+
+        .mode-button:hover {
+            color: #cbd5e1;
+            background: rgba(255,255,255,.035);
+        }
+
+        .mode-button.active {
+            color: white;
+            background: linear-gradient( 135deg, rgba(79,70,229,.95), rgba(147,51,234,.95) );
+            box-shadow: 0 8px 25px rgba(99,102,241,.25), inset 0 1px rgba(255,255,255,.15);
+        }
+
+        .mode-button.register-active {
+            background: linear-gradient( 135deg, rgba(79,70,229,.95), rgba(147,51,234,.95), rgba(245,158,11,.80) );
+        }
+
+    .mode-icon {
+        width: 17px;
+        height: 17px;
+        display: flex;
+    }
+
+        .mode-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+    /* =========================================================
+               HEADER
+            ========================================================= */
+
+    .form-header {
+        text-align: left;
+        margin-bottom: 30px;
+    }
+
+    .eyebrow {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        margin-bottom: 14px;
+        border-radius: 999px;
+        background: rgba(99,102,241,.08);
+        border: 1px solid rgba(99,102,241,.15);
+        color: #a5b4fc;
+        font-size: 9px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+    }
+
+    .register-eyebrow {
+        color: #c4b5fd;
+    }
+
+    .eyebrow-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #818cf8;
+        box-shadow: 0 0 12px #818cf8;
+    }
+
+    .form-header h1 {
+        margin: 0;
+        color: white;
+        font-size: clamp(30px, 3vw, 42px);
+        line-height: 1.05;
+        letter-spacing: -.045em;
+        font-weight: 800;
+    }
+
+        .form-header h1 span {
+            color: transparent;
+            background: linear-gradient( 90deg, #f472b6, #a855f7, #6366f1 );
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+    .form-header p {
+        max-width: 420px;
+        margin: 13px 0 0;
+        color: #64748b;
+        font-size: 12px;
+        line-height: 1.7;
+    }
+
+    /* =========================================================
+               ALERT
+            ========================================================= */
+
+    .alert {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 13px 15px;
+        margin-bottom: 22px;
+        border-radius: 15px;
+        font-size: 11px;
+        backdrop-filter: blur(20px);
+    }
+
+    .alert-error {
+        color: #fda4af;
+        background: rgba(244,63,94,.07);
+        border: 1px solid rgba(244,63,94,.16);
+    }
+
+    .alert-success {
+        color: #86efac;
+        background: rgba(34,197,94,.07);
+        border: 1px solid rgba(34,197,94,.16);
+    }
+
+    .alert-icon {
+        width: 18px;
+        height: 18px;
+        flex-shrink: 0;
+    }
+
+        .alert-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+    /* =========================================================
+               FORM
+            ========================================================= */
+
+    .auth-form {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .field {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+        .field label {
+            color: #94a3b8;
+            font-size: 15px;
+            font-weight: 700;
+            letter-spacing: .03em;
+        }
+
+    .input-wrapper {
+        position: relative;
+    }
+
+        .input-wrapper input {
+            width: 100%;
+            height: 52px;
+            padding: 0 16px;
+            border-radius: 15px;
+            outline: none;
+            border: 1px solid rgba(255,255,255,.07);
+            color: #f1f5f9;
+            background: linear-gradient( 135deg, rgba(15,23,42,.76), rgba(2,6,23,.58) );
+            box-shadow: inset 0 1px rgba(255,255,255,.035), 0 8px 25px rgba(0,0,0,.10);
+            font-size: 12px;
+            transition: all .25s ease;
+        }
+
+            .input-wrapper input::placeholder {
+                color: #475569;
+            }
+
+            .input-wrapper input:hover {
+                border-color: rgba(148,163,184,.16);
+            }
+
+            .input-wrapper input:focus {
+                border-color: rgba(168,85,247,.55);
+                background: rgba(15,23,42,.86);
+                box-shadow: 0 0 0 4px rgba(168,85,247,.07), 0 10px 35px rgba(0,0,0,.18);
+            }
+
+    .input-icon + input {
+        padding-left: 46px;
+    }
+
+    .input-icon {
+        position: absolute;
+        left: 16px;
+        top: 50%;
+        width: 17px;
+        height: 17px;
+        transform: translateY(-50%);
+        color: #475569;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+        .input-icon svg {
+            width: 100%;
+            height: 100%;
+        }
+
+    .form-options {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-top: -3px;
+    }
+
+    .remember {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: #64748b;
+        font-size: 12px;
+        cursor: pointer;
+    }
+
+        .remember input {
+            display: none;
+        }
+
+        .remember span {
+            width: 15px;
+            height: 15px;
+            border-radius: 5px;
+            border: 1px solid #334155;
+            background: rgba(15,23,42,.7);
+            transition: all .2s;
+        }
+
+        .remember input:checked + span {
+            background: #7c3aed;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 15px rgba(139,92,246,.3);
+        }
+
+    .forgot {
+        color: #8b5cf6;
+        font-size: 10px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color .2s;
+    }
+
+        .forgot:hover {
+            color: #c4b5fd;
+        }
+
+    /* =========================================================
+               PRIMARY BUTTON
+            ========================================================= */
+
+    .primary-button {
+        width: 100%;
+        height: 54px;
+        margin-top: 3px;
+        border: 0;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        cursor: pointer;
+        color: white;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: .02em;
+        background: linear-gradient( 110deg, #4f46e5, #9333ea 55%, #f59e0b );
+        box-shadow: 0 15px 40px rgba(124,58,237,.22), inset 0 1px rgba(255,255,255,.18);
+        transition: transform .2s ease, box-shadow .2s ease, opacity .2s ease;
+    }
+
+        .primary-button svg {
+            width: 17px;
+            height: 17px;
+            transition: transform .25s ease;
+        }
+
+        .primary-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 50px rgba(124,58,237,.32), inset 0 1px rgba(255,255,255,.20);
+        }
+
+            .primary-button:hover svg {
+                transform: translateX(4px);
+            }
+
+        .primary-button:active {
+            transform: translateY(0);
+        }
+
+        .primary-button:disabled {
+            cursor: not-allowed;
+            opacity: .55;
+            transform: none;
+        }
+
+    /* =========================================================
+               REGISTER
+            ========================================================= */
+
+    .register-form {
+        gap: 17px;
+    }
+
+    .fields-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+    }
+
+        .fields-grid .full {
+            grid-column: 1 / -1;
+        }
+
+    .section-label {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        margin-top: 3px;
+        margin-bottom: 1px;
+        color: #64748b;
+        font-size: 15px;
+        font-weight: 500;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+    }
+
+        .section-label span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 7px;
+            color: #c4b5fd;
+            background: rgba(139,92,246,.10);
+            border: 1px solid rgba(139,92,246,.15);
+            font-size: 15px;
+        }
+
+    .address-label {
+        margin-top: 7px;
+    }
+
+    .register-button {
+        margin-top: 5px;
+        margin-bottom: 30px;
+    }
+
+    .spinner {
+        width: 15px;
+        height: 15px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,.3);
+        border-top-color: white;
+        animation: spin .7s linear infinite;
+    }
+
+    @@keyframes spin {
+        to {
+            transform: rotate(360deg);
+        }
+    }
+
+    /* =========================================================
+               FOOTER
+            ========================================================= */
+
+    .footer {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        color: #334155;
+        font-size: 15px;
+        letter-spacing: .04em;
+        position: relative;
+        z-index: 2;
+    }
+
+    .footer-separator {
+        width: 3px;
+        height: 3px;
+        border-radius: 50%;
+        background: #475569;
+    }
+
+    .footer button {
+        border: 0;
+        background: transparent;
+        color: #64748b;
+        cursor: pointer;
+        font: inherit;
+        transition: color .2s;
+    }
+
+        .footer button:hover {
+            color: #c4b5fd;
+        }
+
+    .footer strong {
+        color: #a78bfa;
+    }
+
+    /* =========================================================
+               VISUAL SIDE
+            ========================================================= */
+
+    .visual-panel {
+        width: 50%;
+        min-height: 100vh;
+        position: relative;
+        overflow: hidden;
+        background: #05070e;
+    }
+
+    .visual-image {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        object-position: center;
+        transform: scale(1.02);
+        filter: saturate(.8) contrast(1.05);
+    }
+
+    .visual-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient( 90deg, #03050b 0%, rgba(3,5,11,.62) 17%, rgba(3,5,11,.08) 60%, rgba(3,5,11,.20) 100% );
+    }
+
+    .visual-top-gradient {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient( 180deg, rgba(3,5,11,.75) 0%, transparent 35%, rgba(3,5,11,.78) 100% );
+    }
+
+    .visual-content {
+        position: absolute;
+        left: clamp(40px, 6vw, 90px);
+        right: 50px;
+        bottom: 100px;
+        max-width: 540px;
+    }
+
+    .status-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 12px;
+        border-radius: 999px;
+        background: rgba(15,23,42,.35);
+        border: 1px solid rgba(255,255,255,.10);
+        color: #cbd5e1;
+        font-size: 9px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: .12em;
+        backdrop-filter: blur(20px);
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #4ade80;
+        box-shadow: 0 0 15px #4ade80;
+    }
+
+    .visual-content h2 {
+        margin: 22px 0 14px;
+        color: white;
+        font-size: clamp(38px, 4vw, 64px);
+        line-height: .98;
+        letter-spacing: -.055em;
+        font-weight: 850;
+    }
+
+        .visual-content h2 span {
+            display: block;
+            color: transparent;
+            background: linear-gradient( 90deg, #f0abfc, #a78bfa, #818cf8 );
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+    .visual-content > p {
+        max-width: 430px;
+        margin: 0;
+        color: #cbd5e1;
+        font-size: 12px;
+        line-height: 1.8;
+        text-shadow: 0 2px 15px rgba(0,0,0,.5);
+    }
+
+    .feature-cards {
+        display: flex;
+        gap: 10px;
+        margin-top: 30px;
+    }
+
+    .feature-card {
+        min-width: 145px;
+        padding: 13px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-radius: 17px;
+        background: rgba(15,23,42,.25);
+        border: 1px solid rgba(255,255,255,.10);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        box-shadow: inset 0 1px rgba(255,255,255,.07), 0 15px 35px rgba(0,0,0,.18);
+    }
+
+    .feature-icon {
+        width: 30px;
+        height: 30px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        color: #c4b5fd;
+        background: rgba(139,92,246,.12);
+        border: 1px solid rgba(139,92,246,.18);
+    }
+
+        .feature-icon svg {
+            width: 16px;
+            height: 16px;
+        }
+
+    .feature-card strong,
+    .feature-card span {
+        display: block;
+    }
+
+    .feature-card strong {
+        color: #f8fafc;
+        font-size: 9px;
+        font-weight: 800;
+    }
+
+    .feature-card span {
+        margin-top: 3px;
+        color: #64748b;
+        font-size: 8px;
+    }
+
+    .visual-footer {
+        position: absolute;
+        left: 45px;
+        right: 45px;
+        bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        color: rgba(255,255,255,.30);
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: .2em;
+    }
+
+    /* =========================================================
+               MODAL
+            ========================================================= */
+
+    .modal-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        background: rgba(0,0,0,.72);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        animation: modalFade .25s ease;
+    }
+
+    @@keyframes modalFade {
+        from {
+            opacity: 0;
+        }
+
+        to {
+            opacity: 1;
+        }
+    }
+
+    .team-modal {
+        width: 100%;
+        max-width: 700px;
+        max-height: 90vh;
+        overflow-y: auto;
+        position: relative;
+        padding: 34px;
+        border-radius: 30px;
+        background: linear-gradient( 145deg, rgba(15,23,42,.92), rgba(5,8,17,.95) );
+        border: 1px solid rgba(255,255,255,.10);
+        box-shadow: 0 40px 100px rgba(0,0,0,.65), inset 0 1px rgba(255,255,255,.07);
+        animation: modalUp .3s ease;
+    }
+
+    @@keyframes modalUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px) scale(.98);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+    }
+
+    .modal-close {
+        position: absolute;
+        top: 18px;
+        right: 18px;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border: 1px solid rgba(255,255,255,.07);
+        border-radius: 11px;
+        background: rgba(255,255,255,.04);
+        color: #64748b;
+        cursor: pointer;
+        transition: all .2s;
+    }
+
+        .modal-close:hover {
+            color: white;
+            background: rgba(255,255,255,.08);
+        }
+
+        .modal-close svg {
+            width: 16px;
+            height: 16px;
+        }
+
+    .modal-header {
+        text-align: center;
+        margin-bottom: 28px;
+    }
+
+    .modal-badge {
+        display: inline-block;
+        padding: 6px 10px;
+        border-radius: 999px;
+        color: #c4b5fd;
+        background: rgba(139,92,246,.08);
+        border: 1px solid rgba(139,92,246,.15);
+        font-size: 8px;
+        font-weight: 800;
+        letter-spacing: .18em;
+    }
+
+    .modal-header h3 {
+        margin: 13px 0 5px;
+        color: white;
+        font-size: 30px;
+        font-weight: 800;
+        letter-spacing: -.035em;
+    }
+
+        .modal-header h3 span {
+            color: #a855f7;
+        }
+
+    .modal-header p {
+        margin: 0;
+        color: #64748b;
+        font-size: 11px;
+    }
+
+    .team-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .team-card {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 14px;
+        border-radius: 19px;
+        background: linear-gradient( 135deg, rgba(255,255,255,.045), rgba(255,255,255,.018) );
+        border: 1px solid rgba(255,255,255,.065);
+        box-shadow: inset 0 1px rgba(255,255,255,.035);
+        transition: all .25s ease;
+    }
+
+        .team-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(168,85,247,.25);
+            background: linear-gradient( 135deg, rgba(139,92,246,.08), rgba(255,255,255,.025) );
+        }
+
+    .member-photo {
+        width: 68px;
+        height: 68px;
+        flex-shrink: 0;
+        overflow: hidden;
+        border-radius: 18px;
+        border: 1px solid rgba(255,255,255,.10);
+        box-shadow: 0 10px 25px rgba(0,0,0,.25);
+    }
+
+        .member-photo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform .4s ease;
+        }
+
+    .team-card:hover .member-photo img {
+        transform: scale(1.07);
+    }
+
+    .member-info {
+        min-width: 0;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+    }
+
+        .member-info h4 {
+            margin: 0;
+            color: #f8fafc;
+            font-size: 20px;
+            font-weight: 750;
+        }
+
+        .member-info span {
+            display: block;
+            margin-top: 4px;
+            color: #64748b;
+            font-size: 15px;
+        }
+
+    .social-links {
+        display: flex;
+        gap: 20px;
+    }
+
+        .social-links a {
+            padding: 7px 9px;
+            border-radius: 8px;
+            color: #94a3b8;
+            background: rgba(255,255,255,.035);
+            border: 1px solid rgba(255,255,255,.06);
+            font-size: 15px;
+            text-decoration: none;
+            transition: all .2s;
+        }
+
+            .social-links a:hover {
+                color: #c4b5fd;
+                border-color: rgba(168,85,247,.25);
+                background: rgba(139,92,246,.08);
+            }
+
+    .modal-button {
+        width: 100%;
+        height: 46px;
+        margin-top: 20px;
+        border: 0;
+        border-radius: 13px;
+        background: linear-gradient( 100deg, #4f46e5, #9333ea );
+        color: white;
+        font-size: 15px;
+        font-weight: 800;
+        cursor: pointer;
+        box-shadow: 0 12px 30px rgba(124,58,237,.22);
+        transition: all .2s;
+    }
+
+        .modal-button:hover {
+            transform: translateY(-1px);
+            opacity: .92;
+        }
+
+    /* =========================================================
+               RESPONSIVE
+            ========================================================= */
+
+    @@media (max-width: 1100px) {
+
+        .auth-panel {
+            width: 55%;
+            padding-left: 45px;
+            padding-right: 45px;
+        }
+
+        .visual-panel {
+            width: 45%;
+        }
+
+        .feature-cards {
+            flex-direction: column;
+            max-width: 220px;
+        }
+
+        .visual-content {
+            left: 45px;
+        }
+    }
+
+    @@media (max-width: 900px) {
+
+        .auth-shell {
+            display: block;
+        }
+
+        .auth-panel {
+            width: 100%;
+            min-height: 100vh;
+            border-right: 0;
+            padding: 28px 24px;
+        }
+
+        .visual-panel {
+            display: none;
+        }
+
+        .content-wrapper {
+            max-width: 540px;
+        }
+    }
+
+    @@media (max-width: 600px) {
+
+        .auth-panel {
+            padding: 22px 16px;
+        }
+
+        .logo-container {
+            margin-bottom: 24px;
+        }
+
+        .logo-glass {
+            padding: 13px 20px;
+            border-radius: 19px;
+        }
+
+        .logo {
+            width: 190px;
+        }
+
+        .mode-switch {
+            margin-bottom: 28px;
+        }
+
+        .form-header h1 {
+            font-size: 32px;
+        }
+
+        .fields-grid {
+            grid-template-columns: 1fr;
+        }
+
+            .fields-grid .full {
+                grid-column: auto;
+            }
+
+        .footer {
+            flex-direction: column;
+            gap: 5px;
+            padding-top: 30px;
+        }
+
+        .footer-separator {
+            display: none;
+        }
+
+        .team-modal {
+            padding: 24px 17px;
+            border-radius: 23px;
+        }
+
+        .team-card {
+            align-items: flex-start;
+        }
+
+        .member-info {
+            align-items: flex-start;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .social-links {
+            flex-wrap: wrap;
+        }
+    }
+
+    @@media (max-height: 800px) and (min-width: 901px) {
+
+        .auth-panel {
+            padding-top: 22px;
+            padding-bottom: 22px;
+        }
+
+        .logo-container {
+            margin-bottom: 18px;
+        }
+
+        .logo {
+            width: 190px;
+        }
+
+        .mode-switch {
+            margin-bottom: 22px;
+        }
+
+        .form-header {
+            margin-bottom: 20px;
+        }
+
+        .auth-form {
+            gap: 14px;
+        }
+
+        .input-wrapper input {
+            height: 46px;
+        }
+
+        .primary-button {
+            height: 48px;
+        }
+    }
+
+</style>
+
+
+@code {
+
+    [SupplyParameterFromQuery]
+    public string? Error { get; set; }
+
+    private bool showRegister = false;
+
+    private LoginDTO LoginModel { get; set; } = new();
+    private RegisterDTO RegisterModel { get; set; } = new();
+
+    private string? errorMessage;
+    private bool isSubmitting = false;
+
+    private bool isTeamModalOpen = false;
+
+    private void OpenTeamModal()
+        => isTeamModalOpen = true;
+
+    private void CloseTeamModal()
+        => isTeamModalOpen = false;
+
+    protected override void OnInitialized()
+    {
+        if (Error == "InvalidCredentials")
+        {
+            errorMessage = "E-mail ou senha inválidos.";
+        }
+        else if (Error == "InvalidToken")
+        {
+            errorMessage = "Erro ao processar a autenticação. Tente novamente.";
+        }
+    }
+
+    private async Task HandleRegister()
+    {
+        errorMessage = null;
+        isSubmitting = true;
+
+        try
+        {
+            var success = await AuthService.RegisterAsync(RegisterModel);
+
+            if (success)
+            {
+                showRegister = false;
+
+                LoginModel.Email = RegisterModel.Email;
+
+                RegisterModel = new();
+
+                errorMessage =
+                    "Conta criada com sucesso! Agora faça login.";
+            }
+            else
+            {
+                errorMessage =
+                    "Falha ao realizar o cadastro.";
+            }
+        }
+        finally
+        {
+            isSubmitting = false;
+        }
+    }
+}
+

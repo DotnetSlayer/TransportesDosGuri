@@ -1,5 +1,6 @@
 ﻿using TransportesDosGuri.Core.Application.DTOs;
 using TransportesDosGuri.Core.Application.ServiceContracts;
+using TransportesDosGuri.Core.Application.ServiceContracts.QuestPDF;
 using TransportesDosGuri.Core.Domain.Entities;
 using TransportesDosGuri.Core.Domain.RepositoryContracts;
 
@@ -8,10 +9,14 @@ namespace TransportesDosGuri.Core.Application.Services
     public class PurchaseService : IPurchaseService
     {
         private readonly IPurchaseRepository _purchaseRepository;
+        private readonly IReceiptPdfGenerator _receiptPdfGenerator;
 
-        public PurchaseService(IPurchaseRepository purchaseRepository)
+        public PurchaseService(
+            IPurchaseRepository purchaseRepository,
+            IReceiptPdfGenerator receiptPdfGenerator)
         {
             _purchaseRepository = purchaseRepository;
+            _receiptPdfGenerator = receiptPdfGenerator;
         }
 
         public async Task<PurchaseDTO> CreateAsync(PurchaseDTO purchase)
@@ -21,7 +26,8 @@ namespace TransportesDosGuri.Core.Application.Services
                 ApplicationUserId = purchase.ApplicationUserId,
                 PurchaseDate = purchase.PurchaseDate,
                 PurchasePrice = purchase.PurchasePrice,
-                Status = purchase.Status
+                Status = purchase.Status,
+                TripId = purchase.TripId
             };
 
             await _purchaseRepository.AddAsync(purchaseEntity);
@@ -55,7 +61,8 @@ namespace TransportesDosGuri.Core.Application.Services
                 ApplicationUserId = purchaseEntities.ApplicationUserId,
                 PurchaseDate = purchaseEntities.PurchaseDate,
                 PurchasePrice = purchaseEntities.PurchasePrice,
-                Status = purchaseEntities.Status
+                Status = purchaseEntities.Status,
+                TripId= purchaseEntities.TripId
             });
         }
 
@@ -74,7 +81,8 @@ namespace TransportesDosGuri.Core.Application.Services
                 ApplicationUserId = purchaseEntity.ApplicationUserId,
                 PurchaseDate = purchaseEntity.PurchaseDate,
                 PurchasePrice = purchaseEntity.PurchasePrice,
-                Status = purchaseEntity.Status
+                Status = purchaseEntity.Status,
+                TripId = purchaseEntity.TripId
             };
         }
 
@@ -91,10 +99,64 @@ namespace TransportesDosGuri.Core.Application.Services
             existingPurchase.PurchaseDate = purchase.PurchaseDate;
             existingPurchase.PurchasePrice = purchase.PurchasePrice;
             existingPurchase.Status = purchase.Status;
+            existingPurchase.TripId = purchase.TripId;
 
             await _purchaseRepository.UpdateAsync(existingPurchase);
 
             return true;
+        }
+
+        public async Task<PurchaseResultDTO> BuySeatsAsync(long userId, BuySeatRequestDTO request)
+        {
+            if (userId <= 0)
+                throw new ArgumentException("Requisição Inválida!");
+
+            if (request == null)
+                throw new ArgumentException("Requisição Inválida!");
+
+            if (request.TripId <= 0)
+                throw new ArgumentException("Requisição Inválida!");
+
+            if (request.FlightSeatIds == null ||
+                !request.FlightSeatIds.Any())
+            {
+                throw new ArgumentException(
+                    "Requisição Inválida!");
+            }
+
+            return await _purchaseRepository.CreatePurchaseAsync(
+                userId,
+                request);
+        }
+
+        public async Task<PurchaseDetailsDTO?> GetUserPurchaseAsync(long purchaseId, long userId)
+        {
+            return await _purchaseRepository.GetUserPurchaseAsync(
+                purchaseId,
+                userId);
+        }
+
+        public async Task<bool> ProcessPaymentAsync(long purchaseId, long userId)
+        {
+            return await _purchaseRepository.ProcessPaymentAsync(
+                purchaseId,
+                userId);
+        }
+
+        public async Task<IEnumerable<PurchaseDetailsDTO>> GetMyTripsAsync(long userId)
+        {
+            return await _purchaseRepository.GetMyTripsAsync(userId);
+        }
+
+        public async Task<byte[]?> GenerateReceiptPdfAsync(long purchaseId, long userId)
+        {
+            var receiptData = await _purchaseRepository.GetReceiptDataAsync(purchaseId, userId);
+
+            if (receiptData == null)
+                return null;
+
+            // O Core chama a interface, não a implementação concreta
+            return _receiptPdfGenerator.Generate(receiptData);
         }
     }
 }

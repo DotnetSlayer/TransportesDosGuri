@@ -24,7 +24,7 @@ namespace TransportesDosGuri.Infrastructure.ExternalServices.Asaas
 
             if (config == null || string.IsNullOrWhiteSpace(config.ApiKey) || string.IsNullOrWhiteSpace(config.BaseUrl))
             {
-                throw new InvalidOperationException("Nenhuma integração do Asaas ativa foi encontrada na tabela AsaasIntegration.");
+                throw new InvalidOperationException("Requisição Inválida!");
             }
 
             var client = _httpClientFactory.CreateClient("AsaasClient");
@@ -52,7 +52,7 @@ namespace TransportesDosGuri.Infrastructure.ExternalServices.Asaas
             var content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception($"Erro Asaas (Criar Cliente): {content}");
+                throw new Exception($"Requisição Inválida!: {content}");
 
             using var doc = JsonDocument.Parse(content);
             return doc.RootElement.GetProperty("id").GetString()!;
@@ -75,7 +75,7 @@ namespace TransportesDosGuri.Infrastructure.ExternalServices.Asaas
             var content = await response.Content.ReadAsStringAsync();
 
             if (!response.IsSuccessStatusCode)
-                throw new Exception($"Erro Asaas (Criar Cobrança): {content}");
+                throw new Exception($"Requisição Inválida!: {content}");
 
             using var doc = JsonDocument.Parse(content);
             return doc.RootElement.GetProperty("id").GetString()!;

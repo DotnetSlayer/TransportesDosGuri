@@ -1,0 +1,7 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="TransportesDosGuri.Core/TransportesDosGuri.Core.csproj" />
+    <Project Path="TransportesDosGuri.Infrastructure/TransportesDosGuri.Infrastructure.csproj" />
+  </Folder>
+  <Project Path="TransportesDosGuri.WebUI/TransportesDosGuri.WebUI.csproj" />
+</Solution>

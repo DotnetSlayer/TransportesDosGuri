@@ -1,4 +1,5 @@
 ﻿using Dapper;
+using System.Data;
 using TransportesDosGuri.Core.Domain.Entities;
 using TransportesDosGuri.Core.Domain.RepositoryContracts;
 using TransportesDosGuri.Infrastructure.Data;
@@ -42,7 +43,19 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                 );
                 """;
 
-            flight.Id = await connection.ExecuteScalarAsync<long>(sql, flight);
+            var parameters = new DynamicParameters();
+
+            parameters.Add("AircraftId", flight.AircraftId);
+            parameters.Add("OriginAirportId", flight.OriginAirportId);
+            parameters.Add("DestinyAirportId", flight.DestinyAirportId);
+
+            parameters.Add("DepartureTime", flight.DepartureTime, DbType.DateTime2);
+            parameters.Add("ArrivalTime", flight.ArrivalTime, DbType.DateTime2);
+
+            parameters.Add("BasePrice", flight.BasePrice);
+            parameters.Add("TripId", flight.TripId);
+
+            flight.Id = await connection.ExecuteScalarAsync<long>(sql, parameters);
         }
 
         public async Task DeleteAsync(long id)

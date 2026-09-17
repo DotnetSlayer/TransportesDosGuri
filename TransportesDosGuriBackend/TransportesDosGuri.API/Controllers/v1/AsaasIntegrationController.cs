@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TransportesDosGuri.Core.Application.DTOs;
 using TransportesDosGuri.Core.Application.ServiceContracts;
@@ -18,9 +19,10 @@ namespace TransportesDosGuri.API.Controllers.v1
         }
 
         /// <summary>
-        /// Endpoint to GET ALL data stored in the AsaasIntegration Table
+        /// Endpoint para RETORNAR TODAS AS INTEGRAÇÕES ASAAS presentes na tabela AsaasIntegration
         /// </summary>
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllAsync()
         {
             var getAll = await _asaasIntegrationsService.GetAllAsync();
@@ -29,9 +31,10 @@ namespace TransportesDosGuri.API.Controllers.v1
         }
 
         /// <summary>
-        /// Endpoint to GET BY ID a specific row stored in the AsaasIntegration Table
+        /// Endpoint para RETORNAR UMA INTEGRAÇÃO ASAAS POR ID presente na tabela AsaasIntegration
         /// </summary>
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetByIdAsync(long id)
         {
             var getById = await _asaasIntegrationsService.GetByIdAsync(id);
@@ -40,36 +43,39 @@ namespace TransportesDosGuri.API.Controllers.v1
         }
 
         /// <summary>
-        /// Endpoint to CREATE a row of information in the AsaasIntegration Table
+        /// Endpoint para CRIAR INTEGRAÇÃO ASAAS na tabela AsaasIntegration
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAsync(AsaasIntegrationDTO asaasIntegration)
         {
             var create = await _asaasIntegrationsService.CreateAsync(asaasIntegration);
 
-            return Ok("Data Saved");
+            return Ok("Base de Dados Atualizada!");
         }
 
         /// <summary>
-        /// Endpoint to UPDATE BY ID a row stored in the AsaasIntegration Table
+        /// Endpoint para ATUALIZAR UMA INTEGRAÇÃO ASAAS POR ID presente na tabela AsaasIntegration
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateAsync(long id, AsaasIntegrationDTO asaasIntegration)
         {
             var update = await _asaasIntegrationsService.UpdateAsync(id, asaasIntegration);
 
-            return Ok("Data Updated");
+            return Ok("Base de Dados Atualizada!");
         }
 
         /// <summary>
-        /// Endpoint to DELETE BY ID a row stored in the AsaasIntegration Table
+        /// Endpoint para EXCLUIR PERMANENTEMENTE UMA INTEGRAÇÃO ASAAS POR ID presente na tabela AsaasIntegration
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
             var delete = await _asaasIntegrationsService.DeleteAsync(id);
 
-            return Ok("Data Deleted");
+            return Ok("Base de Dados Atualizada!");
         }
     }
 }

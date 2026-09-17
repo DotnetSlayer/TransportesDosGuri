@@ -12,16 +12,16 @@
 
     public enum AircraftType
     {
-        Unspecified = 0,
+        Indeterminado = 0,
 
-        CommercialAircraft,
+        Comercial,
 
-        BusinessAircraft,
+        Executiva,
 
-        CargoAircraft,
+        Cargueira,
 
-        RegionalAircraft,
+        Regional,
 
-        Jet
+        Jato
     }
 }

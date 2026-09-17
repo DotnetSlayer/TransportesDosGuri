@@ -19,10 +19,10 @@
 
     public enum ReservationStatus
     {
-        Pending,
+        Pendente,
 
-        Confirmed,
+        Confirmado,
 
-        Canceled
+        Cancelado
     }
 }

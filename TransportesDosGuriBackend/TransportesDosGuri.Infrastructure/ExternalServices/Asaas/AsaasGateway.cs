@@ -31,7 +31,7 @@ namespace TransportesDosGuri.Infrastructure.ExternalServices.Asaas
             {
                 Customer = customerId,
                 Value = amount,
-                // Converte DateOnly para a string no formato esperado pelo Asaas (yyyy-MM-dd)
+
                 DueDate = dueDate.ToString("yyyy-MM-dd"),
                 BillingType = "BOLETO"
             };

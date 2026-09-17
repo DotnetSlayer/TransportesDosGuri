@@ -13,5 +13,7 @@ namespace TransportesDosGuri.Core.Application.ServiceContracts
         Task<bool> UpdateAsync(long id, FlightSeatDTO flightSeat);
 
         Task<bool> DeleteAsync(long id);
+
+        Task<IEnumerable<FlightSeatDTO>> GetByFlightIdsAsync(IEnumerable<long> flightIds);
     }
 }

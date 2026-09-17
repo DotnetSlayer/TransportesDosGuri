@@ -1,4 +1,5 @@
 ﻿using Asp.Versioning;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using TransportesDosGuri.Core.Application.DTOs;
 using TransportesDosGuri.Core.Application.ServiceContracts;
@@ -18,9 +19,10 @@ namespace TransportesDosGuri.API.Controllers.v1
         }
 
         /// <summary>
-        /// Endpoint to GET ALL data stored in the Airport Table
+        /// Endpoint para RETORNAR TODOS OS AEROPORTOS presentes na tabela Airport
         /// </summary>
         [HttpGet]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetAllAsync()
         {
             var getAll = await _airportService.GetAllAsync();
@@ -29,9 +31,10 @@ namespace TransportesDosGuri.API.Controllers.v1
         }
 
         /// <summary>
-        /// Endpoint to GET BY ID a specific row stored in the Airport Table
+        /// Endpoint para RETORNAR UM AEROPORTO POR ID presente na tabela Airport
         /// </summary>
         [HttpGet("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> GetByIdAsync(long id)
         {
             var getById = await _airportService.GetByIdAsync(id);
@@ -40,36 +43,39 @@ namespace TransportesDosGuri.API.Controllers.v1
         }
 
         /// <summary>
-        /// Endpoint to CREATE a row of information in the Airport Table
+        /// Endpoint para CRIAR AEROPORTO na tabela Airport
         /// </summary>
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> CreateAsync(AirportDTO airport)
         {
             var create = await _airportService.CreateAsync(airport);
 
-            return Ok("Data Saved");
+            return Ok("Base de Dados Atualizada!");
         }
 
         /// <summary>
-        /// Endpoint to UPDATE BY ID a row stored in the Airport Table
+        /// Endpoint para ATUALIZAR UM AEROPORTO POR ID presente na tabela Airport
         /// </summary>
         [HttpPut("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateAsync(long id, AirportDTO airport)
         {
             var update = await _airportService.UpdateAsync(id, airport);
 
-            return Ok("Data Updated");
+            return Ok("Base de Dados Atualizada!");
         }
 
         /// <summary>
-        /// Endpoint to DELETE BY ID a row stored in the Airport Table
+        /// Endpoint para EXCLUIR PERMANENTEMENTE UM AEROPORTO POR ID presente na tabela Airport
         /// </summary>
         [HttpDelete("{id}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
             var delete = await _airportService.DeleteAsync(id);
 
-            return Ok("Data Deleted");
+            return Ok("Base de Dados Atualizada!");
         }
     }
 }

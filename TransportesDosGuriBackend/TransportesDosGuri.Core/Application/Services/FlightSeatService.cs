@@ -22,7 +22,9 @@ namespace TransportesDosGuri.Core.Application.Services
                 SeatNumber = flightSeat.SeatNumber,
                 Class = flightSeat.Class,
                 Location = flightSeat.Location,
-                Side = flightSeat.Side
+                Side = flightSeat.Side,
+                Status = flightSeat.Status,
+                FlightId = flightSeat.FlightId
             };
 
             await _flightSeatRepository.AddAsync(flightSeatEntity);
@@ -57,7 +59,9 @@ namespace TransportesDosGuri.Core.Application.Services
                 SeatNumber = flightSeatEntities.SeatNumber,
                 Class = flightSeatEntities.Class,
                 Location = flightSeatEntities.Location,
-                Side = flightSeatEntities.Side
+                Side = flightSeatEntities.Side,
+                Status = flightSeatEntities.Status,
+                FlightId = flightSeatEntities.FlightId
             });
         }
 
@@ -77,7 +81,9 @@ namespace TransportesDosGuri.Core.Application.Services
                 SeatNumber = flightSeatEntity.SeatNumber,
                 Class = flightSeatEntity.Class,
                 Location = flightSeatEntity.Location,
-                Side = flightSeatEntity.Side
+                Side = flightSeatEntity.Side,
+                Status = flightSeatEntity.Status,
+                FlightId = flightSeatEntity.FlightId
             };
         }
 
@@ -95,10 +101,34 @@ namespace TransportesDosGuri.Core.Application.Services
             existingFlightSeat.Class = flightSeat.Class;
             existingFlightSeat.Location = flightSeat.Location;
             existingFlightSeat.Side = flightSeat.Side;
+            existingFlightSeat.Status = flightSeat.Status;
+            existingFlightSeat.FlightId = flightSeat.FlightId;
 
             await _flightSeatRepository.UpdateAsync(existingFlightSeat);
 
             return true;
+        }
+
+        public async Task<IEnumerable<FlightSeatDTO>> GetByFlightIdsAsync(IEnumerable<long> flightIds)
+        {
+            if (flightIds == null || !flightIds.Any())
+            {
+                return Enumerable.Empty<FlightSeatDTO>();
+            }
+
+            var flightSeatEntities = await _flightSeatRepository.GetByFlightIdsAsync(flightIds);
+
+            return flightSeatEntities.Select(seat => new FlightSeatDTO
+            {
+                Id = seat.Id,
+                AircraftId = seat.AircraftId,
+                SeatNumber = seat.SeatNumber,
+                Class = seat.Class,
+                Location = seat.Location,
+                Side = seat.Side,
+                Status = seat.Status,
+                FlightId = seat.FlightId
+            });
         }
     }
 }

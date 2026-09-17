@@ -1,9 +1,12 @@
 ﻿@page "/adminAirports"
 @rendermode InteractiveServer
+@attribute [Authorize]
 
-@inject IAirportService AirportService
+@using Microsoft.AspNetCore.Authorization
 @using TransportesDosGuri.Core.DTOs
 @using TransportesDosGuri.Core.Interfaces
+
+@inject IAirportService AirportService
 
 <PageTitle>Transportes Dos Guri · Aeroportos</PageTitle>
 

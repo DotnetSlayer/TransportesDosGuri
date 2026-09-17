@@ -20,23 +20,23 @@ namespace TransportesDosGuri.Infrastructure.Services
             await _http.GetFromJsonAsync<List<FlightSeatDTO>>("/api/v1/FlightSeat") ?? new();
 
         public async Task<FlightSeatDTO?> GetByIdAsync(long id) =>
-            await _http.GetFromJsonAsync<FlightSeatDTO>($"/api/v1/Flight/{id}");
+            await _http.GetFromJsonAsync<FlightSeatDTO>($"/api/v1/FlightSeat/{id}");
 
         public async Task<bool> CreateAsync(FlightSeatDTO dto)
         {
-            var response = await _http.PostAsJsonAsync("/api/v1/Flight", dto);
+            var response = await _http.PostAsJsonAsync("/api/v1/FlightSeat", dto);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> UpdateAsync(long id, FlightSeatDTO dto)
         {
-            var response = await _http.PutAsJsonAsync($"/api/v1/Flight/{id}", dto);
+            var response = await _http.PutAsJsonAsync($"/api/v1/FlightSeat/{id}", dto);
             return response.IsSuccessStatusCode;
         }
 
         public async Task<bool> DeleteAsync(long id)
         {
-            var response = await _http.DeleteAsync($"/api/v1/Flight/{id}");
+            var response = await _http.DeleteAsync($"/api/v1/FlightSeat/{id}");
             return response.IsSuccessStatusCode;
         }
     }

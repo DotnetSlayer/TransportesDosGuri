@@ -6,317 +6,357 @@
     <members>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AircraftController.GetAllAsync">
             <summary>
-            Endpoint to GET ALL data stored in the Aircraft Table
+            Endpoint para RETORNAR TODAS AS AERONAVES presentes na tabela Aircraft
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AircraftController.GetByIdAsync(System.Int64)">
             <summary>
-            Endpoint to GET BY ID a specific row stored in the Aircraft Table
+            Endpoint para RETORNAR UMA AERONAVE POR ID presente na tabela Aircraft
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AircraftController.CreateAsync(TransportesDosGuri.Core.Application.DTOs.AircraftDTO)">
             <summary>
-            Endpoint to CREATE a row of information in the Aircraft Table
+            Endpoint para CRIAR AERONAVE na tabela Aircraft
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AircraftController.UpdateAsync(System.Int64,TransportesDosGuri.Core.Application.DTOs.AircraftDTO)">
             <summary>
-            Endpoint to UPDATE BY ID a row stored in the Aircraft Table
+            Endpoint para ATUALIZAR UMA AERONAVE POR ID presente na tabela Aircraft
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AircraftController.DeleteAsync(System.Int64)">
             <summary>
-            Endpoint to DELETE BY ID a row stored in the Aircraft Table
+            Endpoint para EXCLUIR PERMANENTEMENTE UMA AERONAVE POR ID presente na tabela Aircraft
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AirportController.GetAllAsync">
             <summary>
-            Endpoint to GET ALL data stored in the Airport Table
+            Endpoint para RETORNAR TODOS OS AEROPORTOS presentes na tabela Airport
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AirportController.GetByIdAsync(System.Int64)">
             <summary>
-            Endpoint to GET BY ID a specific row stored in the Airport Table
+            Endpoint para RETORNAR UM AEROPORTO POR ID presente na tabela Airport
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AirportController.CreateAsync(TransportesDosGuri.Core.Application.DTOs.AirportDTO)">
             <summary>
-            Endpoint to CREATE a row of information in the Airport Table
+            Endpoint para CRIAR AEROPORTO na tabela Airport
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AirportController.UpdateAsync(System.Int64,TransportesDosGuri.Core.Application.DTOs.AirportDTO)">
             <summary>
-            Endpoint to UPDATE BY ID a row stored in the Airport Table
+            Endpoint para ATUALIZAR UM AEROPORTO POR ID presente na tabela Airport
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AirportController.DeleteAsync(System.Int64)">
             <summary>
-            Endpoint to DELETE BY ID a row stored in the Airport Table
+            Endpoint para EXCLUIR PERMANENTEMENTE UM AEROPORTO POR ID presente na tabela Airport
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AsaasIntegrationController.GetAllAsync">
             <summary>
-            Endpoint to GET ALL data stored in the AsaasIntegration Table
+            Endpoint para RETORNAR TODAS AS INTEGRAÇÕES ASAAS presentes na tabela AsaasIntegration
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AsaasIntegrationController.GetByIdAsync(System.Int64)">
             <summary>
-            Endpoint to GET BY ID a specific row stored in the AsaasIntegration Table
+            Endpoint para RETORNAR UMA INTEGRAÇÃO ASAAS POR ID presente na tabela AsaasIntegration
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AsaasIntegrationController.CreateAsync(TransportesDosGuri.Core.Application.DTOs.AsaasIntegrationDTO)">
             <summary>
-            Endpoint to CREATE a row of information in the AsaasIntegration Table
+            Endpoint para CRIAR INTEGRAÇÃO ASAAS na tabela AsaasIntegration
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AsaasIntegrationController.UpdateAsync(System.Int64,TransportesDosGuri.Core.Application.DTOs.AsaasIntegrationDTO)">
             <summary>
-            Endpoint to UPDATE BY ID a row stored in the AsaasIntegration Table
+            Endpoint para ATUALIZAR UMA INTEGRAÇÃO ASAAS POR ID presente na tabela AsaasIntegration
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.AsaasIntegrationController.DeleteAsync(System.Int64)">
             <summary>
-            Endpoint to DELETE BY ID a row stored in the AsaasIntegration Table
+            Endpoint para EXCLUIR PERMANENTEMENTE UMA INTEGRAÇÃO ASAAS POR ID presente na tabela AsaasIntegration
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.FlightController.GetAllAsync">
             <summary>
-            Endpoint to GET ALL data stored in the Flight Table
+            Endpoint para RETORNAR TODAS OS VOOS presentes na tabela Flight
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.FlightController.GetByIdAsync(System.Int64)">
             <summary>
-            Endpoint to GET BY ID a specific row stored in the Flight Table
+            Endpoint para RETORNAR UM VOO POR ID presente na tabela Flight
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.FlightController.CreateAsync(TransportesDosGuri.Core.Application.DTOs.FlightDTO)">
             <summary>
-            Endpoint to CREATE a row of information in the Flight Table
+            Endpoint para CRIAR VOO na tabela Flight
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.FlightController.UpdateAsync(System.Int64,TransportesDosGuri.Core.Application.DTOs.FlightDTO)">
             <summary>
-            Endpoint to UPDATE BY ID a row stored in the Flight Table
+            Endpoint para ATUALIZAR UM VOO POR ID presente na tabela Flight
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.FlightController.DeleteAsync(System.Int64)">
             <summary>
-            Endpoint to DELETE BY ID a row stored in the Flight Table
+            Endpoint para EXCLUIR PERMANENTEMENTE UM VOO POR ID presente na tabela Flight
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.FlightSeatController.GetAllAsync">
             <summary>
-            Endpoint to GET ALL data stored in the FlightSeat Table
+            Endpoint para RETORNAR TODOS OS ASSENTOS DE VOOS presentes na tabela FlightSeat
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.FlightSeatController.GetByIdAsync(System.Int64)">
             <summary>
-            Endpoint to GET BY ID a specific row stored in the FlightSeat Table
+            Endpoint para RETORNAR UM ASSENTO DE VOO POR ID presente na tabela FlightSeat
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.FlightSeatController.CreateAsync(TransportesDosGuri.Core.Application.DTOs.FlightSeatDTO)">
             <summary>
-            Endpoint to CREATE a row of information in the FlightSeat Table
+            Endpoint para CRIAR ASSENTO DE VOO na tabela FlightSeat
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.FlightSeatController.UpdateAsync(System.Int64,TransportesDosGuri.Core.Application.DTOs.FlightSeatDTO)">
             <summary>
-            Endpoint to UPDATE BY ID a row stored in the FlightSeat Table
+            Endpoint para ATUALIZAR UM ASSENTO DE VOO POR ID presente na tabela FligthSeat
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.FlightSeatController.DeleteAsync(System.Int64)">
             <summary>
-            Endpoint to DELETE BY ID a row stored in the FlightSeat Table
+            Endpoint para EXCLUIR PERMANENTEMENTE UM ASSENTO DE VOO POR ID presente na tabela FlightSeat
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.Register(TransportesDosGuri.Core.Application.DTOs.Identity.RegisterDTO)">
             <summary>
-            Endpoint to REGISTER USER in AspNetUsers Table
+            Endpoint para REGISTRAR USUÁRIO na tabela AspNetUsers
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.Login(TransportesDosGuri.Core.Application.DTOs.Identity.LoginDTO)">
             <summary>
-            Endpoint to LOGIN USER in AspNetUsers Table
+            Endpoint para LOGAR USUÁRIO presente na tabela AspNetUsers
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.GetById(System.Int64)">
             <summary>
-            Endpoint to GET USER BY ID in AspNetUsers Table
+            Endpoint para RETORNAR UM USUÁRIO POR ID presente na tabela AspNetUsers
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.GetAll">
             <summary>
-            Endpoint to GET ALL USERS in AspNetUsers Table
+            Endpoint para RETORNAR TODOS OS USUÁRIOS presentes na tabela AspNetUsers
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.Edit(System.Int64,TransportesDosGuri.Core.Application.DTOs.Identity.UpdateDTO)">
             <summary>
-            Endpoint to UPDATE USER stored in AspNetUsers Table
+            Endpoint para ATUALIZAR UM USUÁRIO POR ID presente na tabela AspNetUsers
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.Delete(System.Int64)">
             <summary>
-            Endpoint to DELETE USER stored in AspNetUsers Table
+            Endpoint para EXCLUIR PERMANENTEMENTE UM USUÁRIO POR ID presente na tabela AspNetUsers
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.GenerateNewAccessToken(TransportesDosGuri.Core.Application.DTOs.Jwt.TokenModelDTO)">
             <summary>
-            Endpoint to GENERATE a new and valid USER ACCESS TOKEN 
+            Endpoint para GERAR UM NOVO TOKEN PARA VALIDAR ACESSOS DE USUÁRIOS  
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.Logout(TransportesDosGuri.Core.Application.DTOs.Jwt.TokenModelDTO)">
             <summary>
-            Endpoint to Logout a valid USER session 
+            Endpoint para FAZER LOGOUT DE USUÁRIO COM SESSÃO VÁLIDA 
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.GetAllAsync">
             <summary>
-            Endpoint to GET ALL data stored in the Purchase Table
+            Endpoint para RETORNAR TODAS AS COMPRAS presentes na tabela Purchase
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.GetByIdAsync(System.Int64)">
             <summary>
-            Endpoint to GET BY ID a specific row stored in the Purchase Table
+            Endpoint para RETORNAR UMA COMPRA POR ID presente na tabela Purchase
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.CreateAsync(TransportesDosGuri.Core.Application.DTOs.PurchaseDTO)">
             <summary>
-            Endpoint to CREATE a row of information in the Purchase Table
+            Endpoint para CRIAR COMPRA na tabela Purchase
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.UpdateAsync(System.Int64,TransportesDosGuri.Core.Application.DTOs.PurchaseDTO)">
             <summary>
-            Endpoint to UPDATE BY ID a row stored in the Purchase Table
+            Endpoint para ATUALIZAR UMA COPMRA POR ID presente na tabela Purchase
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.DeleteAsync(System.Int64)">
             <summary>
-            Endpoint to DELETE BY ID a row stored in the Purchase Table
+            Endpoint para EXCLUIR PERMANENTEMENTE UMA COMPRA POR ID presente na tabela Purchase
+            </summary>
+        </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.BuySeats(TransportesDosGuri.Core.Application.DTOs.BuySeatRequestDTO)">
+            <summary>
+            Endpoint para COMPRAR ASSENTO DE VOO 
+            </summary>
+        </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.GetMyPurchase(System.Int64)">
+            <summary>
+            Endpoint para VERIFICAR COMPRAS RELACIONADAS A USUÁRIO ESPECÍFICO
+            </summary>
+        </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.ProcessPayment(System.Int64)">
+            <summary>
+            Endpoint para PROCESSAR PAGAMENTO
+            </summary>
+        </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.GetMyTrips">
+            <summary>
+            Endpoint para VERIFICAR VIAGENS RELACINOADAS A USUÁRIO ESPECÍFICO
+            </summary>
+        </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.DownloadReceipt(System.Int64)">
+            <summary>
+            Endpoint para BAIXAR O RECIBO EM PDF DE UMA COMPRA
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.ReservationController.GetAllAsync">
             <summary>
-            Endpoint to GET ALL data stored in the Reservation Table
+            Endpoint para RETORNAR TODAS AS RESERVAS presentes na tabela Reservation
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.ReservationController.GetByIdAsync(System.Int64)">
             <summary>
-            Endpoint to GET BY ID a specific row stored in the Reservation Table
+            Endpoint para RETORNAR UMA RESERVA POR ID presente na tabela Reservations
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.ReservationController.CreateAsync(TransportesDosGuri.Core.Application.DTOs.ReservationDTO)">
             <summary>
-            Endpoint to CREATE a row of information in the Reservation Table
+            Endpoint para CRIAR RESERVA na tabela Reservation
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.ReservationController.UpdateAsync(System.Int64,TransportesDosGuri.Core.Application.DTOs.ReservationDTO)">
             <summary>
-            Endpoint to UPDATE BY ID a row stored in the Reservation Table
+            Endpoint para ATUALIZAR UMA RESERVA POR ID presente na tabela Reservation
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.ReservationController.DeleteAsync(System.Int64)">
             <summary>
-            Endpoint to DELETE BY ID a row stored in the Reservation Table
+            Endpoint para EXCLUIR PERMANENTEMENTE UMA RESERVA POR ID presente na tabela Reservation
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.ScheduleController.GetAllAsync">
             <summary>
-            Endpoint to GET ALL data stored in the Schedule Table
+            Endpoint para RETORNAR TODAS AS ESCALAS presentes na tabela Schedule
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.ScheduleController.GetByIdAsync(System.Int64)">
             <summary>
-            Endpoint to GET BY ID a specific row stored in the Schedule Table
+            Endpoint para RETORNAR UMA ESCALA POR ID presente na tabela Schedule
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.ScheduleController.CreateAsync(TransportesDosGuri.Core.Application.DTOs.ScheduleDTO)">
             <summary>
-            Endpoint to CREATE a row of information in the Schedule Table
+            Endpoint para CRIAR ESCALA na tabela Schedule
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.ScheduleController.UpdateAsync(System.Int64,TransportesDosGuri.Core.Application.DTOs.ScheduleDTO)">
             <summary>
-            Endpoint to UPDATE BY ID a row stored in the Schedule Table
+            Endpoint para ATUALIZAR UMA ESCALA POR ID presente na tabela Schedule
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.ScheduleController.DeleteAsync(System.Int64)">
             <summary>
-            Endpoint to DELETE BY ID a row stored in the Schedule Table
+            Endpoint para EXCLUIR PERMANENTEMENTE UMA ESCALA POR ID presente na tabela Schedule
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.SeatController.GetAllAsync">
             <summary>
-            Endpoint to GET ALL data stored in the Seat Table
+            Endpoint para RETORNAR TODOS OS ASSENTOS presentes na tabela Seat
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.SeatController.GetByIdAsync(System.Int64)">
             <summary>
-            Endpoint to GET BY ID a specific row stored in the Seat Table
+            Endpoint para RETORNAR UM ASSENTO POR ID presente na tabela Seat
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.SeatController.CreateAsync(TransportesDosGuri.Core.Application.DTOs.SeatDTO)">
             <summary>
-            Endpoint to CREATE a row of information in the Seat Table
+            Endpoint para CRIAR ASSENTO na tabela Seat
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.SeatController.UpdateAsync(System.Int64,TransportesDosGuri.Core.Application.DTOs.SeatDTO)">
             <summary>
-            Endpoint to UPDATE BY ID a row stored in the Seat Table
+            Endpoint para ATUALIZAR UM ASSENTO POR ID presente na tabela Seat
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.SeatController.DeleteAsync(System.Int64)">
             <summary>
-            Endpoint to DELETE BY ID a row stored in the Seat Table
+            Endpoint para EXCLUIR PERMANENTEMENTE UM ASSENTO POR ID presente na tabela Seat
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.TripController.GetAllAsync">
             <summary>
-            Endpoint to GET ALL data stored in the Trip Table
+            Endpoint para RETORNAR TODAS AS VIAGENS presentes na tabela Trip
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.TripController.GetByIdAsync(System.Int64)">
             <summary>
-            Endpoint to GET BY ID a specific row stored in the Trip Table
+            Endpoint para RETORNAR UMA VIAGEM POR ID presente na tabela Trip
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.TripController.CreateAsync(TransportesDosGuri.Core.Application.DTOs.TripDTO)">
             <summary>
-            Endpoint to CREATE a row of information in the Trip Table
+            Endpoint para CRIAR VIAGEM na tabela Trip
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.TripController.UpdateAsync(System.Int64,TransportesDosGuri.Core.Application.DTOs.TripDTO)">
             <summary>
-            Endpoint to UPDATE BY ID a row stored in the Trip Table
+            Endpoint para ATUALIZAR UMA VIAGEM POR ID presente na tabela Trip
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.TripController.DeleteAsync(System.Int64)">
             <summary>
-            Endpoint to DELETE BY ID a row stored in the Trip Table
+            Endpoint para EXCLUIR PERMANENTEMENTE UMA VIAGEM POR ID presente na tabela Trip
+            </summary>
+        </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.TripController.Search(System.String)">
+            <summary>
+            Endpoint para PESQUISAR VIAGENS
+            </summary>
+        </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.TripController.GetDetails(System.Int64)">
+            <summary>
+            Endpoint para PESQUISAR DETALHES DE VIAGEM ESPECÍFICA presente na tabela Trip
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.UserRequestController.GetAllAsync">
             <summary>
-            Endpoint to GET ALL data stored in the UserRequest Table
+            Endpoint para RETORNAR TODAS AS REQUISIÇÕES DE USUÁRIOS presentes na tabela UserRequest
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.UserRequestController.GetByIdAsync(System.Int64)">
             <summary>
-            Endpoint to GET BY ID a specific row stored in the UserRequest Table
+            Endpoint para RETORNAR UMA REQUISIÇÃO DE USUÁRIO POR ID presente na tabela UserRequest
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.UserRequestController.CreateAsync(TransportesDosGuri.Core.Application.DTOs.UserRequestDTO)">
             <summary>
-            Endpoint to CREATE a row of information in the UserRequest Table
+            Endpoint para CRIAR REQUISIÇÃO DE USUÁRIO na tabela UserRequest
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.UserRequestController.UpdateAsync(System.Int64,TransportesDosGuri.Core.Application.DTOs.UserRequestDTO)">
             <summary>
-            Endpoint to UPDATE BY ID a row stored in the UserRequest Table
+            Endpoint para ATUALIZAR UMA REQUISIÇÃO DE USUÁRIO POR ID presente na tabela UserRequest
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.UserRequestController.DeleteAsync(System.Int64)">
             <summary>
-            Endpoint to DELETE BY ID a row stored in the UserRequest Table
+            Endpoint para EXCLUIR PERMANENTEMENTE UMA REQUISI~ÇÃO DE USUÁRIO POR ID presente na tabela UserRequest
+            </summary>
+        </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.UserRequestController.CreateWithPaymentAsync(TransportesDosGuri.Core.Application.DTOs.UserRequestDTO)">
+            <summary>
+            Endpoint para GERAR REGISTRO DE COBRANÇA NO ASAAS
             </summary>
         </member>
         <member name="T:Program">

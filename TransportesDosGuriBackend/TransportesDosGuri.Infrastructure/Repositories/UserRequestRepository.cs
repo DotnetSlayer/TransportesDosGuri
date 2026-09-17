@@ -39,7 +39,7 @@ namespace TransportesDosGuri.Infrastructure.Repositories
             userRequest.Id = await connection.ExecuteScalarAsync<long>(sql, new
             {
                 userRequest.Price,
-                DueDate = userRequest.DueDate.ToDateTime(TimeOnly.MinValue), // Conversão aqui
+                DueDate = userRequest.DueDate.ToDateTime(TimeOnly.MinValue), 
                 userRequest.ApplicationUserId,
                 userRequest.AsaasSubscriptionId
             });

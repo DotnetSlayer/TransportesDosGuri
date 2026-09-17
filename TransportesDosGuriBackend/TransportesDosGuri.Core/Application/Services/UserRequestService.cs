@@ -9,8 +9,8 @@ namespace TransportesDosGuri.Core.Application.Services
     public class UserRequestService : IUserRequestService
     {
         private readonly IUserRequestRepository _userRequestRepository;
-        private readonly IUserRepository _userRepository; // Added user repository
-        private readonly IAsaasGateway _asaasGateway;     // Added gateway
+        private readonly IUserRepository _userRepository;
+        private readonly IAsaasGateway _asaasGateway; 
 
         public UserRequestService(
             IUserRequestRepository userRequestRepository,
@@ -24,14 +24,12 @@ namespace TransportesDosGuri.Core.Application.Services
 
         public async Task<UserRequestDTO> CreateWithPaymentAsync(UserRequestDTO userRequestDto)
         {
-            // 1. Fetch ApplicationUser using the dedicated IUserRepository
             var user = await _userRepository.GetByIdAsync(userRequestDto.ApplicationUserId);
             if (user == null)
-                throw new Exception("User not found.");
+                throw new Exception("Requisição Inválida!");
 
-            string customerId = user.CustomerAsaasId; // Reads Asaas Customer ID from ApplicationUser
+            string customerId = user.CustomerAsaasId; 
 
-            // 2. Create customer in Asaas if they don't have an Asaas Customer ID yet
             if (string.IsNullOrEmpty(customerId))
             {
                 customerId = await _asaasGateway.CreateCustomerAsync(
@@ -41,18 +39,15 @@ namespace TransportesDosGuri.Core.Application.Services
                     user.IdentityNumber
                 );
 
-                // Persist the newly generated CustomerAsaasId to the user record
                 await _userRepository.UpdateAsaasCustomerIdAsync(user.Id, customerId);
             }
 
-            // 3. Create charge on Asaas ('payments' endpoint for single payments)
             var paymentId = await _asaasGateway.CreateSinglePaymentAsync(
                 customerId,
                 userRequestDto.Price,
                 userRequestDto.DueDate
             );
 
-            // 4. Map DTO to Entity with the newly returned payment ID (pay_...)
             var userRequestEntity = new UserRequest
             {
                 Price = userRequestDto.Price,
@@ -61,17 +56,13 @@ namespace TransportesDosGuri.Core.Application.Services
                 AsaasSubscriptionId = paymentId
             };
 
-            // 5. Persist UserRequest to SQL database via Dapper
             await _userRequestRepository.AddAsync(userRequestEntity);
 
-            // 6. Return response DTO with generated IDs
             userRequestDto.Id = userRequestEntity.Id;
             userRequestDto.AsaasSubscriptionId = paymentId;
 
             return userRequestDto;
         }
-
-        // --- Standard CRUD Methods ---
 
         public async Task<UserRequestDTO> CreateAsync(UserRequestDTO userRequest)
         {
