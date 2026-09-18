@@ -1,0 +1,679 @@
+﻿@page "/my-trips"
+@attribute [Authorize]
+
+@using TransportesDosGuri.Core.DTOs
+@using TransportesDosGuri.Core.Interfaces
+@using TransportesDosGuri.Core.Enums
+@using Microsoft.AspNetCore.Authorization
+
+@inject IPurchaseService PurchaseService
+@inject NavigationManager Navigation
+
+<PageTitle>Minhas viagens</PageTitle>
+
+<div class="my-trips-page">
+
+    <!-- BACKGROUND EFFECTS -->
+    <div class="background-effects">
+        <div class="orb orb-purple"></div>
+        <div class="orb orb-indigo"></div>
+        <div class="orb orb-amber"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <main class="my-trips-main">
+
+        <div class="my-trips-container">
+
+            <!-- HEADER -->
+            <header class="page-header">
+
+                <div class="header-text">
+                    <h1>
+                        Minhas
+                        <span>viagens.</span>
+                    </h1>
+                    <p>
+                        Aqui estão suas viagens confirmadas. Acompanhe compras, valores e detalhes de cada reserva.
+                    </p>
+                </div>
+
+                <button type="button"
+                        @onclick="LoadTripsAsync"
+                        disabled="@loading"
+                        class="refresh-button">
+
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round" />
+                    </svg>
+
+                    <span>@(loading ? "Carregando..." : "Atualizar")</span>
+
+                </button>
+
+            </header>
+
+            @if (loading)
+            {
+                <div class="state-box">
+                    <div class="spinner"></div>
+                    <p>Carregando viagens...</p>
+                </div>
+            }
+            else if (trips.Count == 0)
+            {
+                <div class="state-box empty">
+
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M2 16l20-6-4 4-2 6-2-3-3 3 1-4-10-1z"
+                                  stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                            <path d="M22 10 12 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                        </svg>
+                    </div>
+
+                    <h2>Nenhuma viagem encontrada</h2>
+                    <p>Você ainda não possui viagens confirmadas.</p>
+
+                    <button class="primary-button" @onclick="GoToTrips">
+                        Encontrar uma viagem
+                    </button>
+
+                </div>
+            }
+            else
+            {
+                <section class="my-trips-grid">
+
+                    @foreach (var purchase in trips)
+                    {
+                        <article class="my-trip-card stat-card-indigo">
+
+                            <div class="stat-card-glow"></div>
+
+                            <div class="card-top">
+                                <div class="trip-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M2 16l20-6-4 4-2 6-2-3-3 3 1-4-10-1z"
+                                              stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                                        <path d="M22 10 12 20" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                    </svg>
+                                </div>
+
+                                <span class="status-confirmed">
+                                    <span class="status-dot"></span>
+                                    Confirmada
+                                </span>
+                            </div>
+
+                            <div class="card-body">
+
+                                <span class="trip-id">
+                                    Compra #@purchase.Id
+                                </span>
+
+                                <h2>
+                                    @purchase.TripName
+                                </h2>
+
+                                <p class="trip-date">
+                                    Compra realizada em
+                                    @purchase.PurchaseDate.ToString("dd/MM/yyyy HH:mm")
+                                </p>
+
+                                <strong class="trip-price">
+                                    @purchase.PurchasePrice.ToString("C2")
+                                </strong>
+
+                            </div>
+
+                            <button class="card-button"
+                                    @onclick="() => OpenPurchase(purchase.Id)">
+                                Ver detalhes
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M5 12h14M13 6l6 6-6 6"
+                                          stroke="currentColor"
+                                          stroke-width="2"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round" />
+                                </svg>
+                            </button>
+
+                        </article>
+                    }
+
+                </section>
+            }
+
+        </div>
+
+    </main>
+
+</div>
+
+<style>
+
+    /* =========================================================
+           PAGE
+        ========================================================= */
+    .my-trips-page {
+        position: relative;
+        min-height: 100vh;
+        width: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, .13), transparent 30%), radial-gradient(circle at 85% 80%, rgba(168, 85, 247, .12), transparent 30%), #03050b;
+        color: #e2e8f0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* =========================================================
+           BACKGROUND
+        ========================================================= */
+    .background-effects {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .orb {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(100px);
+        opacity: .32;
+        animation: floatOrb 14s ease-in-out infinite alternate;
+    }
+
+    .orb-purple {
+        width: 420px;
+        height: 420px;
+        background: #9333ea;
+        left: -180px;
+        top: -140px;
+    }
+
+    .orb-indigo {
+        width: 500px;
+        height: 500px;
+        background: #4f46e5;
+        right: -220px;
+        bottom: -200px;
+        animation-delay: -4s;
+    }
+
+    .orb-amber {
+        width: 280px;
+        height: 280px;
+        background: #f59e0b;
+        left: 45%;
+        bottom: -180px;
+        opacity: .12;
+        animation-delay: -7s;
+    }
+
+    .grid-overlay {
+        position: absolute;
+        inset: 0;
+        opacity: .035;
+        background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+        background-size: 60px 60px;
+    }
+
+    @@keyframes floatOrb {
+        from { transform: translate3d(0,0,0) scale(1); }
+        to   { transform: translate3d(40px,-30px,0) scale(1.08); }
+    }
+
+    /* =========================================================
+           LAYOUT
+        ========================================================= */
+    .my-trips-main {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .my-trips-container {
+        flex: 1;
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 32px clamp(20px, 4vw, 48px) 48px;
+        display: flex;
+        flex-direction: column;
+        gap: 32px;
+    }
+
+    /* =========================================================
+           HEADER
+        ========================================================= */
+    .page-header {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+    .header-text {
+        max-width: 620px;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        color: #ffffff;
+        font-size: clamp(28px, 3.4vw, 42px);
+        line-height: 1.05;
+        letter-spacing: -.045em;
+        font-weight: 800;
+    }
+
+        .page-header h1 span {
+            color: transparent;
+            background: linear-gradient(90deg, #f472b6, #a855f7, #6366f1);
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+    .page-header p {
+        margin: 13px 0 0;
+        max-width: 520px;
+        color: #64748b;
+        font-size: 12.5px;
+        line-height: 1.7;
+    }
+
+    /* =========================================================
+           REFRESH BUTTON
+        ========================================================= */
+    .refresh-button {
+        display: inline-flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0 18px;
+        height: 42px;
+        border-radius: 13px;
+        cursor: pointer;
+        color: #cbd5e1;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: .02em;
+        background: linear-gradient(135deg, rgba(15,23,42,.76), rgba(2,6,23,.58));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 10px 25px rgba(0,0,0,.18);
+        transition: all .25s ease;
+    }
+
+        .refresh-button svg {
+            width: 15px;
+            height: 15px;
+            color: #94a3b8;
+            transition: transform .4s ease, color .2s ease;
+        }
+
+        .refresh-button:hover:not(:disabled) {
+            color: #ffffff;
+            border-color: rgba(168,85,247,.35);
+            background: linear-gradient(135deg, rgba(79,70,229,.20), rgba(147,51,234,.14));
+            box-shadow: 0 12px 30px rgba(99,102,241,.22), inset 0 1px rgba(255,255,255,.08);
+        }
+
+            .refresh-button:hover:not(:disabled) svg {
+                color: #c4b5fd;
+                transform: rotate(180deg);
+            }
+
+        .refresh-button:disabled {
+            opacity: .55;
+            cursor: not-allowed;
+        }
+
+    /* =========================================================
+           STATE BOX (loading / empty)
+        ========================================================= */
+    .state-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: 64px 24px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, rgba(15,23,42,.62), rgba(2,6,23,.48));
+        border: 1px solid rgba(255,255,255,.06);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        text-align: center;
+    }
+
+        .state-box p {
+            margin: 0;
+            color: #64748b;
+            font-size: 12.5px;
+            letter-spacing: .02em;
+        }
+
+        .state-box h2 {
+            margin: 6px 0 0;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+
+    .spinner {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 2px solid rgba(148,163,184,.20);
+        border-top-color: #a855f7;
+        animation: spin .8s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    .empty-icon {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        color: #a5b4fc;
+        background: rgba(99,102,241,.12);
+        border: 1px solid rgba(99,102,241,.22);
+    }
+
+        .empty-icon svg {
+            width: 26px;
+            height: 26px;
+        }
+
+    /* =========================================================
+           PRIMARY BUTTON
+        ========================================================= */
+    .primary-button {
+        margin-top: 10px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        height: 44px;
+        padding: 0 22px;
+        border-radius: 13px;
+        cursor: pointer;
+        color: #ffffff;
+        font-size: 12px;
+        font-weight: 700;
+        letter-spacing: .02em;
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        border: 1px solid rgba(255,255,255,.10);
+        box-shadow: 0 14px 32px rgba(99,102,241,.30), inset 0 1px rgba(255,255,255,.12);
+        transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+    }
+
+        .primary-button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+            box-shadow: 0 20px 42px rgba(147,51,234,.38), inset 0 1px rgba(255,255,255,.16);
+        }
+
+    /* =========================================================
+           TRIPS GRID
+        ========================================================= */
+    .my-trips-grid {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    @@media (min-width: 640px) {
+        .my-trips-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (min-width: 1100px) {
+        .my-trips-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    /* =========================================================
+           TRIP CARD
+        ========================================================= */
+    .my-trip-card {
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        padding: 22px;
+        border-radius: 20px;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        transition: transform .28s ease, border-color .28s ease, box-shadow .28s ease;
+    }
+
+        .my-trip-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(168,85,247,.30);
+            box-shadow: inset 0 1px rgba(255,255,255,.06), 0 26px 55px rgba(99,102,241,.22);
+        }
+
+    .stat-card-glow {
+        position: absolute;
+        width: 200px;
+        height: 200px;
+        top: -110px;
+        right: -110px;
+        border-radius: 50%;
+        filter: blur(70px);
+        opacity: .5;
+        pointer-events: none;
+        transition: opacity .3s ease;
+    }
+
+    .stat-card-indigo .stat-card-glow {
+        background: rgba(99,102,241,.55);
+    }
+
+    .my-trip-card:hover .stat-card-glow {
+        opacity: .8;
+    }
+
+    /* top row */
+    .card-top {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 10px;
+    }
+
+    .trip-icon {
+        width: 42px;
+        height: 42px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        color: #a5b4fc;
+        background: rgba(99,102,241,.12);
+        border: 1px solid rgba(99,102,241,.22);
+        box-shadow: inset 0 1px rgba(255,255,255,.06);
+    }
+
+        .trip-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+    /* status badge */
+    .status-confirmed {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        padding: 6px 11px;
+        border-radius: 999px;
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        color: #6ee7b7;
+        background: rgba(16,185,129,.10);
+        border: 1px solid rgba(16,185,129,.24);
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #34d399;
+        box-shadow: 0 0 10px #34d399;
+        animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: .45; }
+    }
+
+    /* body */
+    .card-body {
+        position: relative;
+        z-index: 1;
+        margin-top: 22px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .trip-id {
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .card-body h2 {
+        margin: 8px 0 0;
+        color: #ffffff;
+        font-size: 19px;
+        font-weight: 800;
+        letter-spacing: -.03em;
+        line-height: 1.2;
+    }
+
+    .trip-date {
+        margin: 10px 0 0;
+        color: #64748b;
+        font-size: 11.5px;
+        line-height: 1.6;
+    }
+
+    .trip-price {
+        margin-top: 16px;
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -.04em;
+        color: transparent;
+        background: linear-gradient(90deg, #a5b4fc, #d8b4fe);
+        background-clip: text;
+        -webkit-background-clip: text;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* action button */
+    .card-button {
+        position: relative;
+        z-index: 1;
+        margin-top: 22px;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        height: 42px;
+        border-radius: 13px;
+        cursor: pointer;
+        color: #cbd5e1;
+        font-size: 11.5px;
+        font-weight: 700;
+        letter-spacing: .02em;
+        background: linear-gradient(135deg, rgba(15,23,42,.76), rgba(2,6,23,.58));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04);
+        transition: all .25s ease;
+    }
+
+        .card-button svg {
+            width: 15px;
+            height: 15px;
+            transition: transform .25s ease;
+        }
+
+        .card-button:hover {
+            color: #ffffff;
+            border-color: rgba(168,85,247,.35);
+            background: linear-gradient(135deg, rgba(79,70,229,.20), rgba(147,51,234,.14));
+            box-shadow: 0 12px 30px rgba(99,102,241,.22), inset 0 1px rgba(255,255,255,.08);
+        }
+
+            .card-button:hover svg {
+                transform: translateX(3px);
+            }
+
+</style>
+
+@code {
+
+    private List<PurchaseDetailsDTO> trips = new();
+
+    private bool loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTripsAsync();
+    }
+
+    private async Task LoadTripsAsync()
+    {
+        loading = true;
+
+        try
+        {
+            trips = await PurchaseService.GetMyTripsAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar viagens: {ex.Message}");
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private void OpenPurchase(long purchaseId)
+    {
+        Navigation.NavigateTo($"/purchase/{purchaseId}");
+    }
+
+    private void GoToTrips()
+    {
+        Navigation.NavigateTo("/trips");
+    }
+
+}

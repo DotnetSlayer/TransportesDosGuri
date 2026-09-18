@@ -5,9 +5,9 @@ using TransportesDosGuri.Core.DTOs;
 
 namespace TransportesDosGuri.Core.Interfaces
 {
-    public interface IUserService
+    public interface IUserRequestService
     {
-        Task<bool> UpdateAsync(long id, UpdateUserDTO updateDto);
-        Task<bool> DeleteAsync(long id);
+        Task<UserRequestDTO?> CreateWithPaymentAsync(
+            UserRequestDTO request);
     }
 }

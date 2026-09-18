@@ -1,9 +1,6 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http.Headers;
-using System.Text;
 using TransportesDosGuri.Core.Common;
 using TransportesDosGuri.Core.Interfaces;
 
@@ -24,9 +21,8 @@ namespace TransportesDosGuri.Infrastructure.Auth
         {
             var path = request.RequestUri?.AbsolutePath ?? string.Empty;
 
-            if (path.Contains("/Account/Login", StringComparison.OrdinalIgnoreCase) ||
-                path.Contains("/Account/Register", StringComparison.OrdinalIgnoreCase) ||
-                path.Contains("/Account/generate-new-jwt-token", StringComparison.OrdinalIgnoreCase))
+            // Ignora injeção de token para endpoints do Account
+            if (path.Contains("/Account/", StringComparison.OrdinalIgnoreCase))
             {
                 return await base.SendAsync(request, cancellationToken);
             }
@@ -40,15 +36,21 @@ namespace TransportesDosGuri.Infrastructure.Auth
 
             var response = await base.SendAsync(request, cancellationToken);
 
+            // Tenta dar Refresh apenas se receber 401 e não for uma tentativa prévia de Auth
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
-                var authService = _serviceProvider.GetRequiredService<IAuthService>();
+                using var scope = _serviceProvider.CreateScope();
+                var authService = scope.ServiceProvider.GetRequiredService<IAuthService>();
+
                 var newToken = await authService.RefreshTokenAsync();
 
                 if (!string.IsNullOrEmpty(newToken))
                 {
+                    await _tokenStorage.SetTokensAsync(newToken, string.Empty);
                     request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", newToken);
-                    response = await base.SendAsync(request, cancellationToken);
+
+                    // Refaz a requisição original com o novo token recebido
+                    return await base.SendAsync(request, cancellationToken);
                 }
             }
 

@@ -1,0 +1,749 @@
+﻿@using TransportesDosGuri.Core.DTOs
+@using TransportesDosGuri.Core.Enums
+
+<div class="flight-card">
+
+    <div class="stat-card-glow"></div>
+
+    <!-- HEADER -->
+    <div class="card-header">
+
+        <div class="trip-icon">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"
+                      stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </div>
+
+        <div class="card-title">
+            <span class="trip-id">Voo</span>
+            <h2>#@Flight.Id</h2>
+        </div>
+
+        <div class="card-badge">
+            @Flight.BasePrice.ToString("C")
+        </div>
+
+    </div>
+
+    <!-- ROUTE -->
+    <div class="flight-route">
+
+        <div class="route-point route-point-departure">
+
+            <span class="data-label">Origem</span>
+
+            <div class="route-airport">
+                <span class="airport-dot"></span>
+                Aeroporto #@Flight.OriginAirportId
+            </div>
+
+            <span class="route-time">
+                @Flight.DepartureTime.ToString("dd/MM/yyyy HH:mm")
+            </span>
+
+        </div>
+
+        <div class="route-track">
+
+            <div class="route-line"></div>
+
+            <div class="route-plane">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M2 16l20-6-4 4-2 6-2-3-3 3 1-4-10-1z"
+                          stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                </svg>
+            </div>
+
+        </div>
+
+        <div class="route-point route-point-arrival">
+
+            <span class="data-label">Destino</span>
+
+            <div class="route-airport">
+                <span class="airport-dot"></span>
+                Aeroporto #@Flight.DestinyAirportId
+            </div>
+
+            <span class="route-time">
+                @Flight.ArrivalTime.ToString("dd/MM/yyyy HH:mm")
+            </span>
+
+        </div>
+
+    </div>
+
+    <!-- META -->
+    <div class="flight-meta">
+
+        <div class="meta-item">
+
+            <div class="meta-icon meta-icon-aircraft">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"
+                          stroke="currentColor" stroke-width="1.8"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </div>
+
+            <div class="meta-body">
+                <span class="data-label">Aeronave</span>
+                <span class="data-value">#@Flight.AircraftId</span>
+            </div>
+
+        </div>
+
+        <div class="meta-item">
+
+            <div class="meta-icon meta-icon-price">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                          stroke="currentColor" stroke-width="1.8"
+                          stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+            </div>
+
+            <div class="meta-body">
+                <span class="data-label">Preço base</span>
+                <span class="data-value data-value-highlight">
+                    @Flight.BasePrice.ToString("C")
+                </span>
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- SEATS -->
+    <div class="seat-section">
+
+        <div class="section-title">
+
+            <span>Selecione seus assentos</span>
+
+            @if (SelectedSeatIds.Any(id => Flight.Seats.Any(s => s.Id == id)))
+            {
+                <span class="section-count">
+                    @SelectedSeatIds.Count(id => Flight.Seats.Any(s => s.Id == id)) selecionado(s)
+                </span>
+            }
+
+        </div>
+
+        @if (Flight.Seats.Any())
+        {
+            <div class="seat-map-wrapper">
+
+                <div class="seat-legend">
+                    <span class="legend-item">
+                        <span class="legend-swatch legend-available"></span>
+                        Disponível
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-swatch legend-selected"></span>
+                        Selecionado
+                    </span>
+                    <span class="legend-item">
+                        <span class="legend-swatch legend-unavailable"></span>
+                        Indisponível
+                    </span>
+                </div>
+
+                <div class="seat-grid">
+
+                    @foreach (var seat in Flight.Seats.OrderBy(x => x.SeatNumber))
+                    {
+                        var selected = SelectedSeatIds.Contains(seat.Id);
+                        var isAvailable = seat.Status == FlightSeatStatus.Available;
+
+                        <button type="button"
+                                class="seat @(selected
+                                    ? "seat-selected"
+                                    : isAvailable
+                                        ? "seat-available"
+                                        : "seat-unavailable")"
+                                disabled="@(!isAvailable)"
+                                @onclick="() => ToggleSeat(seat.Id)">
+
+                            <span class="seat-number">
+                                @seat.SeatNumber
+                            </span>
+
+                            @if (selected)
+                            {
+                                <svg class="seat-check" viewBox="0 0 24 24" fill="none">
+                                    <path d="m5 12 5 5L20 7"
+                                          stroke="currentColor"
+                                          stroke-width="2.4"
+                                          stroke-linecap="round"
+                                          stroke-linejoin="round" />
+                                </svg>
+                            }
+
+                        </button>
+                    }
+
+                </div>
+
+            </div>
+        }
+        else
+        {
+            <div class="seat-empty">
+                <svg viewBox="0 0 24 24" fill="none">
+                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+                    <path d="M12 8v4M12 16h.01"
+                          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                </svg>
+                <span>Este voo não possui assentos disponíveis para seleção.</span>
+            </div>
+        }
+
+    </div>
+
+</div>
+
+<style>
+
+    /* =========================================================
+           FLIGHT CARD
+        ========================================================= */
+    .flight-card {
+        position: relative;
+        padding: 26px;
+        border-radius: 22px;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        transition: border-color .28s ease, box-shadow .28s ease;
+    }
+
+        .flight-card:hover {
+            border-color: rgba(168,85,247,.25);
+            box-shadow: inset 0 1px rgba(255,255,255,.06), 0 24px 50px rgba(99,102,241,.18);
+        }
+
+    .stat-card-glow {
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        top: -140px;
+        right: -140px;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: .5;
+        pointer-events: none;
+        background: rgba(99,102,241,.55);
+        transition: opacity .3s ease;
+    }
+
+    .flight-card:hover .stat-card-glow {
+        opacity: .75;
+    }
+
+    /* =========================================================
+           HEADER
+        ========================================================= */
+    .card-header {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .trip-icon {
+        flex-shrink: 0;
+        width: 46px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        color: #a5b4fc;
+        background: rgba(99,102,241,.12);
+        border: 1px solid rgba(99,102,241,.22);
+        box-shadow: inset 0 1px rgba(255,255,255,.06);
+    }
+
+        .trip-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+    .card-title {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+        flex: 1;
+    }
+
+    .trip-id {
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .card-title h2 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -.03em;
+        line-height: 1.2;
+    }
+
+    .card-badge {
+        flex-shrink: 0;
+        display: inline-flex;
+        align-items: center;
+        padding: 7px 13px;
+        border-radius: 999px;
+        color: #d8b4fe;
+        font-size: 12px;
+        font-weight: 800;
+        letter-spacing: -.01em;
+        background: rgba(168,85,247,.10);
+        border: 1px solid rgba(168,85,247,.24);
+        font-variant-numeric: tabular-nums;
+        white-space: nowrap;
+    }
+
+    /* =========================================================
+           ROUTE
+        ========================================================= */
+    .flight-route {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 14px;
+        padding: 22px 0;
+    }
+
+    @@media (min-width: 700px) {
+        .flight-route {
+            grid-template-columns: 1fr auto 1fr;
+            gap: 20px;
+            align-items: center;
+        }
+    }
+
+    .route-point {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .route-point-arrival {
+        text-align: left;
+    }
+
+    @@media (min-width: 700px) {
+        .route-point-arrival {
+            text-align: right;
+            align-items: flex-end;
+        }
+    }
+
+    .data-label {
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .route-airport {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        color: #ffffff;
+        font-size: 14.5px;
+        font-weight: 700;
+        letter-spacing: -.015em;
+    }
+
+    .airport-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #818cf8;
+        box-shadow: 0 0 10px rgba(129,140,248,.8);
+        flex-shrink: 0;
+    }
+
+    .route-point-arrival .airport-dot {
+        background: #a855f7;
+        box-shadow: 0 0 10px rgba(168,85,247,.8);
+    }
+
+    .route-time {
+        color: #64748b;
+        font-size: 11.5px;
+        letter-spacing: .02em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* route track */
+    .route-track {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        position: relative;
+        min-height: 34px;
+    }
+
+    .route-line {
+        flex: 1;
+        height: 1px;
+        background: linear-gradient(90deg,
+            rgba(129,140,248,.10),
+            rgba(129,140,248,.55),
+            rgba(168,85,247,.55),
+            rgba(168,85,247,.10));
+    }
+
+    .route-plane {
+        flex-shrink: 0;
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        color: #c7d2fe;
+        background: rgba(99,102,241,.12);
+        border: 1px solid rgba(99,102,241,.28);
+        box-shadow: 0 0 20px rgba(99,102,241,.20);
+    }
+
+        .route-plane svg {
+            width: 16px;
+            height: 16px;
+        }
+
+    @@media (max-width: 699px) {
+        .route-track {
+            order: -1;
+        }
+
+        .route-line {
+            display: none;
+        }
+
+        .route-plane {
+            width: 100%;
+            border-radius: 14px;
+            height: 40px;
+        }
+    }
+
+    /* =========================================================
+           META
+        ========================================================= */
+    .flight-meta {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        padding: 20px 0;
+        border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    @@media (min-width: 640px) {
+        .flight-meta {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    .meta-item {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 14px;
+        background: rgba(2,6,23,.36);
+        border: 1px solid rgba(255,255,255,.05);
+        transition: border-color .25s ease, background .25s ease;
+    }
+
+        .meta-item:hover {
+            border-color: rgba(168,85,247,.20);
+            background: rgba(15,23,42,.50);
+        }
+
+    .meta-icon {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px;
+        border: 1px solid transparent;
+    }
+
+        .meta-icon svg {
+            width: 17px;
+            height: 17px;
+        }
+
+    .meta-icon-aircraft {
+        color: #a5b4fc;
+        background: rgba(99,102,241,.12);
+        border-color: rgba(99,102,241,.22);
+    }
+
+    .meta-icon-price {
+        color: #d8b4fe;
+        background: rgba(168,85,247,.12);
+        border-color: rgba(168,85,247,.22);
+    }
+
+    .meta-body {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+    }
+
+    .data-value {
+        color: #e2e8f0;
+        font-size: 13px;
+        font-weight: 700;
+        letter-spacing: -.01em;
+    }
+
+    .data-value-highlight {
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: -.03em;
+        color: transparent;
+        background: linear-gradient(90deg, #a5b4fc, #d8b4fe);
+        background-clip: text;
+        -webkit-background-clip: text;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* =========================================================
+           SEAT SECTION
+        ========================================================= */
+    .seat-section {
+        position: relative;
+        z-index: 1;
+        padding-top: 20px;
+        border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 16px;
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .section-count {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 11px;
+        border-radius: 999px;
+        color: #d8b4fe;
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        background: rgba(168,85,247,.10);
+        border: 1px solid rgba(168,85,247,.24);
+        white-space: nowrap;
+    }
+
+    .seat-map-wrapper {
+        padding: 18px;
+        border-radius: 16px;
+        background: rgba(2,6,23,.42);
+        border: 1px solid rgba(255,255,255,.05);
+    }
+
+    /* legend */
+    .seat-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-bottom: 16px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .legend-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #64748b;
+        font-size: 10.5px;
+        font-weight: 600;
+        letter-spacing: .02em;
+    }
+
+    .legend-swatch {
+        width: 11px;
+        height: 11px;
+        border-radius: 4px;
+        border: 1px solid transparent;
+    }
+
+    .legend-available {
+        background: rgba(16,185,129,.14);
+        border-color: rgba(16,185,129,.35);
+    }
+
+    .legend-selected {
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        border-color: rgba(255,255,255,.16);
+    }
+
+    .legend-unavailable {
+        background: rgba(239,68,68,.10);
+        border-color: rgba(239,68,68,.30);
+    }
+
+    /* seat grid */
+    .seat-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+        gap: 8px;
+    }
+
+    .seat {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 4px;
+        min-height: 44px;
+        padding: 6px 8px;
+        border-radius: 11px;
+        cursor: pointer;
+        font-family: inherit;
+        font-size: 11.5px;
+        font-weight: 800;
+        letter-spacing: -.005em;
+        font-variant-numeric: tabular-nums;
+        transition: transform .2s ease, border-color .2s ease,
+                    background .2s ease, box-shadow .2s ease, color .2s ease;
+    }
+
+        .seat:disabled {
+            cursor: not-allowed;
+        }
+
+    /* available */
+    .seat-available {
+        color: #6ee7b7;
+        background: rgba(16,185,129,.06);
+        border: 1px solid rgba(16,185,129,.30);
+    }
+
+        .seat-available:hover {
+            transform: translateY(-2px);
+            color: #a7f3d0;
+            background: rgba(16,185,129,.14);
+            border-color: rgba(16,185,129,.55);
+            box-shadow: 0 8px 20px rgba(16,185,129,.20);
+        }
+
+    /* selected */
+    .seat-selected {
+        color: #ffffff;
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        border: 1px solid rgba(255,255,255,.16);
+        box-shadow: 0 10px 24px rgba(147,51,234,.35),
+                    inset 0 1px rgba(255,255,255,.18);
+    }
+
+        .seat-selected:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+            box-shadow: 0 14px 30px rgba(147,51,234,.45),
+                        inset 0 1px rgba(255,255,255,.22);
+        }
+
+    /* unavailable */
+    .seat-unavailable {
+        color: #64748b;
+        background: rgba(239,68,68,.05);
+        border: 1px solid rgba(239,68,68,.20);
+        opacity: .55;
+        text-decoration: line-through;
+        text-decoration-color: rgba(239,68,68,.45);
+    }
+
+    .seat-number {
+        line-height: 1;
+    }
+
+    .seat-check {
+        width: 12px;
+        height: 12px;
+        flex-shrink: 0;
+    }
+
+    /* empty */
+    .seat-empty {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 18px 20px;
+        border-radius: 14px;
+        color: #fcd34d;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .01em;
+        background: rgba(245,158,11,.08);
+        border: 1px solid rgba(245,158,11,.22);
+    }
+
+        .seat-empty svg {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            color: #fbbf24;
+        }
+
+</style>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public FlightDetailsDTO Flight { get; set; } = default!;
+
+    [Parameter, EditorRequired]
+    public HashSet<long> SelectedSeatIds { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<long> OnSeatToggle { get; set; }
+
+    private async Task ToggleSeat(long seatId)
+    {
+        await OnSeatToggle.InvokeAsync(seatId);
+    }
+
+}

@@ -6,6 +6,7 @@ using TransportesDosGuri.Core.Interfaces;
 using TransportesDosGuri.Infrastructure.Auth;
 using TransportesDosGuri.Infrastructure.Services;
 using TransportesDosGuri.WebUI.Components;
+using TransportesDosGuri.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,7 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
         options.AccessDeniedPath = "/error";
     });
 
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddCascadingAuthenticationState();
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
 builder.Services.AddScoped<ITokenStorageService, TokenStorageService>();
@@ -34,9 +36,13 @@ builder.Services.AddTransient<JwtAuthorizationHandler>();
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7030";
 
 builder.Services.AddHttpClient<IAuthService, AuthService>(c => c.BaseAddress = new Uri(apiBaseUrl));
+builder.Services.AddHttpClient<IPurchaseService, PurchaseService>(c => c.BaseAddress = new Uri(apiBaseUrl)).AddHttpMessageHandler<JwtAuthorizationHandler>();
+builder.Services.AddHttpClient<ITripService, TripService>(c => c.BaseAddress = new Uri(apiBaseUrl)).AddHttpMessageHandler<JwtAuthorizationHandler>();
+builder.Services.AddHttpClient<IUserRequestService, UserRequestService>(c => c.BaseAddress = new Uri(apiBaseUrl)).AddHttpMessageHandler<JwtAuthorizationHandler>();
+builder.Services.AddHttpClient<IUserService, UserService>(c => c.BaseAddress = new Uri(apiBaseUrl)).AddHttpMessageHandler<JwtAuthorizationHandler>();
+
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
-
 
 var app = builder.Build();
 

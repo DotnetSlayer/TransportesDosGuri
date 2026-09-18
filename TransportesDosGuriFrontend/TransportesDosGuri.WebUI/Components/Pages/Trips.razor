@@ -1,0 +1,578 @@
+﻿@page "/trips"
+@attribute [Authorize]
+
+@using TransportesDosGuri.Core.DTOs
+@using TransportesDosGuri.Core.Interfaces
+@using Microsoft.AspNetCore.Authorization
+
+@inject ITripService TripService
+@inject NavigationManager Navigation
+
+<PageTitle>Viagens</PageTitle>
+
+<div class="trips-page">
+
+    <!-- BACKGROUND EFFECTS -->
+    <div class="background-effects">
+        <div class="orb orb-purple"></div>
+        <div class="orb orb-indigo"></div>
+        <div class="orb orb-amber"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <main class="trips-main">
+
+        <div class="trips-container">
+
+            <!-- HEADER -->
+            <header class="page-header">
+
+                <div class="header-text">
+                    <h1>
+                        Encontre sua
+                        <span>viagem.</span>
+                    </h1>
+                    <p>
+                        Escolha o destino e consulte as opções disponíveis na frota.
+                    </p>
+                </div>
+
+            </header>
+
+            <!-- SEARCH -->
+            <section class="search-container">
+
+                <div class="search-input-wrapper">
+
+                    <svg class="search-icon" viewBox="0 0 24 24" fill="none">
+                        <circle cx="11" cy="11" r="7"
+                                stroke="currentColor" stroke-width="1.8" />
+                        <path d="m20 20-3.5-3.5"
+                              stroke="currentColor" stroke-width="1.8"
+                              stroke-linecap="round" />
+                    </svg>
+
+                    <input @bind="searchTerm"
+                           @bind:event="oninput"
+                           @onkeydown="HandleKeyDown"
+                           placeholder="Pesquisar viagem..." />
+
+                    @if (!string.IsNullOrWhiteSpace(searchTerm))
+                    {
+                        <button type="button"
+                                class="clear-button"
+                                @onclick="ClearSearch">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M6 6l12 12M18 6 6 18"
+                                      stroke="currentColor" stroke-width="2"
+                                      stroke-linecap="round" />
+                            </svg>
+                        </button>
+                    }
+
+                </div>
+
+                <button class="primary-button search-button"
+                        @onclick="SearchAsync"
+                        disabled="@loading">
+
+                    @if (loading)
+                    {
+                        <span class="button-spinner"></span>
+                        <span>Buscando...</span>
+                    }
+                    else
+                    {
+                        <span>Pesquisar</span>
+                    }
+
+                </button>
+
+            </section>
+
+            <!-- RESULTS -->
+            @if (loading)
+            {
+                <div class="state-box">
+                    <div class="spinner"></div>
+                    <p>Carregando viagens...</p>
+                </div>
+            }
+            else if (trips.Count == 0)
+            {
+                <div class="state-box empty">
+
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <path d="M2 16l20-6-4 4-2 6-2-3-3 3 1-4-10-1z"
+                                  stroke="currentColor" stroke-width="1.6" stroke-linejoin="round" />
+                            <path d="M22 10 12 20" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" />
+                        </svg>
+                    </div>
+
+                    <h2>Nenhuma viagem encontrada</h2>
+                    <p>
+                        @if (string.IsNullOrWhiteSpace(searchTerm))
+                        {
+                            <span>Não há viagens disponíveis no momento.</span>
+                        }
+                        else
+                        {
+                            <span>Tente outro termo de pesquisa.</span>
+                        }
+                    </p>
+
+                    @if (!string.IsNullOrWhiteSpace(searchTerm))
+                    {
+                        <button class="primary-button" @onclick="ClearSearch">
+                            Limpar pesquisa
+                        </button>
+                    }
+
+                </div>
+            }
+            else
+            {
+                <section class="trips-grid">
+
+                    @foreach (var trip in trips)
+                    {
+                        <TripCard Trip="trip"
+                                  OnDetailsClicked="OpenTrip" />
+                    }
+
+                </section>
+            }
+
+        </div>
+
+    </main>
+
+</div>
+
+<style>
+
+    /* =========================================================
+           PAGE
+        ========================================================= */
+    .trips-page {
+        position: relative;
+        min-height: 100vh;
+        width: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, .13), transparent 30%), radial-gradient(circle at 85% 80%, rgba(168, 85, 247, .12), transparent 30%), #03050b;
+        color: #e2e8f0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* =========================================================
+           BACKGROUND
+        ========================================================= */
+    .background-effects {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .orb {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(100px);
+        opacity: .32;
+        animation: floatOrb 14s ease-in-out infinite alternate;
+    }
+
+    .orb-purple {
+        width: 420px;
+        height: 420px;
+        background: #9333ea;
+        left: -180px;
+        top: -140px;
+    }
+
+    .orb-indigo {
+        width: 500px;
+        height: 500px;
+        background: #4f46e5;
+        right: -220px;
+        bottom: -200px;
+        animation-delay: -4s;
+    }
+
+    .orb-amber {
+        width: 280px;
+        height: 280px;
+        background: #f59e0b;
+        left: 45%;
+        bottom: -180px;
+        opacity: .12;
+        animation-delay: -7s;
+    }
+
+    .grid-overlay {
+        position: absolute;
+        inset: 0;
+        opacity: .035;
+        background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+        background-size: 60px 60px;
+    }
+
+    @@keyframes floatOrb {
+        from { transform: translate3d(0,0,0) scale(1); }
+        to   { transform: translate3d(40px,-30px,0) scale(1.08); }
+    }
+
+    /* =========================================================
+           LAYOUT
+        ========================================================= */
+    .trips-main {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .trips-container {
+        flex: 1;
+        width: 100%;
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: 32px clamp(20px, 4vw, 48px) 48px;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+    }
+
+    /* =========================================================
+           HEADER
+        ========================================================= */
+    .page-header {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+    .header-text {
+        max-width: 620px;
+    }
+
+    .page-header h1 {
+        margin: 0;
+        color: #ffffff;
+        font-size: clamp(28px, 3.4vw, 42px);
+        line-height: 1.05;
+        letter-spacing: -.045em;
+        font-weight: 800;
+    }
+
+        .page-header h1 span {
+            color: transparent;
+            background: linear-gradient(90deg, #f472b6, #a855f7, #6366f1);
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+    .page-header p {
+        margin: 13px 0 0;
+        max-width: 520px;
+        color: #64748b;
+        font-size: 12.5px;
+        line-height: 1.7;
+    }
+
+    /* =========================================================
+           SEARCH
+        ========================================================= */
+    .search-container {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    @@media (min-width: 640px) {
+        .search-container {
+            flex-direction: row;
+            align-items: stretch;
+        }
+    }
+
+    .search-input-wrapper {
+        position: relative;
+        flex: 1;
+        display: flex;
+        align-items: center;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 10px 25px rgba(0,0,0,.18);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        transition: border-color .25s ease, box-shadow .25s ease;
+    }
+
+        .search-input-wrapper:focus-within {
+            border-color: rgba(168,85,247,.35);
+            box-shadow: 0 12px 30px rgba(99,102,241,.22), inset 0 1px rgba(255,255,255,.08);
+        }
+
+    .search-icon {
+        width: 18px;
+        height: 18px;
+        margin-left: 18px;
+        color: #64748b;
+        flex-shrink: 0;
+        pointer-events: none;
+    }
+
+    .search-input-wrapper input {
+        flex: 1;
+        height: 50px;
+        padding: 0 16px;
+        background: transparent;
+        border: none;
+        outline: none;
+        color: #ffffff;
+        font-size: 13px;
+        font-weight: 500;
+        letter-spacing: -.005em;
+        font-family: inherit;
+    }
+
+        .search-input-wrapper input::placeholder {
+            color: #475569;
+        }
+
+    .clear-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 30px;
+        height: 30px;
+        margin-right: 10px;
+        border-radius: 9px;
+        cursor: pointer;
+        color: #64748b;
+        background: rgba(148,163,184,.08);
+        border: 1px solid rgba(255,255,255,.05);
+        transition: all .25s ease;
+    }
+
+        .clear-button svg {
+            width: 14px;
+            height: 14px;
+        }
+
+        .clear-button:hover {
+            color: #e2e8f0;
+            background: rgba(148,163,184,.16);
+            border-color: rgba(168,85,247,.28);
+        }
+
+    /* =========================================================
+           BUTTONS
+        ========================================================= */
+    .primary-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        height: 50px;
+        padding: 0 26px;
+        border-radius: 14px;
+        cursor: pointer;
+        color: #ffffff;
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: .02em;
+        white-space: nowrap;
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        border: 1px solid rgba(255,255,255,.10);
+        box-shadow: 0 14px 32px rgba(99,102,241,.30), inset 0 1px rgba(255,255,255,.12);
+        transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+    }
+
+        .primary-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+            box-shadow: 0 20px 42px rgba(147,51,234,.38), inset 0 1px rgba(255,255,255,.16);
+        }
+
+        .primary-button:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+        }
+
+    .search-button {
+        min-width: 140px;
+    }
+
+    .button-spinner {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,.30);
+        border-top-color: #ffffff;
+        animation: spin .8s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* =========================================================
+           TRIPS GRID
+        ========================================================= */
+    .trips-grid {
+        display: grid;
+        grid-template-columns: repeat(1, minmax(0, 1fr));
+        gap: 16px;
+    }
+
+    @@media (min-width: 640px) {
+        .trips-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
+    @@media (min-width: 1100px) {
+        .trips-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+        }
+    }
+
+    /* =========================================================
+           STATE BOX
+        ========================================================= */
+    .state-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: 64px 24px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, rgba(15,23,42,.62), rgba(2,6,23,.48));
+        border: 1px solid rgba(255,255,255,.06);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        text-align: center;
+    }
+
+        .state-box p {
+            margin: 0;
+            color: #64748b;
+            font-size: 12.5px;
+            letter-spacing: .02em;
+        }
+
+        .state-box h2 {
+            margin: 6px 0 0;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+
+    .spinner {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 2px solid rgba(148,163,184,.20);
+        border-top-color: #a855f7;
+        animation: spin .8s linear infinite;
+    }
+
+    .empty-icon {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        color: #a5b4fc;
+        background: rgba(99,102,241,.12);
+        border: 1px solid rgba(99,102,241,.22);
+    }
+
+        .empty-icon svg {
+            width: 26px;
+            height: 26px;
+        }
+
+</style>
+
+@code {
+
+    private List<TripDTO> trips = new();
+
+    private string? searchTerm;
+
+    private bool loading;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTripsAsync();
+    }
+
+    private async Task LoadTripsAsync()
+    {
+        loading = true;
+
+        try
+        {
+            trips = await TripService.GetAllAsync();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar viagens: {ex.Message}");
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task SearchAsync()
+    {
+        loading = true;
+
+        try
+        {
+            trips = await TripService.SearchAsync(searchTerm);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao pesquisar viagens: {ex.Message}");
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task ClearSearch()
+    {
+        searchTerm = null;
+        await LoadTripsAsync();
+    }
+
+    private async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await SearchAsync();
+        }
+    }
+
+    private void OpenTrip(long tripId)
+    {
+        Navigation.NavigateTo($"/trip/{tripId}");
+    }
+
+}

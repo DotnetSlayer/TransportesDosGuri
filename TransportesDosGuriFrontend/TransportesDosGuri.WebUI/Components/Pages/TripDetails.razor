@@ -1,0 +1,1052 @@
+﻿@page "/trip/{TripId:long}"
+@attribute [Authorize]
+
+@using TransportesDosGuri.Core.DTOs
+@using TransportesDosGuri.Core.Interfaces
+@using TransportesDosGuri.Core.Enums
+@using Microsoft.AspNetCore.Authorization
+
+@inject ITripService TripService
+@inject IPurchaseService PurchaseService
+@inject NavigationManager Navigation
+
+<PageTitle>Detalhes da viagem</PageTitle>
+
+<div class="trip-page">
+
+    <!-- BACKGROUND EFFECTS -->
+    <div class="background-effects">
+        <div class="orb orb-purple"></div>
+        <div class="orb orb-indigo"></div>
+        <div class="orb orb-amber"></div>
+        <div class="grid-overlay"></div>
+    </div>
+
+    <main class="trip-main">
+
+        <div class="trip-container">
+
+            @if (loading)
+            {
+                <div class="state-box">
+                    <div class="spinner"></div>
+                    <p>Carregando viagem...</p>
+                </div>
+            }
+            else if (trip == null)
+            {
+                <div class="state-box empty">
+
+                    <div class="empty-icon">
+                        <svg viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+                            <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                        </svg>
+                    </div>
+
+                    <h2>Viagem não encontrada</h2>
+                    <p>Não conseguimos localizar essa viagem.</p>
+
+                    <button class="primary-button" @onclick="GoBack">
+                        Voltar para viagens
+                    </button>
+
+                </div>
+            }
+            else
+            {
+                <!-- HEADER -->
+                <header class="page-header">
+
+                    <div class="header-text">
+
+                        <button class="back-link" @onclick="GoBack">
+                            <svg viewBox="0 0 24 24" fill="none">
+                                <path d="M19 12H5M11 18l-6-6 6-6"
+                                      stroke="currentColor"
+                                      stroke-width="2"
+                                      stroke-linecap="round"
+                                      stroke-linejoin="round" />
+                            </svg>
+                            Voltar
+                        </button>
+
+                        <h1>
+                            @trip.TripName
+                            <span>.</span>
+                        </h1>
+
+                        <p>
+                            Partida em @trip.DepartureTime.ToString("dd 'de' MMMM 'de' yyyy 'às' HH:mm").
+                            Escolha seus assentos nos voos abaixo.
+                        </p>
+
+                    </div>
+
+                    <span class="status-badge status-info">
+                        <span class="status-dot"></span>
+                        Viagem disponível
+                    </span>
+
+                </header>
+
+                <!-- SUMMARY -->
+                <section class="trip-summary">
+
+                    <div class="summary-card">
+                        <div class="stat-card-glow"></div>
+
+                        <div class="summary-item">
+                            <div class="summary-icon summary-icon-departure">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M2 16l20-6-4 4-2 6-2-3-3 3 1-4-10-1z"
+                                          stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <div class="summary-body">
+                                <span class="data-label">Saída</span>
+                                <span class="data-value">
+                                    @trip.DepartureTime.ToString("dd/MM/yyyy HH:mm")
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="summary-item">
+                            <div class="summary-icon summary-icon-arrival">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M22 16 2 10l4-4 2-6 2 3 3-3-1 4 10 1z"
+                                          stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <div class="summary-body">
+                                <span class="data-label">Chegada</span>
+                                <span class="data-value">
+                                    @trip.ArrivalTime.ToString("dd/MM/yyyy HH:mm")
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="summary-item">
+                            <div class="summary-icon summary-icon-price">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"
+                                          stroke="currentColor" stroke-width="1.8"
+                                          stroke-linecap="round" stroke-linejoin="round" />
+                                </svg>
+                            </div>
+                            <div class="summary-body">
+                                <span class="data-label">Preço base</span>
+                                <span class="data-value data-value-highlight">
+                                    @trip.TotalPrice.ToString("C2")
+                                </span>
+                            </div>
+                        </div>
+
+                    </div>
+
+                </section>
+
+                <!-- FLIGHTS -->
+                <section class="flights">
+
+                    @foreach (var flight in trip.Flights)
+                    {
+                        <article class="flight-card">
+
+                            <div class="stat-card-glow"></div>
+
+                            <div class="card-header">
+
+                                <div class="trip-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2z"
+                                              stroke="currentColor" stroke-width="1.8"
+                                              stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+
+                                <div class="card-title">
+                                    <span class="trip-id">Voo</span>
+                                    <h2>#@flight.Id</h2>
+                                </div>
+
+                            </div>
+
+                            <div class="flight-times">
+
+                                <div class="flight-time">
+                                    <span class="data-label">Partida</span>
+                                    <span class="data-value">
+                                        @flight.DepartureTime.ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                </div>
+
+                                <div class="flight-arrow">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M5 12h14M13 6l6 6-6 6"
+                                              stroke="currentColor"
+                                              stroke-width="2"
+                                              stroke-linecap="round"
+                                              stroke-linejoin="round" />
+                                    </svg>
+                                </div>
+
+                                <div class="flight-time flight-time-right">
+                                    <span class="data-label">Chegada</span>
+                                    <span class="data-value">
+                                        @flight.ArrivalTime.ToString("dd/MM/yyyy HH:mm")
+                                    </span>
+                                </div>
+
+                            </div>
+
+                            <div class="seat-section">
+
+                                <div class="section-title">
+                                    <span>Escolha seu assento</span>
+                                </div>
+
+                                <div class="seat-map-wrapper">
+                                    <SeatMap
+                                        Seats="flight.Seats"
+                                        SelectedSeatIds="selectedSeatIds"
+                                        OnSeatSelected="ToggleSeat" />
+                                </div>
+
+                            </div>
+
+                        </article>
+                    }
+
+                </section>
+
+                <!-- PURCHASE SUMMARY -->
+                @if (selectedSeatIds.Count > 0)
+                {
+                    <div class="purchase-summary">
+
+                        <div class="stat-card-glow"></div>
+
+                        <div class="purchase-summary-content">
+
+                            <div class="purchase-summary-info">
+
+                                <span class="data-label">Resumo da compra</span>
+
+                                <h2>
+                                    <span class="count-highlight">@selectedSeatIds.Count</span>
+                                    @(selectedSeatIds.Count == 1 ? "assento selecionado" : "assentos selecionados")
+                                </h2>
+
+                                <p>
+                                    Confirme sua seleção para prosseguir com o pagamento.
+                                </p>
+
+                            </div>
+
+                            <button class="primary-button"
+                                    @onclick="BuySeatsAsync"
+                                    disabled="@buying">
+
+                                @if (buying)
+                                {
+                                    <span class="button-spinner"></span>
+                                    <span>Processando...</span>
+                                }
+                                else
+                                {
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <circle cx="9" cy="20" r="1.5" fill="currentColor" />
+                                        <circle cx="18" cy="20" r="1.5" fill="currentColor" />
+                                        <path d="M2 3h2l2.5 12.5a2 2 0 0 0 2 1.5h9a2 2 0 0 0 2-1.6L21 7H6"
+                                              stroke="currentColor" stroke-width="1.8"
+                                              stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Comprar assentos</span>
+                                }
+
+                            </button>
+
+                        </div>
+
+                    </div>
+                }
+            }
+
+        </div>
+
+    </main>
+
+</div>
+
+<style>
+
+    /* =========================================================
+           PAGE
+        ========================================================= */
+    .trip-page {
+        position: relative;
+        min-height: 100vh;
+        width: 100%;
+        overflow: hidden;
+        background: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, .13), transparent 30%), radial-gradient(circle at 85% 80%, rgba(168, 85, 247, .12), transparent 30%), #03050b;
+        color: #e2e8f0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    /* =========================================================
+           BACKGROUND
+        ========================================================= */
+    .background-effects {
+        position: fixed;
+        inset: 0;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .orb {
+        position: absolute;
+        border-radius: 999px;
+        filter: blur(100px);
+        opacity: .32;
+        animation: floatOrb 14s ease-in-out infinite alternate;
+    }
+
+    .orb-purple {
+        width: 420px;
+        height: 420px;
+        background: #9333ea;
+        left: -180px;
+        top: -140px;
+    }
+
+    .orb-indigo {
+        width: 500px;
+        height: 500px;
+        background: #4f46e5;
+        right: -220px;
+        bottom: -200px;
+        animation-delay: -4s;
+    }
+
+    .orb-amber {
+        width: 280px;
+        height: 280px;
+        background: #f59e0b;
+        left: 45%;
+        bottom: -180px;
+        opacity: .12;
+        animation-delay: -7s;
+    }
+
+    .grid-overlay {
+        position: absolute;
+        inset: 0;
+        opacity: .035;
+        background-image: linear-gradient(rgba(255,255,255,.5) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,.5) 1px, transparent 1px);
+        background-size: 60px 60px;
+    }
+
+    @@keyframes floatOrb {
+        from { transform: translate3d(0,0,0) scale(1); }
+        to   { transform: translate3d(40px,-30px,0) scale(1.08); }
+    }
+
+    /* =========================================================
+           LAYOUT
+        ========================================================= */
+    .trip-main {
+        position: relative;
+        z-index: 1;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .trip-container {
+        flex: 1;
+        width: 100%;
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 32px clamp(20px, 4vw, 48px) 48px;
+        display: flex;
+        flex-direction: column;
+        gap: 28px;
+    }
+
+    /* =========================================================
+           HEADER
+        ========================================================= */
+    .page-header {
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        align-items: flex-start;
+        justify-content: space-between;
+    }
+
+    .header-text {
+        max-width: 620px;
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        margin-bottom: 14px;
+        padding: 6px 12px 6px 8px;
+        border-radius: 999px;
+        cursor: pointer;
+        color: #a5b4fc;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        background: rgba(99,102,241,.08);
+        border: 1px solid rgba(99,102,241,.18);
+        transition: all .25s ease;
+    }
+
+        .back-link svg {
+            width: 14px;
+            height: 14px;
+            transition: transform .25s ease;
+        }
+
+        .back-link:hover {
+            color: #c7d2fe;
+            border-color: rgba(168,85,247,.35);
+            background: rgba(79,70,229,.16);
+        }
+
+            .back-link:hover svg {
+                transform: translateX(-3px);
+            }
+
+    .page-header h1 {
+        margin: 0;
+        color: #ffffff;
+        font-size: clamp(28px, 3.4vw, 42px);
+        line-height: 1.05;
+        letter-spacing: -.045em;
+        font-weight: 800;
+    }
+
+        .page-header h1 span {
+            color: transparent;
+            background: linear-gradient(90deg, #f472b6, #a855f7, #6366f1);
+            background-clip: text;
+            -webkit-background-clip: text;
+        }
+
+    .page-header p {
+        margin: 13px 0 0;
+        max-width: 520px;
+        color: #64748b;
+        font-size: 12.5px;
+        line-height: 1.7;
+    }
+
+    /* =========================================================
+           STATUS BADGE
+        ========================================================= */
+    .status-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 8px 14px;
+        border-radius: 999px;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .14em;
+        text-transform: uppercase;
+        border: 1px solid transparent;
+        white-space: nowrap;
+    }
+
+    .status-dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        animation: pulse 2.2s ease-in-out infinite;
+    }
+
+    @@keyframes pulse {
+        0%, 100% { opacity: 1; }
+        50%      { opacity: .45; }
+    }
+
+    .status-info {
+        color: #a5b4fc;
+        background: rgba(99,102,241,.10);
+        border-color: rgba(99,102,241,.24);
+    }
+
+        .status-info .status-dot {
+            background: #818cf8;
+            box-shadow: 0 0 10px #818cf8;
+        }
+
+    /* =========================================================
+           SUMMARY CARD
+        ========================================================= */
+    .trip-summary {
+        position: relative;
+    }
+
+    .summary-card {
+        position: relative;
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 18px;
+        padding: 24px;
+        border-radius: 22px;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+    }
+
+    @@media (min-width: 780px) {
+        .summary-card {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 24px;
+        }
+    }
+
+    .stat-card-glow {
+        position: absolute;
+        width: 260px;
+        height: 260px;
+        top: -140px;
+        right: -140px;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: .5;
+        pointer-events: none;
+        background: rgba(99,102,241,.55);
+        transition: opacity .3s ease;
+    }
+
+    .summary-item {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        min-width: 0;
+    }
+
+        .summary-item + .summary-item {
+            padding-top: 18px;
+            border-top: 1px solid rgba(255,255,255,.06);
+        }
+
+    @@media (min-width: 780px) {
+        .summary-item + .summary-item {
+            padding-top: 0;
+            padding-left: 24px;
+            border-top: none;
+            border-left: 1px solid rgba(255,255,255,.06);
+        }
+    }
+
+    .summary-icon {
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        border: 1px solid transparent;
+        box-shadow: inset 0 1px rgba(255,255,255,.06);
+    }
+
+        .summary-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+    .summary-icon-departure {
+        color: #a5b4fc;
+        background: rgba(99,102,241,.12);
+        border-color: rgba(99,102,241,.22);
+    }
+
+    .summary-icon-arrival {
+        color: #6ee7b7;
+        background: rgba(16,185,129,.12);
+        border-color: rgba(16,185,129,.22);
+    }
+
+    .summary-icon-price {
+        color: #d8b4fe;
+        background: rgba(168,85,247,.12);
+        border-color: rgba(168,85,247,.22);
+    }
+
+    .summary-body {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+    }
+
+    .data-label {
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .data-value {
+        color: #e2e8f0;
+        font-size: 13.5px;
+        font-weight: 700;
+        letter-spacing: -.01em;
+    }
+
+    .data-value-highlight {
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -.04em;
+        color: transparent;
+        background: linear-gradient(90deg, #a5b4fc, #d8b4fe);
+        background-clip: text;
+        -webkit-background-clip: text;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* =========================================================
+           FLIGHTS
+        ========================================================= */
+    .flights {
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+    }
+
+    .flight-card {
+        position: relative;
+        padding: 26px;
+        border-radius: 22px;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        transition: border-color .28s ease, box-shadow .28s ease;
+    }
+
+        .flight-card:hover {
+            border-color: rgba(168,85,247,.25);
+            box-shadow: inset 0 1px rgba(255,255,255,.06), 0 24px 50px rgba(99,102,241,.18);
+        }
+
+    .card-header {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .trip-icon {
+        flex-shrink: 0;
+        width: 46px;
+        height: 46px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 14px;
+        color: #a5b4fc;
+        background: rgba(99,102,241,.12);
+        border: 1px solid rgba(99,102,241,.22);
+        box-shadow: inset 0 1px rgba(255,255,255,.06);
+    }
+
+        .trip-icon svg {
+            width: 22px;
+            height: 22px;
+        }
+
+    .card-title {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+    }
+
+    .trip-id {
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .card-title h2 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 20px;
+        font-weight: 800;
+        letter-spacing: -.03em;
+        line-height: 1.2;
+    }
+
+    /* flight times */
+    .flight-times {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 16px;
+        align-items: center;
+        padding: 22px 0;
+    }
+
+    .flight-time {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+    }
+
+    .flight-time-right {
+        text-align: right;
+        align-items: flex-end;
+    }
+
+    .flight-arrow {
+        width: 34px;
+        height: 34px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        color: #a5b4fc;
+        background: rgba(99,102,241,.10);
+        border: 1px solid rgba(99,102,241,.22);
+    }
+
+        .flight-arrow svg {
+            width: 16px;
+            height: 16px;
+        }
+
+    /* seat section */
+    .seat-section {
+        position: relative;
+        z-index: 1;
+        padding-top: 22px;
+        border-top: 1px solid rgba(255,255,255,.06);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 18px;
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .seat-map-wrapper {
+        padding: 18px;
+        border-radius: 16px;
+        background: rgba(2,6,23,.42);
+        border: 1px solid rgba(255,255,255,.05);
+    }
+
+    /* =========================================================
+           PURCHASE SUMMARY
+        ========================================================= */
+    .purchase-summary {
+        position: sticky;
+        bottom: 20px;
+        z-index: 2;
+        padding: 22px 24px;
+        border-radius: 20px;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(15,23,42,.92), rgba(2,6,23,.88));
+        border: 1px solid rgba(168,85,247,.28);
+        box-shadow: 0 22px 55px rgba(99,102,241,.30), inset 0 1px rgba(255,255,255,.06);
+        backdrop-filter: blur(28px);
+        -webkit-backdrop-filter: blur(28px);
+        animation: slideUp .35s ease;
+    }
+
+    @@keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .purchase-summary .stat-card-glow {
+        background: rgba(168,85,247,.55);
+    }
+
+    .purchase-summary-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        align-items: stretch;
+    }
+
+    @@media (min-width: 640px) {
+        .purchase-summary-content {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+        }
+    }
+
+    .purchase-summary-info {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+    }
+
+        .purchase-summary-info h2 {
+            margin: 0;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+
+        .purchase-summary-info p {
+            margin: 0;
+            color: #64748b;
+            font-size: 11.5px;
+            letter-spacing: .02em;
+        }
+
+    .count-highlight {
+        color: transparent;
+        background: linear-gradient(90deg, #a5b4fc, #d8b4fe);
+        background-clip: text;
+        -webkit-background-clip: text;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* =========================================================
+           BUTTONS
+        ========================================================= */
+    .primary-button {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        height: 50px;
+        padding: 0 26px;
+        border-radius: 14px;
+        cursor: pointer;
+        color: #ffffff;
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: .02em;
+        white-space: nowrap;
+        background: linear-gradient(135deg, #6366f1, #a855f7);
+        border: 1px solid rgba(255,255,255,.10);
+        box-shadow: 0 14px 32px rgba(99,102,241,.30), inset 0 1px rgba(255,255,255,.12);
+        transition: transform .25s ease, box-shadow .25s ease, filter .25s ease;
+    }
+
+        .primary-button svg {
+            width: 18px;
+            height: 18px;
+        }
+
+        .primary-button:hover:not(:disabled) {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+            box-shadow: 0 20px 42px rgba(147,51,234,.38), inset 0 1px rgba(255,255,255,.16);
+        }
+
+        .primary-button:disabled {
+            opacity: .65;
+            cursor: not-allowed;
+        }
+
+    .button-spinner {
+        width: 16px;
+        height: 16px;
+        border-radius: 50%;
+        border: 2px solid rgba(255,255,255,.30);
+        border-top-color: #ffffff;
+        animation: spin .8s linear infinite;
+    }
+
+    @@keyframes spin {
+        to { transform: rotate(360deg); }
+    }
+
+    /* =========================================================
+           STATE BOX
+        ========================================================= */
+    .state-box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 14px;
+        padding: 64px 24px;
+        border-radius: 22px;
+        background: linear-gradient(135deg, rgba(15,23,42,.62), rgba(2,6,23,.48));
+        border: 1px solid rgba(255,255,255,.06);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
+        backdrop-filter: blur(20px);
+        -webkit-backdrop-filter: blur(20px);
+        text-align: center;
+    }
+
+        .state-box p {
+            margin: 0;
+            color: #64748b;
+            font-size: 12.5px;
+            letter-spacing: .02em;
+        }
+
+        .state-box h2 {
+            margin: 6px 0 0;
+            color: #ffffff;
+            font-size: 20px;
+            font-weight: 800;
+            letter-spacing: -.03em;
+        }
+
+    .spinner {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        border: 2px solid rgba(148,163,184,.20);
+        border-top-color: #a855f7;
+        animation: spin .8s linear infinite;
+    }
+
+    .empty-icon {
+        width: 58px;
+        height: 58px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 16px;
+        color: #a5b4fc;
+        background: rgba(99,102,241,.12);
+        border: 1px solid rgba(99,102,241,.22);
+    }
+
+        .empty-icon svg {
+            width: 26px;
+            height: 26px;
+        }
+
+</style>
+
+@code {
+
+    [Parameter]
+    public long TripId { get; set; }
+
+    private TripDetailsDTO? trip;
+
+    private bool loading;
+
+    private bool buying;
+
+    private HashSet<long> selectedSeatIds = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadTripAsync();
+    }
+
+    private async Task LoadTripAsync()
+    {
+        loading = true;
+
+        try
+        {
+            trip = await TripService.GetDetailsAsync(TripId);
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao carregar viagem: {ex.Message}");
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task ToggleSeat(long seatId)
+    {
+        if (selectedSeatIds.Contains(seatId))
+        {
+            selectedSeatIds.Remove(seatId);
+        }
+        else
+        {
+            selectedSeatIds.Add(seatId);
+        }
+
+        await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task BuySeatsAsync()
+    {
+        if (buying)
+            return;
+
+        if (selectedSeatIds.Count == 0)
+            return;
+
+        buying = true;
+
+        try
+        {
+            var request = new BuySeatRequestDTO
+            {
+                TripId = TripId,
+                FlightSeatIds = selectedSeatIds.ToList()
+            };
+
+            var result = await PurchaseService.BuySeatsAsync(request);
+
+            if (result == null)
+                return;
+
+            Navigation.NavigateTo($"/purchase/{result.PurchaseId}");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Erro ao comprar assentos: {ex.Message}");
+        }
+        finally
+        {
+            buying = false;
+        }
+    }
+
+    private void GoBack()
+    {
+        Navigation.NavigateTo("/trips");
+    }
+
+}

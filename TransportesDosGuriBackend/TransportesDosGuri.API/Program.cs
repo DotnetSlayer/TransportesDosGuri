@@ -1,3 +1,4 @@
+
 using Asp.Versioning;
 using Dapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -9,207 +10,505 @@ using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Data;
+using System.Text;
+
 using TransportesDosGuri.Core.Application.ServiceContracts;
 using TransportesDosGuri.Core.Application.ServiceContracts.Identity;
 using TransportesDosGuri.Core.Application.ServiceContracts.Jwt;
 using TransportesDosGuri.Core.Application.ServiceContracts.QuestPDF;
+
 using TransportesDosGuri.Core.Application.Services;
 using TransportesDosGuri.Core.Application.Services.Identity;
 using TransportesDosGuri.Core.Application.Services.Jwt;
+
 using TransportesDosGuri.Core.Domain.Entities.Identity;
 using TransportesDosGuri.Core.Domain.RepositoryContracts;
 using TransportesDosGuri.Core.Domain.RepositoryContracts.Misc;
+
 using TransportesDosGuri.Infrastructure.Data;
 using TransportesDosGuri.Infrastructure.ExternalServices.Asaas;
 using TransportesDosGuri.Infrastructure.IdentityContext;
 using TransportesDosGuri.Infrastructure.QuestPDF;
 using TransportesDosGuri.Infrastructure.Repositories;
+using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 
-QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// QUESTPDF
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+QuestPDF.Settings.License =
+    QuestPDF.Infrastructure.LicenseType.Community;
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// CONTROLLERS
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 builder.Services.AddControllers(options =>
 {
-    options.Filters.Add(new ProducesAttribute("application/json"));
-    options.Filters.Add(new ConsumesAttribute("application/json"));
-
-    var policy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
-
-    options.Filters.Add(new AuthorizeFilter(policy));
-});
-
-builder.Services.AddApiVersioning(config =>
-{
-    config.ApiVersionReader = ApiVersionReader.Combine(
-        new UrlSegmentApiVersionReader(),
-        new QueryStringApiVersionReader("api-version"),
-        new HeaderApiVersionReader("api-version")
+    options.Filters.Add(
+        new ProducesAttribute("application/json")
     );
 
-    config.DefaultApiVersion = new ApiVersion(1, 0);
-    config.AssumeDefaultVersionWhenUnspecified = true;
-    config.ReportApiVersions = true;
-})
-.AddApiExplorer(options =>
-{
-    options.GroupNameFormat = "'v'VVV";
-    options.SubstituteApiVersionInUrl = true;
+    options.Filters.Add(
+        new ConsumesAttribute("application/json")
+    );
+
+    // Todas as actions exigem autenticação por padrão.
+    // Use [AllowAnonymous] nos endpoints públicos,
+    // como login e registro.
+
+    var policy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+
+    options.Filters.Add(
+        new AuthorizeFilter(policy)
+    );
 });
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// API VERSIONING
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+builder.Services
+    .AddApiVersioning(config =>
+    {
+        config.ApiVersionReader =
+            ApiVersionReader.Combine(
+                new UrlSegmentApiVersionReader(),
+                new QueryStringApiVersionReader("api-version"),
+                new HeaderApiVersionReader("api-version")
+            );
+
+        config.DefaultApiVersion =
+            new ApiVersion(1, 0);
+
+        config.AssumeDefaultVersionWhenUnspecified =
+            true;
+
+        config.ReportApiVersions =
+            true;
+    })
+    .AddApiExplorer(options =>
+    {
+        options.GroupNameFormat =
+            "'v'VVV";
+
+        options.SubstituteApiVersionInUrl =
+            true;
+    });
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// OPEN API
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 builder.Services.AddOpenApi();
 
-Dapper.SqlMapper.AddTypeHandler(new DateOnlyTypeHandler());
-
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// DAPPER
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-builder.Services.AddScoped<IAircraftService, AircraftService>();
-builder.Services.AddScoped<IAircraftRepository, AircraftRepository>();
-
-builder.Services.AddScoped<IAirportService, AirportService>();
-builder.Services.AddScoped<IAirportRepository, AirportRepository>();
-
-builder.Services.AddScoped<IAsaasIntegrationService, AsaasIntegrationService>();
-builder.Services.AddScoped<IAsaasIntegrationRepository, AsaasIntegrationRepository>();
-
-builder.Services.AddScoped<IFlightSeatService, FlightSeatService>();
-builder.Services.AddScoped<IFlightSeatRepository, FlightSeatRepository>();
-
-builder.Services.AddScoped<IFlightService, FlightService>();
-builder.Services.AddScoped<IFlightRepository, FlightRepository>();
-
-builder.Services.AddScoped<IPurchaseService, PurchaseService>();
-builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
-
-builder.Services.AddScoped<IReservationService, ReservationService>();
-builder.Services.AddScoped<IReservationRepository, ReservationRepository>();
-
-builder.Services.AddScoped<IScheduleService, ScheduleService>();
-builder.Services.AddScoped<IScheduleRepository, ScheduleRepository>();
-
-builder.Services.AddScoped<ISeatService, SeatService>();
-builder.Services.AddScoped<ISeatRepository, SeatRepository>();
-
-builder.Services.AddScoped<ITripService, TripService>();
-builder.Services.AddScoped<ITripRepository, TripRepository>();
-
-builder.Services.AddScoped<IUserRequestService, UserRequestService>();
-builder.Services.AddScoped<IUserRequestRepository, UserRequestRepository>();
-
+Dapper.SqlMapper.AddTypeHandler(
+    new DateOnlyTypeHandler()
+);
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
-
-builder.Services.AddScoped<IIdentityService, IdentityService>();
-
-builder.Services.AddScoped<IDbConnectionFactory, DbConnectionFactory>();
-
-builder.Services.AddScoped<IUserRepository, UserRepository>();
-
-builder.Services.AddTransient<IJwtService, JwtService>();
-
-builder.Services.AddScoped<IReceiptPdfGenerator, ReceiptPdfGenerator>();
-
+// APPLICATION SERVICES
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-builder.Services.AddHttpClient("AsaasClient", client =>
-{
-    client.DefaultRequestHeaders.Add("User-Agent", "TransportesDosGuri/1.0");
-});
+builder.Services.AddScoped<
+    IAircraftService,
+    AircraftService
+>();
+
+builder.Services.AddScoped<
+    IAircraftRepository,
+    AircraftRepository
+>();
+
+builder.Services.AddScoped<
+    IAirportService,
+    AirportService
+>();
+
+builder.Services.AddScoped<
+    IAirportRepository,
+    AirportRepository
+>();
+
+builder.Services.AddScoped<
+    IAsaasIntegrationService,
+    AsaasIntegrationService
+>();
+
+builder.Services.AddScoped<
+    IAsaasIntegrationRepository,
+    AsaasIntegrationRepository
+>();
+
+builder.Services.AddScoped<
+    IFlightSeatService,
+    FlightSeatService
+>();
+
+builder.Services.AddScoped<
+    IFlightSeatRepository,
+    FlightSeatRepository
+>();
+
+builder.Services.AddScoped<
+    IFlightService,
+    FlightService
+>();
+
+builder.Services.AddScoped<
+    IFlightRepository,
+    FlightRepository
+>();
+
+builder.Services.AddScoped<
+    IPurchaseService,
+    PurchaseService
+>();
+
+builder.Services.AddScoped<
+    IPurchaseRepository,
+    PurchaseRepository
+>();
+
+builder.Services.AddScoped<
+    IReservationService,
+    ReservationService
+>();
+
+builder.Services.AddScoped<
+    IReservationRepository,
+    ReservationRepository
+>();
+
+builder.Services.AddScoped<
+    IScheduleService,
+    ScheduleService
+>();
+
+builder.Services.AddScoped<
+    IScheduleRepository,
+    ScheduleRepository
+>();
+
+builder.Services.AddScoped<
+    ISeatService,
+    SeatService
+>();
+
+builder.Services.AddScoped<
+    ISeatRepository,
+    SeatRepository
+>();
+
+builder.Services.AddScoped<
+    ITripService,
+    TripService
+>();
+
+builder.Services.AddScoped<
+    ITripRepository,
+    TripRepository
+>();
+
+builder.Services.AddScoped<
+    IUserRequestService,
+    UserRequestService
+>();
+
+builder.Services.AddScoped<
+    IUserRequestRepository,
+    UserRequestRepository
+>();
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// IDENTITY / JWT / PDF
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+builder.Services.AddScoped<
+    IIdentityService,
+    IdentityService
+>();
+
+builder.Services.AddScoped<
+    IDbConnectionFactory,
+    DbConnectionFactory
+>();
+
+builder.Services.AddScoped<
+    IUserRepository,
+    UserRepository
+>();
+
+builder.Services.AddTransient<
+    IJwtService,
+    JwtService
+>();
+
+builder.Services.AddScoped<
+    IReceiptPdfGenerator,
+    ReceiptPdfGenerator
+>();
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// ASAAS
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+builder.Services.AddHttpClient(
+    "AsaasClient",
+    client =>
+    {
+        client.DefaultRequestHeaders.Add(
+            "User-Agent",
+            "TransportesDosGuri/1.0"
+        );
+    }
+);
 
 builder.Services.AddScoped<AsaasClient>();
 
-builder.Services.AddScoped<IAsaasGateway, AsaasGateway>();
+builder.Services.AddScoped<
+    IAsaasGateway,
+    AsaasGateway
+>();
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// SWAGGER
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
 {
-    options.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, "api.xml"));
+    var xmlPath = Path.Combine(
+        AppContext.BaseDirectory,
+        "api.xml"
+    );
 
-    options.SwaggerDoc("v1", new Microsoft.OpenApi.OpenApiInfo()
+    if (File.Exists(xmlPath))
     {
-        Title = "Transportes dos Guri WEB API",
-        Version = "1.0"
-    });
+        options.IncludeXmlComments(xmlPath);
+    }
 
-});
-
-builder.Services.AddCors(options =>
-{
-    options.AddDefaultPolicy(policyBuilder =>
-    {
-        policyBuilder.WithOrigins(builder.Configuration.GetSection("AllowedOrigins").Get<string[]>())
-        .WithHeaders("Authorization", "origin", "accept", "content-type")
-        .AllowAnyMethod();
-    });
+    options.SwaggerDoc(
+        "v1",
+        new Microsoft.OpenApi.OpenApiInfo
+        {
+            Title = "Transportes dos Guri WEB API",
+            Version = "1.0"
+        }
+    );
 });
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+// CORS
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
-builder.Services.AddDbContext<ApplicationUserDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+var allowedOrigins =
+    builder.Configuration
+        .GetSection("AllowedOrigins")
+        .Get<string[]>();
 
-builder.Services.AddIdentity<ApplicationUser, ApplicationRole>(options =>
+if (allowedOrigins == null ||
+    allowedOrigins.Length == 0)
 {
-    options.Password.RequiredLength = 8;
-    options.Password.RequireNonAlphanumeric = false;
-    options.Password.RequireUppercase = true;
-    options.Password.RequireDigit = true;
-})
-.AddUserStore<UserStore<
-    ApplicationUser,
-    ApplicationRole,
-    ApplicationUserDbContext,
-    long,
-    IdentityUserClaim<long>,
-    IdentityUserRole<long>,
-    IdentityUserLogin<long>,
-    IdentityUserToken<long>,
-    IdentityRoleClaim<long>>>()
-.AddRoleStore<RoleStore<
-    ApplicationRole,
-    ApplicationUserDbContext,
-    long,
-    IdentityUserRole<long>,
-    IdentityRoleClaim<long>>>()
-.AddDefaultTokenProviders();
+    throw new InvalidOperationException(
+        "Nenhuma origem foi configurada em AllowedOrigins."
+    );
+}
 
-builder.Services.AddAuthentication(options =>
+builder.Services.AddCors(options =>
 {
-    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-})
-    .AddJwtBearer(options =>
-    {
-        options.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters()
+    options.AddPolicy(
+        "AllowFrontend",
+        policy =>
         {
-            ValidateAudience = true,
-
-            ValidAudience = builder.Configuration["Jwt:Audience"],
-
-            ValidateIssuer = true,
-
-            ValidIssuer = builder.Configuration["Jwt:Issuer"],
-
-            ValidateLifetime = true,
-
-            ValidateIssuerSigningKey = true,
-
-            IssuerSigningKey = new SymmetricSecurityKey(System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"])),
-
-
-            RoleClaimType = System.Security.Claims.ClaimTypes.Role,
-
-            NameClaimType = System.Security.Claims.ClaimTypes.Name
-        };
-    });
-
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminOnly", policy => policy.RequireRole("Admin"));
+            policy
+                .WithOrigins(allowedOrigins)
+                .AllowAnyHeader()
+                .AllowAnyMethod();
+        }
+    );
 });
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// DATABASE
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+builder.Services.AddDbContext<ApplicationUserDbContext>(
+    options =>
+    {
+        options.UseSqlServer(
+            builder.Configuration
+                .GetConnectionString(
+                    "DefaultConnection"
+                )
+        );
+    }
+);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// ASP.NET IDENTITY
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+builder.Services
+    .AddIdentity<ApplicationUser, ApplicationRole>(
+        options =>
+        {
+            options.Password.RequiredLength = 8;
+
+            options.Password.RequireNonAlphanumeric =
+                false;
+
+            options.Password.RequireUppercase =
+                true;
+
+            options.Password.RequireDigit =
+                true;
+        }
+    )
+    .AddUserStore<UserStore<
+        ApplicationUser,
+        ApplicationRole,
+        ApplicationUserDbContext,
+        long,
+        IdentityUserClaim<long>,
+        IdentityUserRole<long>,
+        IdentityUserLogin<long>,
+        IdentityUserToken<long>,
+        IdentityRoleClaim<long>
+    >>()
+    .AddRoleStore<RoleStore<
+        ApplicationRole,
+        ApplicationUserDbContext,
+        long,
+        IdentityUserRole<long>,
+        IdentityRoleClaim<long>
+    >>()
+    .AddDefaultTokenProviders();
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// JWT CONFIGURATION
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+var jwtKey =
+    builder.Configuration["Jwt:Key"];
+
+if (string.IsNullOrWhiteSpace(jwtKey))
+{
+    throw new InvalidOperationException(
+        "Jwt:Key não foi configurado."
+    );
+}
+
+var jwtIssuer =
+    builder.Configuration["Jwt:Issuer"];
+
+if (string.IsNullOrWhiteSpace(jwtIssuer))
+{
+    throw new InvalidOperationException(
+        "Jwt:Issuer não foi configurado."
+    );
+}
+
+var jwtAudience =
+    builder.Configuration["Jwt:Audience"];
+
+if (string.IsNullOrWhiteSpace(jwtAudience))
+{
+    throw new InvalidOperationException(
+        "Jwt:Audience não foi configurado."
+    );
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// AUTHENTICATION
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+builder.Services
+    .AddAuthentication(
+        options =>
+        {
+            options.DefaultAuthenticateScheme =
+                JwtBearerDefaults.AuthenticationScheme;
+
+            options.DefaultChallengeScheme =
+                JwtBearerDefaults.AuthenticationScheme;
+        }
+    )
+    .AddJwtBearer(
+        options =>
+        {
+            options.TokenValidationParameters =
+                new TokenValidationParameters
+                {
+                    // Audience
+                    ValidateAudience = true,
+                    ValidAudience = jwtAudience,
+
+                    // Issuer
+                    ValidateIssuer = true,
+                    ValidIssuer = jwtIssuer,
+
+                    // Expiração
+                    ValidateLifetime = true,
+
+                    // Assinatura
+                    ValidateIssuerSigningKey = true,
+
+                    IssuerSigningKey =
+                        new SymmetricSecurityKey(
+                            Encoding.UTF8.GetBytes(
+                                jwtKey
+                            )
+                        ),
+
+                    // Claims
+                    RoleClaimType =
+                        System.Security.Claims.ClaimTypes.Role,
+
+                    NameClaimType =
+                        System.Security.Claims.ClaimTypes.Name,
+
+                    // Evita tolerância de tempo entre servidores
+                    ClockSkew = TimeSpan.Zero
+                };
+        }
+    );
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// AUTHORIZATION
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+builder.Services.AddAuthorization(
+    options =>
+    {
+        options.AddPolicy(
+            "AdminOnly",
+            policy =>
+            {
+                policy.RequireRole("Admin");
+            }
+        );
+    }
+);
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// BUILD
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 var app = builder.Build();
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// DEVELOPMENT
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 if (app.Environment.IsDevelopment())
 {
@@ -217,39 +516,91 @@ if (app.Environment.IsDevelopment())
 
     app.UseSwagger();
 
-    app.UseSwaggerUI(options =>
-    {
-        options.SwaggerEndpoint("/swagger/v1/swagger.json", "1.0");
-    });
+    app.UseSwaggerUI(
+        options =>
+        {
+            options.SwaggerEndpoint(
+                "/swagger/v1/swagger.json",
+                "Transportes dos Guri API v1"
+            );
+        }
+    );
 }
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// HTTP PIPELINE
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 app.UseRouting();
 
-app.UseCors();
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// CORS
+//
+// IMPORTANTE:
+// Deve ficar depois de UseRouting()
+// e antes de Authentication/Authorization.
+// 
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
-app.UseHsts();
+app.UseCors("AllowFrontend");
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// HTTPS
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
+if (!app.Environment.IsDevelopment())
+{
+    app.UseHsts();
+}
 
 app.UseHttpsRedirection();
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// AUTHENTICATION
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 app.UseAuthentication();
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// AUTHORIZATION
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 app.UseAuthorization();
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// CONTROLLERS
+///////////////////////////////////////////////////////////////////////////////////////////////////
+
 app.MapControllers();
+
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// RUN
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
 app.Run();
 
+///////////////////////////////////////////////////////////////////////////////////////////////////
+// DAPPER DATEONLY HANDLER
+///////////////////////////////////////////////////////////////////////////////////////////////////
 
-public class DateOnlyTypeHandler : SqlMapper.TypeHandler<DateOnly>
+public class DateOnlyTypeHandler
+    : SqlMapper.TypeHandler<DateOnly>
 {
-    public override void SetValue(IDbDataParameter parameter, DateOnly value)
+    public override void SetValue(
+        IDbDataParameter parameter,
+        DateOnly value)
     {
-        parameter.Value = value.ToDateTime(TimeOnly.MinValue);
+        parameter.Value =
+            value.ToDateTime(
+                TimeOnly.MinValue
+            );
     }
 
-    public override DateOnly Parse(object value)
+    public override DateOnly Parse(
+        object value)
     {
-        return DateOnly.FromDateTime((DateTime)value);
+        return DateOnly.FromDateTime(
+            (DateTime)value
+        );
     }
 }

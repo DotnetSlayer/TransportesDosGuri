@@ -25,7 +25,7 @@ public class AuthController : ControllerBase
         if (!success)
             return Redirect("/login?error=InvalidCredentials");
 
-        return Redirect("/adminHome");
+        return Redirect("/trips");
     }
 
     [HttpGet("logout")]

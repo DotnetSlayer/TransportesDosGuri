@@ -1,0 +1,711 @@
+﻿@using TransportesDosGuri.Core.DTOs
+@using TransportesDosGuri.Core.Enums
+
+<div class="purchase-summary-card">
+
+    <div class="stat-card-glow"></div>
+
+    <!-- HEADER -->
+    <div class="summary-header">
+
+        <div class="summary-icon">
+            <svg viewBox="0 0 24 24" fill="none">
+                <path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"
+                      stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round" stroke-linejoin="round" />
+                <rect x="9" y="3" width="6" height="4" rx="1"
+                      stroke="currentColor" stroke-width="1.8" />
+                <path d="M9 12h6M9 16h4"
+                      stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round" />
+            </svg>
+        </div>
+
+        <div class="summary-title">
+            <span class="summary-label">Resumo</span>
+            <h2>Resumo da compra</h2>
+        </div>
+
+    </div>
+
+    @if (Trip is null)
+    {
+        <div class="state-inline">
+            <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+                <path d="M12 8v4M12 16h.01"
+                      stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+            </svg>
+            <span>Nenhuma viagem selecionada.</span>
+        </div>
+    }
+    else
+    {
+        <!-- TRIP INFO -->
+        <div class="trip-block">
+
+            <div class="trip-name-row">
+                <div class="trip-icon">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M2 16l20-6-4 4-2 6-2-3-3 3 1-4-10-1z"
+                              stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <h3>@Trip.TripName</h3>
+            </div>
+
+            <div class="route-grid">
+
+                <div class="route-point">
+                    <span class="data-label">Origem</span>
+                    <span class="route-airport">
+                        <span class="airport-dot"></span>
+                        Aeroporto #@Trip.OriginAirportId
+                    </span>
+                    <span class="route-time">
+                        @Trip.DepartureTime.ToString("dd/MM/yyyy HH:mm")
+                    </span>
+                </div>
+
+                <div class="route-arrow">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <path d="M5 12h14M13 6l6 6-6 6"
+                              stroke="currentColor"
+                              stroke-width="2"
+                              stroke-linecap="round"
+                              stroke-linejoin="round" />
+                    </svg>
+                </div>
+
+                <div class="route-point route-point-arrival">
+                    <span class="data-label">Destino</span>
+                    <span class="route-airport">
+                        <span class="airport-dot"></span>
+                        Aeroporto #@Trip.DestinyAirportId
+                    </span>
+                    <span class="route-time">
+                        @Trip.ArrivalTime.ToString("dd/MM/yyyy HH:mm")
+                    </span>
+                </div>
+
+            </div>
+
+        </div>
+
+        <!-- SEATS -->
+        <div class="seats-block">
+
+            <div class="section-title">
+                <span>Assentos selecionados</span>
+                @if (SelectedSeatIds.Any())
+                {
+                    <span class="section-count">
+                        @SelectedSeatIds.Count
+                    </span>
+                }
+            </div>
+
+            @if (SelectedSeatIds.Any())
+            {
+                <ul class="seat-list">
+
+                    @foreach (var seat in SelectedSeats)
+                    {
+                        <li class="seat-item">
+
+                            <div class="seat-item-left">
+                                <div class="seat-icon">
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M6 4v6a3 3 0 0 0 3 3h6a3 3 0 0 0 3-3V4"
+                                              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                        <path d="M6 10v6a4 4 0 0 0 4 4h8"
+                                              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                        <path d="M6 20H3M18 20h3"
+                                              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                    </svg>
+                                </div>
+                                <span class="seat-number">
+                                    @seat.SeatNumber
+                                </span>
+                            </div>
+
+                            <span class="seat-class @GetClassVariant(seat.Class)">
+                                @GetSeatClassName(seat.Class)
+                            </span>
+
+                        </li>
+                    }
+
+                </ul>
+            }
+            else
+            {
+                <div class="state-inline state-inline-warning">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+                        <path d="M12 8v4M12 16h.01"
+                              stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                    <span>Nenhum assento selecionado.</span>
+                </div>
+            }
+
+        </div>
+
+        <!-- TOTALS -->
+        <div class="totals-block">
+
+            <div class="total-row">
+                <span class="total-label">Quantidade de assentos</span>
+                <strong class="total-value">@SelectedSeatIds.Count</strong>
+            </div>
+
+            <div class="total-row total-row-highlight">
+                <span class="total-label">Valor estimado</span>
+                <strong class="total-price">@EstimatedTotal.ToString("C")</strong>
+            </div>
+
+        </div>
+
+        <!-- FOOTER NOTE -->
+        <div class="summary-note">
+            <svg viewBox="0 0 24 24" fill="none">
+                <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+                <path d="M12 8h.01M11 12h1v4h1"
+                      stroke="currentColor" stroke-width="1.8"
+                      stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span>O valor final da compra é calculado e validado pelo servidor.</span>
+        </div>
+    }
+
+</div>
+
+<style>
+
+    /* =========================================================
+           PURCHASE SUMMARY CARD
+        ========================================================= */
+    .purchase-summary-card {
+        position: relative;
+        padding: 24px;
+        border-radius: 22px;
+        overflow: hidden;
+        background: linear-gradient(135deg, rgba(15,23,42,.72), rgba(2,6,23,.55));
+        border: 1px solid rgba(255,255,255,.07);
+        box-shadow: inset 0 1px rgba(255,255,255,.04), 0 18px 40px rgba(0,0,0,.22);
+        backdrop-filter: blur(22px);
+        -webkit-backdrop-filter: blur(22px);
+        color: #e2e8f0;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    .stat-card-glow {
+        position: absolute;
+        width: 240px;
+        height: 240px;
+        top: -130px;
+        right: -130px;
+        border-radius: 50%;
+        filter: blur(80px);
+        opacity: .5;
+        pointer-events: none;
+        background: rgba(168,85,247,.55);
+    }
+
+    /* =========================================================
+           HEADER
+        ========================================================= */
+    .summary-header {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        padding-bottom: 20px;
+        border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .summary-icon {
+        flex-shrink: 0;
+        width: 44px;
+        height: 44px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 13px;
+        color: #d8b4fe;
+        background: rgba(168,85,247,.12);
+        border: 1px solid rgba(168,85,247,.22);
+        box-shadow: inset 0 1px rgba(255,255,255,.06);
+    }
+
+        .summary-icon svg {
+            width: 21px;
+            height: 21px;
+        }
+
+    .summary-title {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        min-width: 0;
+    }
+
+    .summary-label {
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .summary-title h2 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: -.03em;
+        line-height: 1.2;
+    }
+
+    /* =========================================================
+           TRIP BLOCK
+        ========================================================= */
+    .trip-block {
+        position: relative;
+        z-index: 1;
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .trip-name-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 18px;
+    }
+
+    .trip-icon {
+        flex-shrink: 0;
+        width: 36px;
+        height: 36px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px;
+        color: #a5b4fc;
+        background: rgba(99,102,241,.12);
+        border: 1px solid rgba(99,102,241,.22);
+    }
+
+        .trip-icon svg {
+            width: 18px;
+            height: 18px;
+        }
+
+    .trip-name-row h3 {
+        margin: 0;
+        color: #ffffff;
+        font-size: 16px;
+        font-weight: 800;
+        letter-spacing: -.025em;
+        line-height: 1.3;
+        word-break: break-word;
+    }
+
+    /* route */
+    .route-grid {
+        display: grid;
+        grid-template-columns: 1fr auto 1fr;
+        gap: 12px;
+        align-items: center;
+        padding: 14px;
+        border-radius: 14px;
+        background: rgba(2,6,23,.36);
+        border: 1px solid rgba(255,255,255,.05);
+    }
+
+    .route-point {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        min-width: 0;
+    }
+
+    .route-point-arrival {
+        text-align: right;
+        align-items: flex-end;
+    }
+
+    .data-label {
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .route-airport {
+        display: inline-flex;
+        align-items: center;
+        gap: 7px;
+        color: #e2e8f0;
+        font-size: 12.5px;
+        font-weight: 700;
+        letter-spacing: -.01em;
+    }
+
+    .airport-dot {
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        background: #818cf8;
+        box-shadow: 0 0 8px rgba(129,140,248,.8);
+        flex-shrink: 0;
+    }
+
+    .route-point-arrival .airport-dot {
+        background: #a855f7;
+        box-shadow: 0 0 8px rgba(168,85,247,.8);
+    }
+
+    .route-time {
+        color: #64748b;
+        font-size: 10.5px;
+        letter-spacing: .02em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .route-arrow {
+        width: 30px;
+        height: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        color: #a5b4fc;
+        background: rgba(99,102,241,.10);
+        border: 1px solid rgba(99,102,241,.22);
+        flex-shrink: 0;
+    }
+
+        .route-arrow svg {
+            width: 14px;
+            height: 14px;
+        }
+
+    /* =========================================================
+           SEATS BLOCK
+        ========================================================= */
+    .seats-block {
+        position: relative;
+        z-index: 1;
+        padding: 20px 0;
+        border-bottom: 1px solid rgba(255,255,255,.06);
+    }
+
+    .section-title {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 14px;
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .18em;
+        text-transform: uppercase;
+        color: #64748b;
+    }
+
+    .section-count {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 22px;
+        height: 22px;
+        padding: 0 8px;
+        border-radius: 999px;
+        color: #d8b4fe;
+        font-size: 10px;
+        font-weight: 800;
+        letter-spacing: .02em;
+        background: rgba(168,85,247,.12);
+        border: 1px solid rgba(168,85,247,.24);
+    }
+
+    .seat-list {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .seat-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 12px 14px;
+        border-radius: 13px;
+        background: rgba(2,6,23,.36);
+        border: 1px solid rgba(255,255,255,.05);
+        transition: border-color .25s ease, background .25s ease;
+    }
+
+        .seat-item:hover {
+            border-color: rgba(168,85,247,.22);
+            background: rgba(15,23,42,.50);
+        }
+
+    .seat-item-left {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        min-width: 0;
+    }
+
+    .seat-icon {
+        width: 32px;
+        height: 32px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 10px;
+        color: #a5b4fc;
+        background: rgba(99,102,241,.12);
+        border: 1px solid rgba(99,102,241,.20);
+        flex-shrink: 0;
+    }
+
+        .seat-icon svg {
+            width: 15px;
+            height: 15px;
+        }
+
+    .seat-number {
+        color: #ffffff;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: -.015em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* seat class badges */
+    .seat-class {
+        display: inline-flex;
+        align-items: center;
+        padding: 5px 11px;
+        border-radius: 999px;
+        font-size: 9.5px;
+        font-weight: 800;
+        letter-spacing: .12em;
+        text-transform: uppercase;
+        white-space: nowrap;
+        border: 1px solid transparent;
+    }
+
+    .seat-class-economical {
+        color: #a5b4fc;
+        background: rgba(99,102,241,.10);
+        border-color: rgba(99,102,241,.24);
+    }
+
+    .seat-class-executive {
+        color: #d8b4fe;
+        background: rgba(168,85,247,.10);
+        border-color: rgba(168,85,247,.24);
+    }
+
+    .seat-class-first {
+        color: #fcd34d;
+        background: rgba(245,158,11,.10);
+        border-color: rgba(245,158,11,.24);
+    }
+
+    /* =========================================================
+           TOTALS
+        ========================================================= */
+    .totals-block {
+        position: relative;
+        z-index: 1;
+        padding: 20px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .total-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+    }
+
+    .total-label {
+        color: #64748b;
+        font-size: 11.5px;
+        font-weight: 600;
+        letter-spacing: .01em;
+    }
+
+    .total-value {
+        color: #e2e8f0;
+        font-size: 14px;
+        font-weight: 800;
+        letter-spacing: -.02em;
+        font-variant-numeric: tabular-nums;
+    }
+
+    .total-row-highlight {
+        padding: 14px 16px;
+        margin-top: 4px;
+        border-radius: 14px;
+        background: linear-gradient(135deg, rgba(99,102,241,.10), rgba(168,85,247,.08));
+        border: 1px solid rgba(168,85,247,.22);
+    }
+
+    .total-price {
+        font-size: 22px;
+        font-weight: 800;
+        letter-spacing: -.04em;
+        color: transparent;
+        background: linear-gradient(90deg, #a5b4fc, #d8b4fe);
+        background-clip: text;
+        -webkit-background-clip: text;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* =========================================================
+           NOTE
+        ========================================================= */
+    .summary-note {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px 14px;
+        border-radius: 13px;
+        color: #94a3b8;
+        font-size: 11px;
+        line-height: 1.6;
+        letter-spacing: .01em;
+        background: rgba(99,102,241,.06);
+        border: 1px solid rgba(99,102,241,.18);
+    }
+
+        .summary-note svg {
+            width: 15px;
+            height: 15px;
+            flex-shrink: 0;
+            margin-top: 1px;
+            color: #a5b4fc;
+        }
+
+    /* =========================================================
+           INLINE STATE
+        ========================================================= */
+    .state-inline {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border-radius: 13px;
+        color: #cbd5e1;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: .01em;
+        background: rgba(148,163,184,.08);
+        border: 1px solid rgba(148,163,184,.20);
+    }
+
+        .state-inline svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            color: #94a3b8;
+        }
+
+    .state-inline-warning {
+        color: #fcd34d;
+        background: rgba(245,158,11,.08);
+        border-color: rgba(245,158,11,.22);
+    }
+
+        .state-inline-warning svg {
+            color: #fbbf24;
+        }
+
+</style>
+
+@code {
+
+    [Parameter, EditorRequired]
+    public TripDetailsDTO Trip { get; set; } = default!;
+
+    [Parameter]
+    public HashSet<long> SelectedSeatIds { get; set; } = new();
+
+    private IEnumerable<FlightSeatDTO> SelectedSeats
+    {
+        get
+        {
+            if (Trip?.Flights is null)
+                return Enumerable.Empty<FlightSeatDTO>();
+
+            return Trip.Flights
+                .SelectMany(x => x.Seats)
+                .Where(x => SelectedSeatIds.Contains(x.Id));
+        }
+    }
+
+    private decimal EstimatedTotal
+    {
+        get
+        {
+            decimal total = 0;
+
+            foreach (var seat in SelectedSeats)
+            {
+                total += Trip.TotalPrice;
+
+                total += seat.Class switch
+                {
+                    SeatClass.Executive => 100m,
+                    SeatClass.First => 200m,
+                    _ => 0m
+                };
+            }
+
+            return total;
+        }
+    }
+
+    private static string GetSeatClassName(SeatClass seatClass)
+    {
+        return seatClass switch
+        {
+            SeatClass.Economical => "Econômica",
+            SeatClass.Executive => "Executiva",
+            SeatClass.First => "Primeira Classe",
+            _ => seatClass.ToString()
+        };
+    }
+
+    private static string GetClassVariant(SeatClass seatClass)
+    {
+        return seatClass switch
+        {
+            SeatClass.Economical => "seat-class-economical",
+            SeatClass.Executive => "seat-class-executive",
+            SeatClass.First => "seat-class-first",
+            _ => "seat-class-economical"
+        };
+    }
+
+}
