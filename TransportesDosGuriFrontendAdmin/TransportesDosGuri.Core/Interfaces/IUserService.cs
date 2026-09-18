@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TransportesDosGuri.Core.DTOs;
+﻿using TransportesDosGuri.Core.DTOs;
 
 namespace TransportesDosGuri.Core.Interfaces
 {
@@ -11,6 +8,6 @@ namespace TransportesDosGuri.Core.Interfaces
         Task<UserDTO?> GetByIdAsync(long id);
         Task<bool> CreateAsync(RegisterDTO registerDto);
         Task<bool> UpdateAsync(long id, UpdateUserDTO updateDto);
-        Task<bool> DeleteAsync(long id);
+        Task<(bool Success, string? Error)> DeleteAsync(long id);
     }
 }

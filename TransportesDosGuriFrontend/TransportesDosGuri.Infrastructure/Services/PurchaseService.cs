@@ -74,5 +74,17 @@ namespace TransportesDosGuri.Infrastructure.Services
 
             return null;
         }
+
+        public async Task<AsaasCheckoutResultDTO?> CreateCheckoutAsync(long purchaseId)
+        {
+            var response = await _http.PostAsync(
+                $"api/v1/Purchase/{purchaseId}/checkout",
+                content: null);
+
+            if (!response.IsSuccessStatusCode)
+                return null;
+
+            return await response.Content.ReadFromJsonAsync<AsaasCheckoutResultDTO>();
+        }
     }
 }

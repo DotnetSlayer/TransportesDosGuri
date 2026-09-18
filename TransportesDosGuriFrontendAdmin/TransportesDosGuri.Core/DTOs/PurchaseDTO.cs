@@ -21,10 +21,10 @@ namespace TransportesDosGuri.Core.DTOs
 
     public enum PurchaseStatus
     {
-        Pending,
+        Pendente = 0,
 
-        Confirmed,
+        Confirmado = 1,
 
-        Canceled
+        Cancelado = 2
     }
 }

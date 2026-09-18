@@ -14,6 +14,8 @@ namespace TransportesDosGuri.Core.DTOs
 
         public string Password { get; set; } = string.Empty;
 
+        public string PhoneNumber { get; set; } = string.Empty;
+
         public string IdentityNumber { get; set; } = string.Empty;
 
         public string? ZipCode { get; set; }

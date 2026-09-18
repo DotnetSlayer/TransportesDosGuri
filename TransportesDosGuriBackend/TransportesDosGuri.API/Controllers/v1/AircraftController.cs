@@ -73,9 +73,23 @@ namespace TransportesDosGuri.API.Controllers.v1
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
-            var delete = await _aircraftService.DeleteAsync(id);
+            try
+            {
+                var delete = await _aircraftService.DeleteAsync(id);
 
-            return Ok("Base de Dados Atualizada!");
+                if (!delete)
+                    return NotFound(new { message = "Aeronave não encontrada." });
+
+                return Ok(new { message = "Aeronave excluída com sucesso." });
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 547)
+            {
+                return Conflict(new
+                {
+                    message = "Não é possível excluir esta aeronave pois existem voos associados a ela. " +
+                              "Exclua ou reatribua os voos primeiro."
+                });
+            }
         }
     }
 }

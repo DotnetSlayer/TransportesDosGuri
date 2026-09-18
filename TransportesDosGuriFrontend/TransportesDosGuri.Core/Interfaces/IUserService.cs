@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Threading.Tasks;
 using TransportesDosGuri.Core.DTOs;
 
 namespace TransportesDosGuri.Core.Interfaces
 {
     public interface IUserService
     {
-        Task<bool> UpdateAsync(long id, UpdateUserDTO updateDto);
-        Task<bool> DeleteAsync(long id);
+        Task<UserDTO?> GetMeAsync();
+        Task<bool> UpdateMeAsync(UpdateUserDTO updateDto);
+        Task<bool> DeleteMeAsync();
     }
 }

@@ -1,9 +1,7 @@
 ﻿using Microsoft.AspNetCore.Components;
-using System;
-using System.Collections.Generic;
-using System.Net;
+using System.Net.Http;
 using System.Net.Http.Json;
-using System.Text;
+using System.Threading.Tasks;
 using TransportesDosGuri.Core.DTOs;
 using TransportesDosGuri.Core.Interfaces;
 
@@ -20,45 +18,31 @@ namespace TransportesDosGuri.Infrastructure.Services
             _navigationManager = navigationManager;
         }
 
-        public async Task<List<UserDTO>?> GetAllAsync()
+        public async Task<UserDTO?> GetMeAsync()
         {
-            var response = await _http.GetAsync("/api/v1/account");
+            var response = await _http.GetAsync("api/v1/account/me");
 
-            if (response.IsSuccessStatusCode)
+            var content = await response.Content.ReadAsStringAsync();
+
+            if (!response.IsSuccessStatusCode)
             {
-                return await response.Content.ReadFromJsonAsync<List<UserDTO>>();
+                throw new Exception(
+                    $"API retornou {(int)response.StatusCode} ({response.StatusCode}). " +
+                    $"Resposta: {content}");
             }
 
-            return null;
+            return await response.Content.ReadFromJsonAsync<UserDTO>();
         }
 
-        public async Task<UserDTO?> GetByIdAsync(long id)
+        public async Task<bool> UpdateMeAsync(UpdateUserDTO updateDto)
         {
-            var response = await _http.GetAsync($"/api/v1/account/{id}");
-
-            if (response.IsSuccessStatusCode)
-            {
-                return await response.Content.ReadFromJsonAsync<UserDTO>();
-            }
-
-            return null;
-        }
-
-        public async Task<bool> CreateAsync(RegisterDTO registerDto)
-        {
-            var response = await _http.PostAsJsonAsync("/api/v1/account/register", registerDto);
+            var response = await _http.PutAsJsonAsync("api/v1/account/me", updateDto);
             return response.IsSuccessStatusCode;
         }
 
-        public async Task<bool> UpdateAsync(long id, UpdateUserDTO updateDto)
+        public async Task<bool> DeleteMeAsync()
         {
-            var response = await _http.PutAsJsonAsync($"/api/v1/account/{id}", updateDto);
-            return response.IsSuccessStatusCode;
-        }
-
-        public async Task<bool> DeleteAsync(long id)
-        {
-            var response = await _http.DeleteAsync($"/api/v1/account/{id}");
+            var response = await _http.DeleteAsync("api/v1/account/me");
             return response.IsSuccessStatusCode;
         }
     }

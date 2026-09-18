@@ -139,9 +139,19 @@
             Endpoint para LOGAR USUÁRIO presente na tabela AspNetUsers
             </summary>
         </member>
-        <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.GetById(System.Int64)">
+        <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.GetMe">
             <summary>
-            Endpoint para RETORNAR UM USUÁRIO POR ID presente na tabela AspNetUsers
+            Endpoint para RETORNAR OS DADOS DO USUÁRIO LOGADO
+            </summary>
+        </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.UpdateMe(TransportesDosGuri.Core.Application.DTOs.Identity.UpdateDTO)">
+            <summary>
+            Endpoint para ATUALIZAR OS DADOS DO USUÁRIO LOGADO
+            </summary>
+        </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.DeleteMe">
+            <summary>
+            Endpoint para EXCLUIR A PRÓPRIA CONTA (usuário logado)
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.GetAll">
@@ -149,24 +159,29 @@
             Endpoint para RETORNAR TODOS OS USUÁRIOS presentes na tabela AspNetUsers
             </summary>
         </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.GetById(System.Int64)">
+            <summary>
+            Endpoint para RETORNAR UM USUÁRIO POR ID (Admin)
+            </summary>
+        </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.Edit(System.Int64,TransportesDosGuri.Core.Application.DTOs.Identity.UpdateDTO)">
             <summary>
-            Endpoint para ATUALIZAR UM USUÁRIO POR ID presente na tabela AspNetUsers
+            Endpoint para ATUALIZAR UM USUÁRIO POR ID (Admin)
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.Delete(System.Int64)">
             <summary>
-            Endpoint para EXCLUIR PERMANENTEMENTE UM USUÁRIO POR ID presente na tabela AspNetUsers
+            Endpoint para EXCLUIR UM USUÁRIO POR ID (Admin)
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.GenerateNewAccessToken(TransportesDosGuri.Core.Application.DTOs.Jwt.TokenModelDTO)">
             <summary>
-            Endpoint para GERAR UM NOVO TOKEN PARA VALIDAR ACESSOS DE USUÁRIOS  
+            Endpoint para GERAR UM NOVO TOKEN
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.Identity.AccountController.Logout(TransportesDosGuri.Core.Application.DTOs.Jwt.TokenModelDTO)">
             <summary>
-            Endpoint para FAZER LOGOUT DE USUÁRIO COM SESSÃO VÁLIDA 
+            Endpoint para FAZER LOGOUT
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.GetAllAsync">
@@ -217,6 +232,11 @@
         <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.DownloadReceipt(System.Int64)">
             <summary>
             Endpoint para BAIXAR O RECIBO EM PDF DE UMA COMPRA
+            </summary>
+        </member>
+        <member name="M:TransportesDosGuri.API.Controllers.v1.PurchaseController.CreateCheckout(System.Int64)">
+            <summary>
+            Endpoint para CRIAR CHECKOUT E CONEXÃO ASAAS
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.ReservationController.GetAllAsync">
@@ -351,12 +371,17 @@
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.UserRequestController.DeleteAsync(System.Int64)">
             <summary>
-            Endpoint para EXCLUIR PERMANENTEMENTE UMA REQUISI~ÇÃO DE USUÁRIO POR ID presente na tabela UserRequest
+            Endpoint para EXCLUIR PERMANENTEMENTE UMA REQUISIÇÃO DE USUÁRIO POR ID presente na tabela UserRequest
             </summary>
         </member>
         <member name="M:TransportesDosGuri.API.Controllers.v1.UserRequestController.CreateWithPaymentAsync(TransportesDosGuri.Core.Application.DTOs.UserRequestDTO)">
             <summary>
             Endpoint para GERAR REGISTRO DE COBRANÇA NO ASAAS
+            </summary>
+        </member>
+        <member name="M:TransportesDosGuri.API.Controllers.ViaCep.v1.ZipCodeController.Get(System.String)">
+            <summary>
+            Endpoint para REQUISITAR INFORMAÇÕES DO CEP ao VIACEP
             </summary>
         </member>
         <member name="T:Program">

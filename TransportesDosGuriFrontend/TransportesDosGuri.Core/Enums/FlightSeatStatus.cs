@@ -6,7 +6,7 @@ namespace TransportesDosGuri.Core.Enums
 {
     public enum FlightSeatStatus
     {
-        Available = 0,
-        Reserved = 1
+        Disponível = 0,
+        Reservado = 1
     }
 }

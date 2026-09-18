@@ -55,10 +55,29 @@ public class AircraftService : IAircraftService
         return HandleResponse(response);
     }
 
-    public async Task<bool> DeleteAsync(long id)
+    public async Task<(bool Success, string? Error)> DeleteAsync(long id)
     {
         var response = await _http.DeleteAsync($"/api/v1/Aircraft/{id}");
-        return HandleResponse(response);
+
+        if (response.StatusCode == HttpStatusCode.Unauthorized ||
+            response.StatusCode == HttpStatusCode.Forbidden)
+        {
+            _navigationManager.NavigateTo("/error", replace: true);
+            return (false, "Sessão expirada. Faça login novamente.");
+        }
+
+        if (response.IsSuccessStatusCode)
+            return (true, null);
+
+        try
+        {
+            var error = await response.Content.ReadFromJsonAsync<ErrorResponse>();
+            return (false, error?.Message ?? "Não foi possível excluir a aeronave.");
+        }
+        catch
+        {
+            return (false, "Não foi possível excluir a aeronave.");
+        }
     }
 
     private bool HandleResponse(HttpResponseMessage response)
@@ -70,5 +89,10 @@ public class AircraftService : IAircraftService
         }
 
         return response.IsSuccessStatusCode;
+    }
+
+    private class ErrorResponse
+    {
+        public string? Message { get; set; }
     }
 }

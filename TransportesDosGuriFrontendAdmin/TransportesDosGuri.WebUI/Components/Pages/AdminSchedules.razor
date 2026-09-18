@@ -1,4 +1,5 @@
 ﻿@page "/adminSchedules"
+@attribute [Authorize]
 @rendermode InteractiveServer
 
 @inject IScheduleService ScheduleService
@@ -7,12 +8,12 @@
 
 @using TransportesDosGuri.Core.DTOs
 @using TransportesDosGuri.Core.Interfaces
+@using Microsoft.AspNetCore.Authorization
 
-<PageTitle>Transportes Dos Guri · Horários e Escalas</PageTitle>
+<PageTitle>Transportes Dos Guri</PageTitle>
 
 <div class="schedules-page">
 
-    <!-- BACKGROUND EFFECTS -->
     <div class="background-effects">
         <div class="orb orb-purple"></div>
         <div class="orb orb-indigo"></div>
@@ -24,7 +25,6 @@
 
         <div class="schedules-container">
 
-            <!-- HEADER -->
             <header class="page-header">
 
                 <div class="header-text">
@@ -43,7 +43,20 @@
 
             </header>
 
-            <!-- FORM CARD -->
+          
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert-error">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                        <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    <span>@errorMessage</span>
+                    <button @onclick="() => errorMessage = null" class="close-btn">×</button>
+                </div>
+            }
+
+         
             <section class="form-card">
 
                 <div class="form-card-glow"></div>
@@ -58,7 +71,7 @@
                 <EditForm Model="scheduleForm" OnValidSubmit="Save">
                     <DataAnnotationsValidator />
 
-                    <!-- SECTION: VÍNCULOS -->
+                   
                     <div class="subsection">
                         <div class="subsection-label">Vínculos</div>
 
@@ -111,7 +124,7 @@
                         </div>
                     </div>
 
-                    <!-- SECTION: JANELA DE TEMPO -->
+                   
                     <div class="subsection">
                         <div class="subsection-label">Janela de tempo</div>
 
@@ -178,7 +191,7 @@
                         </div>
                     </div>
 
-                    <!-- ACTIONS -->
+                  
                     <div class="form-actions">
                         @if (scheduleForm.Id != 0)
                         {
@@ -203,7 +216,7 @@
 
             </section>
 
-            <!-- TABLE CARD -->
+      
             <section class="table-card">
 
                 <div class="table-card-glow"></div>
@@ -349,24 +362,17 @@
 
 <style>
 
-    /* =========================================================
-           PAGE
-        ========================================================= */
     .schedules-page {
         position: relative;
-        min-height: 100vh;
+        min-height: 100%;
         width: 100%;
-        overflow: hidden;
         background: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, .13), transparent 30%), radial-gradient(circle at 85% 80%, rgba(168, 85, 247, .12), transparent 30%), #03050b;
         color: #e2e8f0;
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    /* =========================================================
-           BACKGROUND
-        ========================================================= */
     .background-effects {
-        position: fixed;
+        position: absolute;
         inset: 0;
         overflow: hidden;
         pointer-events: none;
@@ -426,13 +432,10 @@
         }
     }
 
-    /* =========================================================
-           LAYOUT
-        ========================================================= */
     .schedules-main {
         position: relative;
         z-index: 1;
-        min-height: 100vh;
+        min-height: 100%;
         display: flex;
         flex-direction: column;
     }
@@ -440,7 +443,7 @@
     .schedules-container {
         flex: 1;
         width: 100%;
-        max-width: 1200px;
+        max-width: 1800px;
         margin: 0 auto;
         padding: 32px clamp(20px, 4vw, 48px) 48px;
         display: flex;
@@ -448,9 +451,6 @@
         gap: 28px;
     }
 
-    /* =========================================================
-           HEADER
-        ========================================================= */
     .page-header {
         display: flex;
         flex-direction: column;
@@ -559,9 +559,55 @@
         color: #64748b;
     }
 
-    /* =========================================================
-           FORM CARD
-        ========================================================= */
+    .alert-error {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        background: rgba(244, 63, 94, .10);
+        border: 1px solid rgba(244, 63, 94, .30);
+        color: #fda4af;
+        font-size: 13px;
+        font-weight: 600;
+        animation: slideDown .3s ease;
+    }
+
+        .alert-error svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .alert-error .close-btn {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            padding: 0;
+            opacity: .7;
+            transition: opacity .2s;
+        }
+
+            .alert-error .close-btn:hover {
+                opacity: 1;
+            }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     .form-card {
         position: relative;
         padding: 24px;
@@ -617,9 +663,6 @@
             font-weight: 800;
         }
 
-    /* =========================================================
-           SUBSECTIONS
-        ========================================================= */
     .subsection {
         position: relative;
         z-index: 1;
@@ -640,9 +683,6 @@
         color: #475569;
     }
 
-    /* =========================================================
-           FORM GRID
-        ========================================================= */
     .form-grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -663,7 +703,6 @@
         }
     }
 
-    /* timeline arrow */
     .timeline-arrow {
         display: none;
         flex-direction: column;
@@ -704,9 +743,6 @@
         }
     }
 
-    /* =========================================================
-           FIELD
-        ========================================================= */
     .field {
         display: flex;
         flex-direction: column;
@@ -795,9 +831,6 @@
         cursor: pointer;
     }
 
-    /* =========================================================
-           FORM ACTIONS
-        ========================================================= */
     .form-actions {
         position: relative;
         z-index: 1;
@@ -865,9 +898,6 @@
             background: linear-gradient(135deg, rgba(30,41,59,.76), rgba(15,23,42,.58));
         }
 
-    /* =========================================================
-           TABLE CARD
-        ========================================================= */
     .table-card {
         position: relative;
         padding: 24px;
@@ -898,9 +928,6 @@
         margin-bottom: 18px;
     }
 
-    /* =========================================================
-           DATA TABLE
-        ========================================================= */
     .table-scroll {
         position: relative;
         z-index: 1;
@@ -963,7 +990,6 @@
         white-space: nowrap;
     }
 
-    /* id chip */
     .id-chip {
         display: inline-flex;
         align-items: center;
@@ -977,7 +1003,6 @@
         border: 1px solid rgba(99,102,241,.18);
     }
 
-    /* flight chip */
     .flight-chip {
         display: inline-flex;
         align-items: center;
@@ -992,7 +1017,6 @@
         border: 1px solid rgba(139,92,246,.20);
     }
 
-    /* airport cell */
     .airport-cell {
         display: flex;
         align-items: center;
@@ -1024,7 +1048,6 @@
         letter-spacing: -.005em;
     }
 
-    /* datetime */
     .datetime-value {
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         font-size: 11.5px;
@@ -1032,7 +1055,6 @@
         white-space: nowrap;
     }
 
-    /* duration badge */
     .duration-badge {
         display: inline-flex;
         align-items: center;
@@ -1055,7 +1077,6 @@
             color: #94a3b8;
         }
 
-    /* row actions */
     .row-actions {
         display: inline-flex;
         gap: 8px;
@@ -1095,9 +1116,6 @@
         background: rgba(244,63,94,.08);
     }
 
-    /* =========================================================
-           EMPTY / LOADING STATES
-        ========================================================= */
     .state-empty {
         position: relative;
         z-index: 1;
@@ -1140,6 +1158,7 @@
     private List<FlightDTO> flightList = new();
     private List<AirportDTO> airportList = new();
     private ScheduleDTO scheduleForm = new() { DepartureTime = DateTime.Now, ArrivalTime = DateTime.Now.AddHours(2) };
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync()
     {
@@ -1157,13 +1176,40 @@
 
     private async Task Save()
     {
-        if (scheduleForm.Id == 0)
-            await ScheduleService.CreateAsync(scheduleForm);
-        else
-            await ScheduleService.UpdateAsync(scheduleForm.Id, scheduleForm);
+        errorMessage = null;
 
-        ResetForm();
-        await LoadSchedules();
+        if (scheduleForm.FlightId <= 0)
+        {
+            errorMessage = "Selecione um voo válido.";
+            return;
+        }
+
+        if (scheduleForm.AirportId <= 0)
+        {
+            errorMessage = "Selecione um aeroporto válido.";
+            return;
+        }
+
+        if (scheduleForm.ArrivalTime <= scheduleForm.DepartureTime)
+        {
+            errorMessage = "A data de chegada deve ser posterior à data de partida.";
+            return;
+        }
+
+        try
+        {
+            if (scheduleForm.Id == 0)
+                await ScheduleService.CreateAsync(scheduleForm);
+            else
+                await ScheduleService.UpdateAsync(scheduleForm.Id, scheduleForm);
+
+            ResetForm();
+            await LoadSchedules();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erro ao salvar escala: {ex.Message}";
+        }
     }
 
     private void Edit(ScheduleDTO item)
@@ -1180,7 +1226,16 @@
 
     private async Task Delete(long id)
     {
-        await ScheduleService.DeleteAsync(id);
+        errorMessage = null;
+
+        var (success, error) = await ScheduleService.DeleteAsync(id);
+
+        if (!success)
+        {
+            errorMessage = error;
+            return;
+        }
+
         await LoadSchedules();
     }
 
@@ -1189,9 +1244,6 @@
     private string GetAirportName(long id) =>
         airportList.FirstOrDefault(a => a.Id == id)?.Name ?? id.ToString();
 
-    /* =========================================================
-       DURATION FORMATTER
-    ========================================================= */
     private string FormatDuration(TimeSpan span)
     {
         if (span <= TimeSpan.Zero)

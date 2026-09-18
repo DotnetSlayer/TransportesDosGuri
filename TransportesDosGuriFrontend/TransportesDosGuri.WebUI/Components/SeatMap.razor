@@ -35,7 +35,7 @@
 
             @foreach (var seat in Seats.OrderBy(x => x.SeatNumber))
             {
-                var isAvailable = seat.Status == FlightSeatStatus.Available;
+                var isAvailable = seat.Status == FlightSeatStatus.Disponível;
                 var isSelected = SelectedSeatIds.Contains(seat.Id);
 
                 <button type="button"
@@ -250,7 +250,7 @@
 
     private async Task ToggleSeat(FlightSeatDTO seat)
     {
-        if (seat.Status != FlightSeatStatus.Available)
+        if (seat.Status != FlightSeatStatus.Disponível)
             return;
 
         await OnSeatSelected.InvokeAsync(seat.Id);

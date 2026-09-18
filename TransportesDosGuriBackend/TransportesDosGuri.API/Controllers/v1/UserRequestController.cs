@@ -67,15 +67,29 @@ namespace TransportesDosGuri.API.Controllers.v1
         }
 
         /// <summary>
-        /// Endpoint para EXCLUIR PERMANENTEMENTE UMA REQUISI~ÇÃO DE USUÁRIO POR ID presente na tabela UserRequest
+        /// Endpoint para EXCLUIR PERMANENTEMENTE UMA REQUISIÇÃO DE USUÁRIO POR ID presente na tabela UserRequest
         /// </summary>
         [HttpDelete("{id}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
-            var delete = await _userRequestService.DeleteAsync(id);
+            try
+            {
+                var delete = await _userRequestService.DeleteAsync(id);
 
-            return Ok("Base de Dados Atualizada!");
+                if (!delete)
+                    return NotFound(new { message = "Requisição de usuário não encontrada." });
+
+                return Ok(new { message = "Requisição de usuário excluída com sucesso." });
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 547)
+            {
+                return Conflict(new
+                {
+                    message = "Não é possível excluir esta requisição pois existem registros associados a ela. " +
+                              "Verifique os vínculos antes de tentar novamente."
+                });
+            }
         }
 
         /// <summary>

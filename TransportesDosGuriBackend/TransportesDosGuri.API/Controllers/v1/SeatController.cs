@@ -73,9 +73,23 @@ namespace TransportesDosGuri.API.Controllers.v1
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
-            var delete = await _seatService.DeleteAsync(id);
+            try
+            {
+                var delete = await _seatService.DeleteAsync(id);
 
-            return Ok("Base de Dados Atualizada!");
+                if (!delete)
+                    return NotFound(new { message = "Assento não encontrado." });
+
+                return Ok(new { message = "Assento excluído com sucesso." });
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 547)
+            {
+                return Conflict(new
+                {
+                    message = "Não é possível excluir este assento pois existem registros associados a ele. " +
+                              "Verifique os vínculos antes de tentar novamente."
+                });
+            }
         }
     }
 }

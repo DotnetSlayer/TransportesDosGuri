@@ -17,9 +17,9 @@ namespace TransportesDosGuri.Core.DTOs
 
         public SeatClass Class { get; set; }
 
-        public string Location { get; set; } = string.Empty;
+        public SeatLocation Location { get; set; }
 
-        public string Side { get; set; } = string.Empty;
+        public SeatSide Side { get; set; }
 
         public FlightSeatStatus Status { get; set; }
     }

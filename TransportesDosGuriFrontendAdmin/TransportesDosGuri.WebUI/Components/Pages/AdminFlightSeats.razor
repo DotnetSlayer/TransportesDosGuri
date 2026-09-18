@@ -1,5 +1,6 @@
 ﻿@page "/adminFlightSeats"
 @rendermode InteractiveServer
+@attribute [Authorize]
 
 @inject IFlightSeatService FlightSeatService
 @inject IAircraftService AircraftService
@@ -7,14 +8,12 @@
 
 @using TransportesDosGuri.Core.DTOs
 @using TransportesDosGuri.Core.Interfaces
+@using Microsoft.AspNetCore.Authorization
 
-<PageTitle>Transportes Dos Guri · Assentos de Voos</PageTitle>
+<PageTitle>Transportes Dos Guri</PageTitle>
 
 <div class="seats-page">
 
-    <!-- =========================================================
-         BACKGROUND
-    ========================================================== -->
 
     <div class="background-effects">
         <div class="orb orb-purple"></div>
@@ -28,9 +27,6 @@
 
         <div class="seats-container">
 
-            <!-- =================================================
-                 HEADER
-            ================================================== -->
 
             <header class="page-header">
 
@@ -63,9 +59,19 @@
             </header>
 
 
-            <!-- =================================================
-                 FORM CARD
-            ================================================== -->
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert-error">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                        <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    <span>@errorMessage</span>
+                    <button @onclick="() => errorMessage = null" class="close-btn">×</button>
+                </div>
+            }
+
 
             <section class="form-card">
 
@@ -98,9 +104,6 @@
                     <div class="form-grid">
 
 
-                        <!-- =====================================
-                             VOO
-                        ====================================== -->
 
                         <div class="field">
 
@@ -145,10 +148,6 @@
                         </div>
 
 
-                        <!-- =====================================
-                             AERONAVE
-                        ====================================== -->
-
                         <div class="field">
 
                             <label>Aeronave</label>
@@ -192,9 +191,6 @@
                         </div>
 
 
-                        <!-- =====================================
-                             ASSENTO
-                        ====================================== -->
 
                         <div class="field">
 
@@ -225,10 +221,6 @@
 
                         </div>
 
-
-                        <!-- =====================================
-                             CLASSE
-                        ====================================== -->
 
                         <div class="field">
 
@@ -268,9 +260,6 @@
                         </div>
 
 
-                        <!-- =====================================
-                             LOCALIZAÇÃO
-                        ====================================== -->
 
                         <div class="field">
 
@@ -315,10 +304,6 @@
                         </div>
 
 
-                        <!-- =====================================
-                             LADO
-                        ====================================== -->
-
                         <div class="field">
 
                             <label>Lado</label>
@@ -360,10 +345,6 @@
 
                         </div>
 
-
-                        <!-- =====================================
-                             STATUS
-                        ====================================== -->
 
                         <div class="field">
 
@@ -411,9 +392,6 @@
                     </div>
 
 
-                    <!-- =================================================
-                         ACTIONS
-                    ================================================== -->
 
                     <div class="form-actions">
 
@@ -457,10 +435,6 @@
 
             </section>
 
-
-            <!-- =================================================
-                 TABLE CARD
-            ================================================== -->
 
             <section class="table-card">
 
@@ -770,15 +744,12 @@
 
 <style>
 
-    /* =========================================================
-       PAGE
-    ========================================================== */
+
 
     .seats-page {
         position: relative;
-        min-height: 100vh;
+        min-height: 100%;
         width: 100%;
-        overflow: hidden;
 
         background:
             radial-gradient(
@@ -806,12 +777,10 @@
     }
 
 
-    /* =========================================================
-       BACKGROUND
-    ========================================================== */
+
 
     .background-effects {
-        position: fixed;
+        position: absolute;
         inset: 0;
         overflow: hidden;
         pointer-events: none;
@@ -903,15 +872,12 @@
     }
 
 
-    /* =========================================================
-       LAYOUT
-    ========================================================== */
 
     .seats-main {
         position: relative;
         z-index: 1;
 
-        min-height: 100vh;
+        min-height: 100%;
 
         display: flex;
         flex-direction: column;
@@ -921,7 +887,7 @@
         flex: 1;
 
         width: 100%;
-        max-width: 1450px;
+        max-width: 1800px;
 
         margin: 0 auto;
 
@@ -937,9 +903,6 @@
     }
 
 
-    /* =========================================================
-       HEADER
-    ========================================================== */
 
     .page-header {
         display: flex;
@@ -1068,9 +1031,77 @@
     }
 
 
-    /* =========================================================
-       CARDS
-    ========================================================== */
+
+    .alert-error {
+        display: flex;
+
+        align-items: center;
+
+        gap: 12px;
+
+        padding: 14px 18px;
+
+        border-radius: 14px;
+
+        background: rgba(244, 63, 94, .10);
+
+        border: 1px solid rgba(244, 63, 94, .30);
+
+        color: #fda4af;
+
+        font-size: 13px;
+
+        font-weight: 600;
+
+        animation: slideDown .3s ease;
+    }
+
+    .alert-error svg {
+        width: 18px;
+        height: 18px;
+
+        flex-shrink: 0;
+    }
+
+    .alert-error .close-btn {
+        margin-left: auto;
+
+        background: none;
+
+        border: none;
+
+        color: inherit;
+
+        cursor: pointer;
+
+        font-size: 20px;
+
+        line-height: 1;
+
+        padding: 0;
+
+        opacity: .7;
+
+        transition: opacity .2s;
+    }
+
+    .alert-error .close-btn:hover {
+        opacity: 1;
+    }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+
 
     .form-card,
     .table-card {
@@ -1149,9 +1180,6 @@
     }
 
 
-    /* =========================================================
-       SECTION LABEL
-    ========================================================== */
 
     .section-label {
         display: flex;
@@ -1197,9 +1225,6 @@
     }
 
 
-    /* =========================================================
-       FORM
-    ========================================================== */
 
     .form-grid {
         position: relative;
@@ -1249,9 +1274,6 @@
     }
 
 
-    /* =========================================================
-       FIELD
-    ========================================================== */
 
     .field {
         display: flex;
@@ -1407,9 +1429,6 @@
     }
 
 
-    /* =========================================================
-       ACTIONS
-    ========================================================== */
 
     .form-actions {
         position: relative;
@@ -1548,9 +1567,6 @@
     }
 
 
-    /* =========================================================
-       TABLE
-    ========================================================== */
 
     .table-scroll {
         position: relative;
@@ -1635,9 +1651,6 @@
     }
 
 
-    /* =========================================================
-       ID
-    ========================================================== */
 
     .id-chip {
         display: inline-flex;
@@ -1666,9 +1679,6 @@
     }
 
 
-    /* =========================================================
-       FLIGHT
-    ========================================================== */
 
     .flight-cell {
         display: flex;
@@ -1733,9 +1743,6 @@
     }
 
 
-    /* =========================================================
-       AIRCRAFT
-    ========================================================== */
 
     .aircraft-cell {
         display: flex;
@@ -1792,9 +1799,6 @@
     }
 
 
-    /* =========================================================
-       SEAT
-    ========================================================== */
 
     .seat-badge {
         display: inline-flex;
@@ -1844,9 +1848,6 @@
     }
 
 
-    /* =========================================================
-       ENUM
-    ========================================================== */
 
     .enum-chip {
         display: inline-flex;
@@ -1868,10 +1869,6 @@
         white-space: nowrap;
     }
 
-
-    /* =========================================================
-       CLASS
-    ========================================================== */
 
     .class-economy {
         color: #cbd5e1;
@@ -1918,9 +1915,6 @@
     }
 
 
-    /* =========================================================
-       LOCATION
-    ========================================================== */
 
     .location-window {
         color: #7dd3fc;
@@ -1956,9 +1950,6 @@
     }
 
 
-    /* =========================================================
-       SIDE
-    ========================================================== */
 
     .side-left {
         color: #c4b5fd;
@@ -1994,9 +1985,6 @@
     }
 
 
-    /* =========================================================
-       STATUS
-    ========================================================== */
 
     .status-available {
         color: #6ee7b7;
@@ -2054,9 +2042,6 @@
     }
 
 
-    /* =========================================================
-       ACTIONS
-    ========================================================== */
 
     .row-actions {
         display: inline-flex;
@@ -2124,9 +2109,6 @@
     }
 
 
-    /* =========================================================
-       EMPTY / LOADING
-    ========================================================== */
 
     .state-empty {
         position: relative;
@@ -2186,9 +2168,6 @@
     }
 
 
-    /* =========================================================
-       RESPONSIVE
-    ========================================================== */
 
     @@media (max-width: 767px) {
 
@@ -2226,9 +2205,6 @@
 
 @code {
 
-    /* =========================================================
-       DATA
-    ========================================================== */
 
     private List<FlightSeatDTO>? seats;
 
@@ -2238,10 +2214,9 @@
 
     private FlightSeatDTO seatForm = new();
 
+    private string? errorMessage;
 
-    /* =========================================================
-       INITIALIZATION
-    ========================================================== */
+
 
     protected override async Task OnInitializedAsync()
     {
@@ -2253,10 +2228,6 @@
     }
 
 
-    /* =========================================================
-       LOAD FLIGHTS
-    ========================================================== */
-
     private async Task LoadFlights()
     {
         flightList =
@@ -2265,9 +2236,6 @@
     }
 
 
-    /* =========================================================
-       LOAD AIRCRAFTS
-    ========================================================== */
 
     private async Task LoadAircrafts()
     {
@@ -2277,10 +2245,6 @@
     }
 
 
-    /* =========================================================
-       LOAD SEATS
-    ========================================================== */
-
     private async Task LoadSeats()
     {
         seats =
@@ -2288,31 +2252,25 @@
     }
 
 
-    /* =========================================================
-       SAVE
-    ========================================================== */
-
     private async Task Save()
     {
-        // =====================================================
-        // VALIDAÇÃO CRUCIAL PARA EVITAR ERRO DE FOREIGN KEY
-        // =====================================================
+        errorMessage = null;
 
         if (seatForm.FlightId <= 0)
         {
-            Console.WriteLine("Erro: Selecione um voo válido.");
+            errorMessage = "Selecione um voo válido.";
             return;
         }
 
         if (seatForm.AircraftId <= 0)
         {
-            Console.WriteLine("Erro: Selecione uma aeronave válida.");
+            errorMessage = "Selecione uma aeronave válida.";
             return;
         }
 
         if (string.IsNullOrWhiteSpace(seatForm.SeatNumber))
         {
-            Console.WriteLine("Erro: Informe o número do assento.");
+            errorMessage = "Informe o número do assento.";
             return;
         }
 
@@ -2336,17 +2294,10 @@
         }
         catch (Exception ex)
         {
-            // Isso vai te mostrar o erro real no console do Visual Studio
-            Console.WriteLine($"Erro ao salvar assento: {ex.Message}");
-            // Se quiser, pode relançar a exceção para o Blazor tratar
-            // throw; 
+            errorMessage = $"Erro ao salvar assento: {ex.Message}";
         }
     }
 
-
-    /* =========================================================
-       EDIT
-    ========================================================== */
 
     private void Edit(FlightSeatDTO item)
     {
@@ -2371,21 +2322,23 @@
     }
 
 
-    /* =========================================================
-       DELETE
-    ========================================================== */
 
     private async Task Delete(long id)
     {
-        await FlightSeatService.DeleteAsync(id);
+        errorMessage = null;
+
+        var (success, error) = await FlightSeatService.DeleteAsync(id);
+
+        if (!success)
+        {
+            errorMessage = error;
+            return;
+        }
 
         await LoadSeats();
     }
 
 
-    /* =========================================================
-       RESET FORM
-    ========================================================== */
 
     private void ResetForm()
     {
@@ -2393,13 +2346,6 @@
     }
 
 
-    /* =========================================================
-       FLIGHT DESCRIPTION
-       
-       Não utiliza FlightNumber.
-       Utiliza somente propriedades existentes
-       no seu modelo Flight.
-    ========================================================== */
 
     private string GetFlightDescription(FlightDTO flight)
     {
@@ -2425,9 +2371,6 @@
     }
 
 
-    /* =========================================================
-       AIRCRAFT DESCRIPTION
-    ========================================================== */
 
     private string GetAircraftModel(long aircraftId)
     {
@@ -2441,9 +2384,6 @@
     }
 
 
-    /* =========================================================
-       CLASS VARIANT
-    ========================================================== */
 
     private string GetClassVariant(
         SeatClass seatClass)
@@ -2468,9 +2408,6 @@
     }
 
 
-    /* =========================================================
-       LOCATION VARIANT
-    ========================================================== */
 
     private string GetLocationVariant(
         SeatLocation location)
@@ -2495,10 +2432,6 @@
     }
 
 
-    /* =========================================================
-       SIDE VARIANT
-    ========================================================== */
-
     private string GetSideVariant(
         SeatSide side)
     {
@@ -2519,9 +2452,6 @@
     }
 
 
-    /* =========================================================
-       STATUS VARIANT
-    ========================================================== */
 
     private string GetStatusVariant(
         FlightSeatStatus status)

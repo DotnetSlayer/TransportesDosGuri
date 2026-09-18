@@ -1,4 +1,5 @@
 ﻿@page "/purchase/{PurchaseId:long}"
+@rendermode InteractiveServer
 @attribute [Authorize]
 
 @using TransportesDosGuri.Core.DTOs
@@ -14,7 +15,6 @@
 
 <div class="purchase-page">
 
-    <!-- BACKGROUND EFFECTS -->
     <div class="background-effects">
         <div class="orb orb-purple"></div>
         <div class="orb orb-indigo"></div>
@@ -55,7 +55,6 @@
             }
             else
             {
-                <!-- HEADER -->
                 <header class="page-header">
 
                     <div class="header-text">
@@ -89,7 +88,6 @@
 
                 </header>
 
-                <!-- MAIN CARD -->
                 <section class="purchase-card">
 
                     <div class="stat-card-glow"></div>
@@ -174,7 +172,7 @@
 
                     </div>
 
-                    @if (purchase.Status == PurchaseStatus.Pending)
+                    @if (purchase.Status == PurchaseStatus.Pendente)
                     {
                         <button class="primary-button payment-button"
                                 @onclick="ProcessPayment"
@@ -183,7 +181,7 @@
                             @if (processingPayment)
                             {
                                 <span class="button-spinner"></span>
-                                <span>Processando...</span>
+                                <span>Gerando fatura...</span>
                             }
                             else
                             {
@@ -196,9 +194,59 @@
                             }
 
                         </button>
+
+                        @if (!string.IsNullOrWhiteSpace(checkoutError))
+                        {
+                            <div class="checkout-error">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
+                                    <path d="M12 8v4M12 16h.01"
+                                          stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                                </svg>
+                                <span>@checkoutError</span>
+                            </div>
+                        }
+
+                        @if (invoiceGenerated)
+                        {
+                            <div class="checkout-info">
+                                <svg viewBox="0 0 24 24" fill="none">
+                                    <path d="M3 6l9 6 9-6"
+                                          stroke="currentColor" stroke-width="1.8"
+                                          stroke-linecap="round" stroke-linejoin="round" />
+                                    <rect x="3" y="5" width="18" height="14" rx="2"
+                                          stroke="currentColor" stroke-width="1.8" />
+                                </svg>
+                                <span>
+                                    Fatura enviada para o e-mail cadastrado.
+                                    Verifique sua caixa de entrada para efetuar o pagamento.
+                                </span>
+                            </div>
+
+                            <button class="ghost-button confirm-button"
+                                    @onclick="ConfirmSandboxPayment"
+                                    disabled="@processingPayment">
+
+                                @if (processingPayment)
+                                {
+                                    <span class="button-spinner"></span>
+                                    <span>Confirmando...</span>
+                                }
+                                else
+                                {
+                                    <svg viewBox="0 0 24 24" fill="none">
+                                        <path d="M5 12l5 5L20 7"
+                                              stroke="currentColor" stroke-width="1.8"
+                                              stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <span>Já paguei (sandbox)</span>
+                                }
+
+                            </button>
+                        }
                     }
 
-                    @if (purchase.Status == PurchaseStatus.Confirmed)
+                    @if (purchase.Status == PurchaseStatus.Confirmado)
                     {
                         <button class="ghost-button receipt-button"
                                 @onclick="DownloadReceipt">
@@ -496,7 +544,6 @@
         background: rgba(99,102,241,.55);
     }
 
-    /* card header */
     .card-header {
         position: relative;
         z-index: 1;
@@ -551,7 +598,6 @@
         word-break: break-word;
     }
 
-    /* purchase data */
     .purchase-data {
         position: relative;
         z-index: 1;
@@ -613,7 +659,6 @@
         }
     }
 
-    /* reservations section */
     .reservations-section {
         position: relative;
         z-index: 1;
@@ -763,7 +808,7 @@
     .ghost-button {
         position: relative;
         z-index: 1;
-        margin-top: 24px;
+        margin-top: 16px;
         width: 100%;
         display: inline-flex;
         align-items: center;
@@ -788,11 +833,16 @@
             height: 18px;
         }
 
-        .ghost-button:hover {
+        .ghost-button:hover:not(:disabled) {
             color: #ffffff;
             border-color: rgba(168,85,247,.35);
             background: linear-gradient(135deg, rgba(79,70,229,.20), rgba(147,51,234,.14));
             box-shadow: 0 12px 30px rgba(99,102,241,.22), inset 0 1px rgba(255,255,255,.08);
+        }
+
+        .ghost-button:disabled {
+            opacity: .65;
+            cursor: not-allowed;
         }
 
     .button-spinner {
@@ -807,6 +857,55 @@
     @@keyframes spin {
         to { transform: rotate(360deg); }
     }
+
+    /* =========================================================
+           CHECKOUT ERROR / INFO
+        ========================================================= */
+    .checkout-error {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 16px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        color: #fca5a5;
+        font-size: 12px;
+        font-weight: 600;
+        background: rgba(239,68,68,.08);
+        border: 1px solid rgba(239,68,68,.24);
+    }
+
+        .checkout-error svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            color: #f87171;
+        }
+
+    .checkout-info {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-top: 16px;
+        padding: 12px 14px;
+        border-radius: 12px;
+        color: #a5b4fc;
+        font-size: 12px;
+        font-weight: 600;
+        background: rgba(99,102,241,.08);
+        border: 1px solid rgba(99,102,241,.24);
+    }
+
+        .checkout-info svg {
+            width: 16px;
+            height: 16px;
+            flex-shrink: 0;
+            color: #818cf8;
+        }
 
     /* =========================================================
            STATE BOX
@@ -881,6 +980,10 @@
 
     private bool processingPayment;
 
+    private bool invoiceGenerated;
+
+    private string? checkoutError;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadPurchaseAsync();
@@ -904,23 +1007,32 @@
         }
     }
 
+    // ============================================================
+    // 1) Pagar compra: só cria a cobrança no Asaas
+    // ============================================================
     private async Task ProcessPayment()
     {
-        if (processingPayment)
-            return;
+        if (processingPayment) return;
 
         processingPayment = true;
+        checkoutError = null;
+        invoiceGenerated = false;
 
         try
         {
-            var success = await PurchaseService.ProcessPaymentAsync(PurchaseId);
+            var checkout = await PurchaseService.CreateCheckoutAsync(PurchaseId);
 
-            if (success)
-                await LoadPurchaseAsync();
+            if (checkout is null)
+            {
+                checkoutError = "Não foi possível gerar a cobrança. Tente novamente.";
+                return;
+            }
+
+            invoiceGenerated = true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erro ao processar pagamento: {ex.Message}");
+            checkoutError = $"Erro ao processar pagamento: {ex.Message}";
         }
         finally
         {
@@ -928,6 +1040,42 @@
         }
     }
 
+    // ============================================================
+    // 2) Já paguei: confirma o pagamento (sandbox)
+    // ============================================================
+    private async Task ConfirmSandboxPayment()
+    {
+        if (processingPayment) return;
+
+        processingPayment = true;
+        checkoutError = null;
+
+        try
+        {
+            var success = await PurchaseService.ProcessPaymentAsync(PurchaseId);
+
+            if (!success)
+            {
+                checkoutError = "Não foi possível confirmar o pagamento.";
+                return;
+            }
+
+            invoiceGenerated = false;
+            await LoadPurchaseAsync();
+        }
+        catch (Exception ex)
+        {
+            checkoutError = $"Erro ao confirmar pagamento: {ex.Message}";
+        }
+        finally
+        {
+            processingPayment = false;
+        }
+    }
+
+    // ============================================================
+    // 3) Baixar recibo (só quando Confirmado)
+    // ============================================================
     private async Task DownloadReceipt()
     {
         try
@@ -960,9 +1108,9 @@
     {
         return status switch
         {
-            PurchaseStatus.Pending => "Pendente",
-            PurchaseStatus.Confirmed => "Confirmada",
-            PurchaseStatus.Canceled => "Cancelada",
+            PurchaseStatus.Pendente => "Pendente",
+            PurchaseStatus.Confirmado => "Confirmada",
+            PurchaseStatus.Cancelado => "Cancelada",
             _ => status.ToString()
         };
     }
@@ -971,9 +1119,9 @@
     {
         return status switch
         {
-            PurchaseStatus.Pending => "status-pending",
-            PurchaseStatus.Confirmed => "status-confirmed",
-            PurchaseStatus.Canceled => "status-canceled",
+            PurchaseStatus.Pendente => "status-pending",
+            PurchaseStatus.Confirmado => "status-confirmed",
+            PurchaseStatus.Cancelado => "status-canceled",
             _ => "status-default"
         };
     }
@@ -982,9 +1130,9 @@
     {
         return seatClass switch
         {
-            SeatClass.Economical => "Econômica",
-            SeatClass.Executive => "Executiva",
-            SeatClass.First => "Primeira Classe",
+            SeatClass.Econômico => "Econômica",
+            SeatClass.Executivo => "Executiva",
+            SeatClass.Primeira => "Primeira Classe",
             _ => seatClass.ToString()
         };
     }

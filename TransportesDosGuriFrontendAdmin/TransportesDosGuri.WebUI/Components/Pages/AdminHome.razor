@@ -18,11 +18,10 @@
 
 @attribute [Authorize]
 
-<PageTitle>Dashboard</PageTitle>
+<PageTitle>Transportes Dos Guri</PageTitle>
 
 <div class="dashboard-page">
 
-    <!-- BACKGROUND EFFECTS -->
     <div class="background-effects">
         <div class="orb orb-purple"></div>
         <div class="orb orb-indigo"></div>
@@ -34,7 +33,6 @@
 
         <div class="dashboard-container">
 
-            <!-- HEADER -->
             <header class="dashboard-header">
 
                 <div class="header-text">
@@ -66,10 +64,8 @@
 
             </header>
 
-            <!-- STAT CARDS -->
             <section class="stat-grid">
 
-                <!-- AERONAVES -->
                 <a href="/adminAircrafts" class="stat-card stat-card-indigo">
                     <div class="stat-card-glow"></div>
                     <div class="stat-top">
@@ -90,14 +86,12 @@
                             }
                             else
                             {
-
                                 <span>@totalAircrafts</span>
                             }
                         </div>
                     </div>
                 </a>
 
-                <!-- AEROPORTOS -->
                 <a href="/adminAirports" class="stat-card stat-card-emerald">
                     <div class="stat-card-glow"></div>
                     <div class="stat-top">
@@ -126,14 +120,12 @@
                             }
                             else
                             {
-
                                 <span>@totalAirports</span>
                             }
                         </div>
                     </div>
                 </a>
 
-                <!-- ASAAS -->
                 <a href="/adminAsaasIntegrations" class="stat-card stat-card-emerald">
                     <div class="stat-card-glow"></div>
                     <div class="stat-top">
@@ -157,14 +149,12 @@
                             }
                             else
                             {
-
                                 <span>@totalAsaasIntegrations</span>
                             }
                         </div>
                     </div>
                 </a>
 
-                <!-- ASSENTOS -->
                 <a href="/adminSeats" class="stat-card stat-card-purple">
                     <div class="stat-card-glow"></div>
                     <div class="stat-top">
@@ -189,14 +179,12 @@
                             }
                             else
                             {
-
                                 <span>@totalSeats</span>
                             }
                         </div>
                     </div>
                 </a>
 
-                <!-- ASSENTOS DE VOOS -->
                 <a href="/adminFlightSeats" class="stat-card stat-card-emerald">
                     <div class="stat-card-glow"></div>
                     <div class="stat-top">
@@ -221,14 +209,12 @@
                             }
                             else
                             {
-
                                 <span>@totalFlightSeats</span>
                             }
                         </div>
                     </div>
                 </a>
 
-                <!-- VOOS -->
                 <a href="/adminFlights" class="stat-card stat-card-indigo">
                     <div class="stat-card-glow"></div>
                     <div class="stat-top">
@@ -250,14 +236,12 @@
                             }
                             else
                             {
-
                                 <span>@totalFlights</span>
                             }
                         </div>
                     </div>
                 </a>
 
-                <!-- COMPRAS -->
                 <a href="/adminPurchases" class="stat-card stat-card-indigo">
                     <div class="stat-card-glow"></div>
                     <div class="stat-top">
@@ -280,14 +264,12 @@
                             }
                             else
                             {
-
                                 <span>@totalPurchases</span>
                             }
                         </div>
                     </div>
                 </a>
 
-                <!-- RESERVAS -->
                 <a href="/adminReservations" class="stat-card stat-card-indigo">
                     <div class="stat-card-glow"></div>
                     <div class="stat-top">
@@ -312,14 +294,12 @@
                             }
                             else
                             {
-
                                 <span>@totalReservations</span>
                             }
                         </div>
                     </div>
                 </a>
 
-                <!-- ESCALAS -->
                 <a href="/adminSchedules" class="stat-card stat-card-indigo">
                     <div class="stat-card-glow"></div>
                     <div class="stat-top">
@@ -342,14 +322,12 @@
                             }
                             else
                             {
-
                                 <span>@totalSchedules</span>
                             }
                         </div>
                     </div>
                 </a>
 
-                <!-- VIAGENS -->
                 <a href="/adminTrips" class="stat-card stat-card-indigo">
                     <div class="stat-card-glow"></div>
                     <div class="stat-top">
@@ -374,14 +352,12 @@
                             }
                             else
                             {
-
                                 <span>@totalTrips</span>
                             }
                         </div>
                     </div>
                 </a>
 
-                <!-- REQUISIÇÕES DE USUÁRIOS -->
                 <a href="/adminUserRequests" class="stat-card stat-card-indigo">
                     <div class="stat-card-glow"></div>
                     <div class="stat-top">
@@ -406,14 +382,12 @@
                             }
                             else
                             {
-
                                 <span>@totalUserRequests</span>
                             }
                         </div>
                     </div>
                 </a>
 
-                <!-- USUÁRIOS -->
                 <a href="/adminUsers" class="stat-card stat-card-indigo">
                     <div class="stat-card-glow"></div>
                     <div class="stat-top">
@@ -436,7 +410,6 @@
                             }
                             else
                             {
-
                                 <span>@totalUsers</span>
                             }
                         </div>
@@ -453,24 +426,17 @@
 
 <style>
 
-    /* =========================================================
-           PAGE
-        ========================================================= */
     .dashboard-page {
         position: relative;
-        min-height: 100vh;
+        min-height: 100%;
         width: 100%;
-        overflow: hidden;
         background: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, .13), transparent 30%), radial-gradient(circle at 85% 80%, rgba(168, 85, 247, .12), transparent 30%), #03050b;
         color: #e2e8f0;
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    /* =========================================================
-           BACKGROUND
-        ========================================================= */
     .background-effects {
-        position: fixed;
+        position: absolute;
         inset: 0;
         overflow: hidden;
         pointer-events: none;
@@ -530,13 +496,10 @@
         }
     }
 
-    /* =========================================================
-           LAYOUT
-        ========================================================= */
     .dashboard-main {
         position: relative;
         z-index: 1;
-        min-height: 100vh;
+        min-height: 100%;
         display: flex;
         flex-direction: column;
     }
@@ -544,7 +507,7 @@
     .dashboard-container {
         flex: 1;
         width: 100%;
-        max-width: 1400px;
+        max-width: 1800px;
         margin: 0 auto;
         padding: 32px clamp(20px, 4vw, 48px) 48px;
         display: flex;
@@ -552,9 +515,6 @@
         gap: 32px;
     }
 
-    /* =========================================================
-           HEADER
-        ========================================================= */
     .dashboard-header {
         display: flex;
         flex-direction: column;
@@ -626,9 +586,6 @@
         line-height: 1.7;
     }
 
-    /* =========================================================
-           REFRESH BUTTON
-        ========================================================= */
     .refresh-button {
         display: inline-flex;
         align-items: center;
@@ -671,9 +628,6 @@
             cursor: not-allowed;
         }
 
-    /* =========================================================
-           STAT GRID
-        ========================================================= */
     .stat-grid {
         display: grid;
         grid-template-columns: repeat(1, minmax(0, 1fr));
@@ -692,9 +646,7 @@
         }
     }
 
-    /* =========================================================
-           STAT CARD
-        ========================================================= */
+
     .stat-card {
         position: relative;
         display: block;
@@ -734,7 +686,6 @@
         opacity: .8;
     }
 
-    /* color variants */
     .stat-card-indigo .stat-card-glow {
         background: rgba(99,102,241,.55);
     }
@@ -791,7 +742,6 @@
         color: #fcd34d;
     }
 
-    /* top row */
     .stat-top {
         position: relative;
         z-index: 1;
@@ -831,7 +781,6 @@
         transform: translateX(2px);
     }
 
-    /* body */
     .stat-body {
         position: relative;
         z-index: 1;

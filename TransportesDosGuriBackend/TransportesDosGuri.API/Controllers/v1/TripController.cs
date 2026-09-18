@@ -75,9 +75,23 @@ namespace TransportesDosGuri.API.Controllers.v1
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
-            var delete = await _tripService.DeleteAsync(id);
+            try
+            {
+                var delete = await _tripService.DeleteAsync(id);
 
-            return Ok("Base de Dados Atualizada!");
+                if (!delete)
+                    return NotFound(new { message = "Viagem não encontrada." });
+
+                return Ok(new { message = "Viagem excluída com sucesso." });
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 547)
+            {
+                return Conflict(new
+                {
+                    message = "Não é possível excluir esta viagem pois existem voos ou compras associadas a ela. " +
+                              "Exclua ou reatribua esses registros primeiro."
+                });
+            }
         }
 
         /// <summary>

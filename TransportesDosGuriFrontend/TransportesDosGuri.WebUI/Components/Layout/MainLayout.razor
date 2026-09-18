@@ -1,23 +1,114 @@
 ﻿@inherits LayoutComponentBase
+@implements IDisposable
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+@inject NavigationManager NavigationManager
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
+<div class="min-h-screen bg-[#070a13] text-slate-200">
+
+    <NavMenu />
+
+    <main class="min-h-screen flex flex-col main-with-sidebar">
+
+        <div class="flex-1 px-6 py-8 flex flex-col">
+            <div class="max-w-[1800px] mx-auto w-full flex-1">
+                @Body
+            </div>
         </div>
 
-        <article class="content px-4">
-            @Body
-        </article>
+        <footer class="px-6 pb-6 text-[11px] text-slate-600 text-center shrink-0">
+            Transportes Dos Guri · @DateTime.Now.Year
+        </footer>
+
     </main>
+
 </div>
 
-<div id="blazor-error-ui" data-nosnippet>
-    An unhandled error has occurred.
-    <a href="." class="reload">Reload</a>
-    <span class="dismiss">🗙</span>
+<div id="blazor-error-ui" data-nosnippet
+     class="hidden fixed bottom-4 right-4 z-50 max-w-sm rounded-lg bg-red-950/90 border border-red-500/40 p-4 text-sm text-red-100">
+    <p class="font-semibold">Algo deu errado.</p>
+    <a href="." class="reload link text-red-200 mt-2 inline-block">Recarregar</a>
+    <button type="button" class="dismiss link text-red-300 ml-3">Fechar</button>
 </div>
+
+@code {
+    private string currentTime = DateTime.Now.ToString("HH:mm");
+    private string currentRoute = "Console";
+    private System.Threading.Timer? timer;
+
+    protected override void OnInitialized()
+    {
+        UpdateRoute();
+        NavigationManager.LocationChanged += OnLocationChanged;
+        timer = new System.Threading.Timer(_ =>
+        {
+            currentTime = DateTime.Now.ToString("HH:mm");
+            InvokeAsync(StateHasChanged);
+        }, null, 0, 10000);
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        UpdateRoute();
+        StateHasChanged();
+    }
+
+    private void UpdateRoute()
+    {
+        var relativePath = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        currentRoute = string.IsNullOrWhiteSpace(relativePath) ? "Console" : relativePath.Split('/')[0];
+    }
+
+    public void Dispose()
+    {
+        timer?.Dispose();
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}
+
+<style>
+
+    .main-with-sidebar {
+        width: 100%;
+    }
+
+    @@media (min-width: 1024px) {
+        .main-with-sidebar {
+            padding-left: 240px;
+        }
+    }
+
+    ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #03050b;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        border-radius: 999px;
+        border: 2px solid #03050b;
+        background: linear-gradient(180deg, rgba(99, 102, 241, .55), rgba(168, 85, 247, .55));
+        transition: background .25s ease, box-shadow .25s ease;
+    }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: linear-gradient(180deg, rgba(99, 102, 241, .85), rgba(168, 85, 247, .85));
+            box-shadow: 0 0 10px rgba(139, 92, 246, .45);
+        }
+
+        ::-webkit-scrollbar-thumb:active {
+            background: linear-gradient(180deg, rgba(99, 102, 241, 1), rgba(168, 85, 247, 1));
+        }
+
+    ::-webkit-scrollbar-corner {
+        background: #03050b;
+    }
+
+    * {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(139, 92, 246, .55) #03050b;
+    }
+
+</style>

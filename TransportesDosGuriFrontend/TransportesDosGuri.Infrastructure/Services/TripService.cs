@@ -55,14 +55,35 @@ namespace TransportesDosGuri.Infrastructure.Services
 
         public async Task<TripDetailsDTO?> GetDetailsAsync(long id)
         {
-            var response = await _http.GetAsync($"api/v1/trip/{id}/details");
+            var url = $"api/v1/Trip/{id}/details";
 
-            if (response.IsSuccessStatusCode)
+            try
             {
-                return await response.Content.ReadFromJsonAsync<TripDetailsDTO>();
-            }
+                var response = await _http.GetAsync(url);
 
-            return null;
+                var content = await response.Content.ReadAsStringAsync();
+
+                Console.WriteLine($"GET {url}");
+                Console.WriteLine($"Status: {(int)response.StatusCode} - {response.StatusCode}");
+                Console.WriteLine($"Response: {content}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content
+                        .ReadFromJsonAsync<TripDetailsDTO>();
+                }
+
+                throw new HttpRequestException(
+                    $"Erro ao buscar detalhes da viagem. " +
+                    $"Status: {(int)response.StatusCode} ({response.StatusCode}). " +
+                    $"Resposta: {content}");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"ERRO TripService: {ex}");
+
+                throw;
+            }
         }
     }
 }

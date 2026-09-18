@@ -73,9 +73,23 @@ namespace TransportesDosGuri.API.Controllers.v1
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
-            var delete = await _flightSeatService.DeleteAsync(id);
+            try
+            {
+                var delete = await _flightSeatService.DeleteAsync(id);
 
-            return Ok("Base de Dados Atualizada!");
+                if (!delete)
+                    return NotFound(new { message = "Assento de voo não encontrado." });
+
+                return Ok(new { message = "Assento de voo excluído com sucesso." });
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 547)
+            {
+                return Conflict(new
+                {
+                    message = "Não é possível excluir este assento pois existem reservas associadas a ele. " +
+                              "Exclua ou reatribua essas reservas primeiro."
+                });
+            }
         }
     }
 }

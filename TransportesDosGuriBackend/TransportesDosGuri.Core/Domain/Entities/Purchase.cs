@@ -14,14 +14,17 @@
 
         public PurchaseStatus Status { get; set; }
 
+        public string? AsaasPaymentId { get; set; }
+        public string? AsaasInvoiceUrl { get; set; }
+
     }
 
     public enum PurchaseStatus
     {
-        Pendente,
+        Pendente = 0,
 
-        Confirmado,
+        Confirmado = 1,
 
-        Cancelado
+        Cancelado = 2
     }
 }

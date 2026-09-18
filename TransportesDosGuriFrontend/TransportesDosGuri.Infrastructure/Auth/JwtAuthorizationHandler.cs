@@ -1,6 +1,9 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
+using System;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Threading;
+using System.Threading.Tasks;
 using TransportesDosGuri.Core.Common;
 using TransportesDosGuri.Core.Interfaces;
 
@@ -11,32 +14,34 @@ namespace TransportesDosGuri.Infrastructure.Auth
         private readonly ITokenStorageService _tokenStorage;
         private readonly IServiceProvider _serviceProvider;
 
-        public JwtAuthorizationHandler(ITokenStorageService tokenStorage, IServiceProvider serviceProvider)
+        public JwtAuthorizationHandler(
+            ITokenStorageService tokenStorage,
+            IServiceProvider serviceProvider)
         {
             _tokenStorage = tokenStorage;
             _serviceProvider = serviceProvider;
         }
 
-        protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        protected override async Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
         {
             var path = request.RequestUri?.AbsolutePath ?? string.Empty;
 
-            // Ignora injeção de token para endpoints do Account
-            if (path.Contains("/Account/", StringComparison.OrdinalIgnoreCase))
-            {
-                return await base.SendAsync(request, cancellationToken);
-            }
+            var isPublicAccountEndpoint =
+                path.EndsWith("/Account/Login", StringComparison.OrdinalIgnoreCase) ||
+                path.EndsWith("/Account/Register", StringComparison.OrdinalIgnoreCase);
 
             var (accessToken, _) = await _tokenStorage.GetTokensAsync();
 
             if (!string.IsNullOrEmpty(accessToken))
             {
-                request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", accessToken);
+                request.Headers.Authorization =
+                    new AuthenticationHeaderValue("Bearer", accessToken);
             }
 
             var response = await base.SendAsync(request, cancellationToken);
 
-            // Tenta dar Refresh apenas se receber 401 e não for uma tentativa prévia de Auth
             if (response.StatusCode == HttpStatusCode.Unauthorized)
             {
                 using var scope = _serviceProvider.CreateScope();
@@ -47,9 +52,10 @@ namespace TransportesDosGuri.Infrastructure.Auth
                 if (!string.IsNullOrEmpty(newToken))
                 {
                     await _tokenStorage.SetTokensAsync(newToken, string.Empty);
-                    request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", newToken);
 
-                    // Refaz a requisição original com o novo token recebido
+                    request.Headers.Authorization =
+                        new AuthenticationHeaderValue("Bearer", newToken);
+
                     return await base.SendAsync(request, cancellationToken);
                 }
             }

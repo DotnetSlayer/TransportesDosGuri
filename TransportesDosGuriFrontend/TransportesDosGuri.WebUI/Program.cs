@@ -33,6 +33,8 @@ builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>
 builder.Services.AddScoped<ITokenStorageService, TokenStorageService>();
 builder.Services.AddTransient<JwtAuthorizationHandler>();
 
+
+
 var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7030";
 
 builder.Services.AddHttpClient<IAuthService, AuthService>(c => c.BaseAddress = new Uri(apiBaseUrl));
@@ -41,6 +43,11 @@ builder.Services.AddHttpClient<ITripService, TripService>(c => c.BaseAddress = n
 builder.Services.AddHttpClient<IUserRequestService, UserRequestService>(c => c.BaseAddress = new Uri(apiBaseUrl)).AddHttpMessageHandler<JwtAuthorizationHandler>();
 builder.Services.AddHttpClient<IUserService, UserService>(c => c.BaseAddress = new Uri(apiBaseUrl)).AddHttpMessageHandler<JwtAuthorizationHandler>();
 
+builder.Services.AddHttpClient<ZipCodeApiService>(c =>
+{
+    c.BaseAddress = new Uri(apiBaseUrl);
+    c.Timeout = TimeSpan.FromSeconds(15);
+});
 
 JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 

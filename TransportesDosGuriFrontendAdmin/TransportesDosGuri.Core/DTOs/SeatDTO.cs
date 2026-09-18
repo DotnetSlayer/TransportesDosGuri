@@ -23,28 +23,28 @@ namespace TransportesDosGuri.Core.DTOs
 
     public enum SeatClass
     {
-        Economical,
+        Econômico = 0,
 
-        Executive,
+        Executivo = 1,
 
-        First
+        Premium = 2
     }
 
     public enum SeatLocation
     {
-        Window,
+        Janela = 0,
 
-        Corridor,
+        Corredor = 1,
 
-        Middle
+        Meio = 2
     }
 
     public enum SeatSide
     {
-        Left,
+        Esquerdo = 0,
 
-        Middle,
+        Meio = 1,
 
-        Right
+        Direito = 2
     }
 }

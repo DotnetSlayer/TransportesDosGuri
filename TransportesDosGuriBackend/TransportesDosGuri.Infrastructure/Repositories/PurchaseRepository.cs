@@ -28,7 +28,9 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                     TripId,
                     PurchaseDate,
                     PurchasePrice,
-                    Status
+                    Status,
+                    AsaasPaymentId,
+                    AsaasInvoiceUrl
                 )
                 OUTPUT INSERTED.Id
                 VALUES
@@ -37,7 +39,9 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                     @TripId,
                     @PurchaseDate,
                     @PurchasePrice,
-                    @Status
+                    @Status,
+                    @AsaasPaymentId,
+                    @AsaasInvoiceUrl
                 );
                 """;
 
@@ -67,7 +71,9 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                     TripId,
                     PurchaseDate,
                     PurchasePrice,
-                    Status
+                    Status,
+                    AsaasPaymentId,
+                    AsaasInvoiceUrl
                 FROM Purchase
                 ORDER BY Id DESC;
                 """;
@@ -86,7 +92,9 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                     TripId,
                     PurchaseDate,
                     PurchasePrice,
-                    Status
+                    Status,
+                    AsaasPaymentId,
+                    AsaasInvoiceUrl
                 FROM Purchase
                 WHERE Id = @Id;
                 """;
@@ -105,7 +113,9 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                     TripId = @TripId,
                     PurchaseDate = @PurchaseDate,
                     PurchasePrice = @PurchasePrice,
-                    Status = @Status
+                    Status = @Status,
+                    AsaasPaymentId = @AsaasPaymentId,
+                    AsaasInvoiceUrl = @AsaasInvoiceUrl
                 WHERE Id = @Id;
                 """;
 
@@ -159,31 +169,18 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                 var seats = (
                     await connection.QueryAsync<PurchaseSeatRow>(
                         sqlSeats,
-                        new
-                        {
-                            SeatIds = seatIds
-                        },
-                        transaction
-                    )
+                        new { SeatIds = seatIds },
+                        transaction)
                 ).ToList();
 
                 if (seats.Count != seatIds.Length)
-                {
-                    throw new InvalidOperationException(
-                        "Requisição Inválida!");
-                }
+                    throw new InvalidOperationException("Requisição Inválida!");
 
                 if (seats.Any(x => x.TripId != request.TripId))
-                {
-                    throw new InvalidOperationException(
-                        "Requisição Inválida!");
-                }
+                    throw new InvalidOperationException("Requisição Inválida!");
 
                 if (seats.Any(x => x.Status != FlightSeatStatus.Disponível))
-                {
-                    throw new InvalidOperationException(
-                        "Requisição Inválida!");
-                }
+                    throw new InvalidOperationException("Requisição Inválida!");
 
                 var totalPrice = seats.Sum(seat =>
                 {
@@ -227,8 +224,7 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                         PurchasePrice = totalPrice,
                         Status = PurchaseStatus.Pendente
                     },
-                    transaction
-                );
+                    transaction);
 
                 const string sqlUpdateSeats = """
                     UPDATE FlightSeat
@@ -245,14 +241,10 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                         ReservedStatus = FlightSeatStatus.Reservado,
                         AvailableStatus = FlightSeatStatus.Disponível
                     },
-                    transaction
-                );
+                    transaction);
 
                 if (updatedSeats != seatIds.Length)
-                {
-                    throw new InvalidOperationException(
-                        "Requisição Inválida!");
-                }
+                    throw new InvalidOperationException("Requisição Inválida!");
 
                 const string sqlReservation = """
                     INSERT INTO Reservation
@@ -284,9 +276,6 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                         _ => 0m
                     };
 
-                    var reservationPrice =
-                        seat.TripTotalPrice + adicional;
-
                     await connection.ExecuteAsync(
                         sqlReservation,
                         new
@@ -296,10 +285,9 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                             PurchaseId = purchaseId,
                             ReservationDate = DateTime.Now,
                             Status = ReservationStatus.Pendente,
-                            Price = reservationPrice
+                            Price = seat.TripTotalPrice + adicional
                         },
-                        transaction
-                    );
+                        transaction);
                 }
 
                 transaction.Commit();
@@ -331,7 +319,9 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                     t.TripName,
                     p.PurchaseDate,
                     p.PurchasePrice,
-                    p.Status
+                    p.Status,
+                    p.AsaasPaymentId,
+                    p.AsaasInvoiceUrl
                 FROM Purchase p
                 INNER JOIN Trip t
                     ON t.Id = p.TripId
@@ -341,11 +331,7 @@ namespace TransportesDosGuri.Infrastructure.Repositories
 
             var purchase = await connection.QueryFirstOrDefaultAsync<PurchaseDetailsDTO>(
                 sqlPurchase,
-                new
-                {
-                    PurchaseId = purchaseId,
-                    UserId = userId
-                });
+                new { PurchaseId = purchaseId, UserId = userId });
 
             if (purchase == null)
                 return null;
@@ -367,18 +353,14 @@ namespace TransportesDosGuri.Infrastructure.Repositories
 
             var reservations = await connection.QueryAsync<ReservationDTO>(
                 sqlReservations,
-                new
-                {
-                    PurchaseId = purchaseId,
-                    UserId = userId
-                });
+                new { PurchaseId = purchaseId, UserId = userId });
 
             purchase.Reservations = reservations.ToList();
 
             return purchase;
         }
 
-        public async Task<bool> ProcessPaymentAsync(long purchaseId,long userId)
+        public async Task<bool> ProcessPaymentAsync(long purchaseId, long userId)
         {
             using var connection = _connectionFactory.CreateConnection();
 
@@ -404,11 +386,7 @@ namespace TransportesDosGuri.Infrastructure.Repositories
 
                 var purchase = await connection.QueryFirstOrDefaultAsync<Purchase>(
                     sqlPurchase,
-                    new
-                    {
-                        PurchaseId = purchaseId,
-                        UserId = userId
-                    },
+                    new { PurchaseId = purchaseId, UserId = userId },
                     transaction);
 
                 if (purchase == null)
@@ -458,7 +436,6 @@ namespace TransportesDosGuri.Infrastructure.Repositories
                     transaction);
 
                 transaction.Commit();
-
                 return true;
             }
             catch
@@ -492,19 +469,13 @@ namespace TransportesDosGuri.Infrastructure.Repositories
             var purchases = (
                 await connection.QueryAsync<PurchaseDetailsDTO>(
                     sqlPurchases,
-                    new
-                    {
-                        UserId = userId,
-                        Status = PurchaseStatus.Confirmado
-                    })
+                    new { UserId = userId, Status = PurchaseStatus.Confirmado })
             ).ToList();
 
             if (!purchases.Any())
                 return purchases;
 
-            var purchaseIds = purchases
-                .Select(x => x.Id)
-                .ToArray();
+            var purchaseIds = purchases.Select(x => x.Id).ToArray();
 
             const string sqlReservations = """
                 SELECT
@@ -524,11 +495,7 @@ namespace TransportesDosGuri.Infrastructure.Repositories
             var reservations = (
                 await connection.QueryAsync<ReservationDTO>(
                     sqlReservations,
-                    new
-                    {
-                        UserId = userId,
-                        PurchaseIds = purchaseIds
-                    })
+                    new { UserId = userId, PurchaseIds = purchaseIds })
             ).ToList();
 
             foreach (var purchase in purchases)
@@ -618,26 +585,38 @@ namespace TransportesDosGuri.Infrastructure.Repositories
             return purchase;
         }
 
+        // ============================================================
+        // NOVO — Corrigido: tabela é "Purchase" (singular), não "Purchases"
+        // ============================================================
+        public async Task UpdateAsaasPaymentIdAsync(long purchaseId, string asaasPaymentId, string? invoiceUrl)
+        {
+            const string sql = """
+                UPDATE Purchase
+                SET AsaasPaymentId  = @AsaasPaymentId,
+                    AsaasInvoiceUrl = @AsaasInvoiceUrl
+                WHERE Id = @Id
+                """;
+
+            using var connection = _connectionFactory.CreateConnection();
+            await connection.ExecuteAsync(sql, new
+            {
+                Id = purchaseId,
+                AsaasPaymentId = asaasPaymentId,
+                AsaasInvoiceUrl = invoiceUrl
+            });
+        }
+
         private class PurchaseSeatRow
         {
             public long Id { get; set; }
-
             public long FlightId { get; set; }
-
             public long AircraftId { get; set; }
-
             public string SeatNumber { get; set; } = string.Empty;
-
             public SeatClass Class { get; set; }
-
             public SeatLocation Location { get; set; }
-
             public SeatSide Side { get; set; }
-
             public FlightSeatStatus Status { get; set; }
-
             public long TripId { get; set; }
-
             public decimal TripTotalPrice { get; set; }
         }
     }

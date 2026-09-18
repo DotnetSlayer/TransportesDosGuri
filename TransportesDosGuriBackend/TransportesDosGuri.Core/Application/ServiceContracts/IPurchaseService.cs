@@ -1,4 +1,5 @@
 ﻿using TransportesDosGuri.Core.Application.DTOs;
+using TransportesDosGuri.Core.Application.DTOs.Asaas;
 
 namespace TransportesDosGuri.Core.Application.ServiceContracts
 {
@@ -30,5 +31,7 @@ namespace TransportesDosGuri.Core.Application.ServiceContracts
             long applicationUserId);
 
         Task<byte[]?> GenerateReceiptPdfAsync(long purchaseId, long userId);
+
+        Task<AsaasCheckoutResultDTO?> CreateCheckoutAsync(long purchaseId, long userId);
     }
 }

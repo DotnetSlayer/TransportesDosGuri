@@ -73,9 +73,23 @@ namespace TransportesDosGuri.API.Controllers.v1
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
-            var delete = await _airportService.DeleteAsync(id);
+            try
+            {
+                var delete = await _airportService.DeleteAsync(id);
 
-            return Ok("Base de Dados Atualizada!");
+                if (!delete)
+                    return NotFound(new { message = "Aeroporto não encontrado." });
+
+                return Ok(new { message = "Aeroporto excluído com sucesso." });
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 547)
+            {
+                return Conflict(new
+                {
+                    message = "Não é possível excluir este aeroporto pois existem viagens, voos ou escalas associadas a ele. " +
+                              "Exclua ou reatribua esses registros primeiro."
+                });
+            }
         }
     }
 }

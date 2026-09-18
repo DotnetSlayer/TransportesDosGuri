@@ -39,16 +39,41 @@
 
                     <div class="empty-icon">
                         <svg viewBox="0 0 24 24" fill="none">
-                            <circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.6" />
-                            <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" />
+                            <circle cx="12"
+                                    cy="12"
+                                    r="9"
+                                    stroke="currentColor"
+                                    stroke-width="1.6" />
+
+                            <path d="M12 8v4M12 16h.01"
+                                  stroke="currentColor"
+                                  stroke-width="1.8"
+                                  stroke-linecap="round" />
                         </svg>
                     </div>
 
-                    <h2>Viagem não encontrada</h2>
-                    <p>Não conseguimos localizar essa viagem.</p>
+                    <h2>
+                        Não foi possível carregar a viagem
+                    </h2>
 
-                    <button class="primary-button" @onclick="GoBack">
+                    @if (!string.IsNullOrWhiteSpace(errorMessage))
+                    {
+                        <p>
+                            @errorMessage
+                        </p>
+                    }
+                    else
+                    {
+                        <p>
+                            Não conseguimos localizar essa viagem.
+                        </p>
+                    }
+
+                    <button class="primary-button"
+                            @onclick="GoBack">
+
                         Voltar para viagens
+
                     </button>
 
                 </div>
@@ -972,6 +997,8 @@
 
     private HashSet<long> selectedSeatIds = new();
 
+    private string? errorMessage;
+
     protected override async Task OnInitializedAsync()
     {
         await LoadTripAsync();
@@ -980,6 +1007,7 @@
     private async Task LoadTripAsync()
     {
         loading = true;
+        errorMessage = null;
 
         try
         {
@@ -987,7 +1015,10 @@
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Erro ao carregar viagem: {ex.Message}");
+            Console.WriteLine($"Erro ao carregar viagem: {ex}");
+
+            errorMessage = ex.Message;
+            trip = null;
         }
         finally
         {

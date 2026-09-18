@@ -74,9 +74,23 @@ namespace TransportesDosGuri.API.Controllers.v1
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
-            var delete = await _purchaseService.DeleteAsync(id);
+            try
+            {
+                var delete = await _purchaseService.DeleteAsync(id);
 
-            return Ok("Base de Dados Atualizada!");
+                if (!delete)
+                    return NotFound(new { message = "Compra não encontrada." });
+
+                return Ok(new { message = "Compra excluída com sucesso." });
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 547)
+            {
+                return Conflict(new
+                {
+                    message = "Não é possível excluir esta compra pois existem reservas associadas a ela. " +
+                              "Exclua ou reatribua essas reservas primeiro."
+                });
+            }
         }
 
         /// <summary>
@@ -200,6 +214,23 @@ namespace TransportesDosGuri.API.Controllers.v1
                 return NotFound(new { message = "Recibo não encontrado ou compra não confirmada." });
 
             return File(pdfBytes, "application/pdf", $"Passagem_{id}.pdf");
+        }
+
+        /// <summary>
+        /// Endpoint para CRIAR CHECKOUT E CONEXÃO ASAAS
+        /// </summary>
+        [HttpPost("{purchaseId:long}/checkout")]
+        public async Task<IActionResult> CreateCheckout(long purchaseId)
+        {
+            if (!TryGetCurrentUserId(out var userId))
+                return Unauthorized();
+
+            var result = await _purchaseService.CreateCheckoutAsync(purchaseId, userId);
+
+            if (result is null)
+                return NotFound(new { message = "Compra não encontrada ou não pertence ao usuário." });
+
+            return Ok(result);
         }
     }
 }

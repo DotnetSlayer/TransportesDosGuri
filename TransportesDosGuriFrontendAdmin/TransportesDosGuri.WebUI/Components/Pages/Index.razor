@@ -14,11 +14,10 @@
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
 
-<PageTitle>@(showRegister ? "Criar conta" : "Login") - Transportes dos Guri</PageTitle>
+<PageTitle>Transportes Dos Guri</PageTitle>
 
 <div class="auth-page">
 
-    <!-- BACKGROUND -->
     <div class="background-effects">
         <div class="orb orb-purple"></div>
         <div class="orb orb-indigo"></div>
@@ -26,17 +25,16 @@
         <div class="grid-overlay"></div>
     </div>
 
-    <!-- MAIN CONTAINER -->
     <main class="auth-shell">
 
-        <!-- LEFT SIDE -->
+
         <section class="auth-panel">
 
             <div class="panel-glow"></div>
 
             <div class="content-wrapper">
 
-                <!-- LOGO -->
+               
                 <div class="flex justify-center mb-10">
                     <img src="/images/logo.png"
                          alt="Transportes dos Guri"
@@ -45,7 +43,6 @@
 
                 @if (!showRegister)
                 {
-                    <!-- LOGIN -->
                     <div class="form-header">
 
                         <h1>
@@ -86,7 +83,7 @@
 
                         <AntiforgeryToken />
 
-                        <!-- EMAIL -->
+  
                         <div class="field">
 
                             <label>Email</label>
@@ -116,7 +113,6 @@
 
                         </div>
 
-                        <!-- PASSWORD -->
                         <div class="field">
 
                             <label>Senha</label>
@@ -176,7 +172,7 @@
                 }
                 else
                 {
-                    <!-- REGISTER -->
+              
                     <div class="form-header register-header">
 
 
@@ -214,7 +210,7 @@
 
                         <DataAnnotationsValidator />
 
-                        <!-- PERSONAL DATA -->
+                    
                         <div class="section-label">
                             <span>01</span>
                             Dados pessoais
@@ -317,7 +313,7 @@
 
                         </div>
 
-                        <!-- ADDRESS -->
+                      
                         <div class="section-label address-label">
                             <span>02</span>
                             Endereço
@@ -436,7 +432,7 @@
 
             </div>
 
-            <!-- FOOTER -->
+    
             <footer class="footer">
 
                 <span>
@@ -455,7 +451,7 @@
 
         </section>
 
-        <!-- RIGHT SIDE -->
+     
         <section class="visual-panel">
 
             <img src="/images/plane.png"
@@ -509,7 +505,7 @@
 
             <div class="team-list">
 
-                <!-- THIAGO WURSTER -->
+                <!-- THIAGO WURSTER BALBINOT -->
                 <div class="team-card">
 
                     <div class="member-photo">

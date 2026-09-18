@@ -13,6 +13,7 @@ using System.Data;
 using System.Text;
 
 using TransportesDosGuri.Core.Application.ServiceContracts;
+using TransportesDosGuri.Core.Application.ServiceContracts.Asaas;
 using TransportesDosGuri.Core.Application.ServiceContracts.Identity;
 using TransportesDosGuri.Core.Application.ServiceContracts.Jwt;
 using TransportesDosGuri.Core.Application.ServiceContracts.QuestPDF;
@@ -54,10 +55,6 @@ builder.Services.AddControllers(options =>
     options.Filters.Add(
         new ConsumesAttribute("application/json")
     );
-
-    // Todas as actions exigem autenticação por padrão.
-    // Use [AllowAnonymous] nos endpoints públicos,
-    // como login e registro.
 
     var policy = new AuthorizationPolicyBuilder()
         .RequireAuthenticatedUser()
@@ -117,6 +114,8 @@ Dapper.SqlMapper.AddTypeHandler(
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // APPLICATION SERVICES
 ///////////////////////////////////////////////////////////////////////////////////////////////////
+
+builder.Services.AddHttpClient();
 
 builder.Services.AddScoped<
     IAircraftService,
@@ -228,6 +227,10 @@ builder.Services.AddScoped<
     UserRequestRepository
 >();
 
+builder.Services.AddScoped<
+    IAsaasCheckoutService, AsaasCheckoutService
+>();
+
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // IDENTITY / JWT / PDF
 ///////////////////////////////////////////////////////////////////////////////////////////////////
@@ -261,23 +264,12 @@ builder.Services.AddScoped<
 // ASAAS
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-builder.Services.AddHttpClient(
-    "AsaasClient",
-    client =>
-    {
-        client.DefaultRequestHeaders.Add(
-            "User-Agent",
-            "TransportesDosGuri/1.0"
-        );
-    }
-);
+builder.Services.AddHttpClient<IAsaasGateway, AsaasGateway>(client =>
+{
+    client.DefaultRequestHeaders.Add("User-Agent", "TransportesDosGuri/1.0");
+});
 
 builder.Services.AddScoped<AsaasClient>();
-
-builder.Services.AddScoped<
-    IAsaasGateway,
-    AsaasGateway
->();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // SWAGGER
@@ -535,11 +527,6 @@ app.UseRouting();
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 // CORS
-//
-// IMPORTANTE:
-// Deve ficar depois de UseRouting()
-// e antes de Authentication/Authorization.
-// 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 app.UseCors("AllowFrontend");

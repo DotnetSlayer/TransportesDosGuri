@@ -19,28 +19,28 @@
 
     public enum SeatClass
     {
-        Econômico,
+        Econômico = 0,
 
-        Executivo,
+        Executivo = 1,
 
-        Premium
+        Premium = 2
     }
 
     public enum SeatLocation
     {
-        Janela,
+        Janela = 0,
 
-        Corredor,
+        Corredor = 1,
 
-        Meio
+        Meio = 2
     }
 
     public enum SeatSide
     {
-        Esquerdo,
+        Esquerdo = 0,
 
-        Meio,
+        Meio = 1,
 
-        Direito
+        Direito = 2
     }
 }

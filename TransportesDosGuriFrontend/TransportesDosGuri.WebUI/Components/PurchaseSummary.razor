@@ -676,8 +676,8 @@
 
                 total += seat.Class switch
                 {
-                    SeatClass.Executive => 100m,
-                    SeatClass.First => 200m,
+                    SeatClass.Executivo => 100m,
+                    SeatClass.Primeira => 200m,
                     _ => 0m
                 };
             }
@@ -690,9 +690,9 @@
     {
         return seatClass switch
         {
-            SeatClass.Economical => "Econômica",
-            SeatClass.Executive => "Executiva",
-            SeatClass.First => "Primeira Classe",
+            SeatClass.Econômico => "Econômica",
+            SeatClass.Executivo => "Executiva",
+            SeatClass.Primeira => "Primeira Classe",
             _ => seatClass.ToString()
         };
     }
@@ -701,9 +701,9 @@
     {
         return seatClass switch
         {
-            SeatClass.Economical => "seat-class-economical",
-            SeatClass.Executive => "seat-class-executive",
-            SeatClass.First => "seat-class-first",
+            SeatClass.Econômico => "seat-class-economical",
+            SeatClass.Executivo => "seat-class-executive",
+            SeatClass.Primeira => "seat-class-first",
             _ => "seat-class-economical"
         };
     }

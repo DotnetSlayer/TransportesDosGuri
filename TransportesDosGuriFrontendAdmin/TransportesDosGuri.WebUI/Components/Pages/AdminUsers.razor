@@ -1,16 +1,17 @@
 ﻿@page "/adminUsers"
 @rendermode InteractiveServer
+@attribute [Authorize]
 
 @inject IUserService UserService
 
 @using TransportesDosGuri.Core.DTOs
 @using TransportesDosGuri.Core.Interfaces
+@using Microsoft.AspNetCore.Authorization
 
-<PageTitle>Transportes Dos Guri · Usuários</PageTitle>
+<PageTitle>Transportes Dos Guri</PageTitle>
 
 <div class="users-page">
 
-    <!-- BACKGROUND EFFECTS -->
     <div class="background-effects">
         <div class="orb orb-purple"></div>
         <div class="orb orb-indigo"></div>
@@ -22,7 +23,6 @@
 
         <div class="users-container">
 
-            <!-- HEADER -->
             <header class="page-header">
 
                 <div class="header-text">
@@ -41,7 +41,18 @@
 
             </header>
 
-            <!-- FORM CARD -->
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert-error">
+                    <svg viewBox="0 0 24 24" fill="none">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                        <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+                    </svg>
+                    <span>@errorMessage</span>
+                    <button @onclick="() => errorMessage = null" class="close-btn">×</button>
+                </div>
+            }
+
             <section class="form-card @(isEditing ? "form-card-editing" : "")">
 
                 <div class="form-card-glow"></div>
@@ -155,7 +166,6 @@
                             </div>
                         </div>
 
-                        <!-- SECTION: ENDEREÇO -->
                         <div class="subsection">
                             <div class="subsection-label">Endereço</div>
 
@@ -286,7 +296,6 @@
                             </div>
                         </div>
 
-                        <!-- ACTIONS -->
                         <div class="form-actions">
                             <button type="button" @onclick="ResetForm" class="btn-secondary">
                                 Cancelar
@@ -311,7 +320,6 @@
                     <EditForm Model="registerForm" OnValidSubmit="SaveRegister">
                         <DataAnnotationsValidator />
 
-                        <!-- SECTION: DADOS PESSOAIS -->
                         <div class="subsection">
                             <div class="subsection-label">Dados pessoais</div>
 
@@ -380,7 +388,6 @@
                             </div>
                         </div>
 
-                        <!-- SECTION: ACESSO -->
                         <div class="subsection">
                             <div class="subsection-label">Acesso</div>
 
@@ -432,7 +439,6 @@
                             </div>
                         </div>
 
-                        <!-- SECTION: ENDEREÇO -->
                         <div class="subsection">
                             <div class="subsection-label">Endereço</div>
 
@@ -563,7 +569,6 @@
                             </div>
                         </div>
 
-                        <!-- ACTIONS -->
                         <div class="form-actions">
                             <button type="submit" class="btn-primary">
                                 <span>Cadastrar usuário</span>
@@ -582,7 +587,6 @@
 
             </section>
 
-            <!-- TABLE CARD -->
             <section class="table-card">
 
                 <div class="table-card-glow"></div>
@@ -729,24 +733,17 @@
 
 <style>
 
-    /* =========================================================
-           PAGE
-        ========================================================= */
     .users-page {
         position: relative;
-        min-height: 100vh;
+        min-height: 100%;
         width: 100%;
-        overflow: hidden;
         background: radial-gradient(circle at 15% 15%, rgba(99, 102, 241, .13), transparent 30%), radial-gradient(circle at 85% 80%, rgba(168, 85, 247, .12), transparent 30%), #03050b;
         color: #e2e8f0;
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
 
-    /* =========================================================
-           BACKGROUND
-        ========================================================= */
     .background-effects {
-        position: fixed;
+        position: absolute;
         inset: 0;
         overflow: hidden;
         pointer-events: none;
@@ -806,13 +803,10 @@
         }
     }
 
-    /* =========================================================
-           LAYOUT
-        ========================================================= */
     .users-main {
         position: relative;
         z-index: 1;
-        min-height: 100vh;
+        min-height: 100%;
         display: flex;
         flex-direction: column;
     }
@@ -820,7 +814,7 @@
     .users-container {
         flex: 1;
         width: 100%;
-        max-width: 1300px;
+        max-width: 1800px;
         margin: 0 auto;
         padding: 32px clamp(20px, 4vw, 48px) 48px;
         display: flex;
@@ -828,9 +822,6 @@
         gap: 28px;
     }
 
-    /* =========================================================
-           HEADER
-        ========================================================= */
     .page-header {
         display: flex;
         flex-direction: column;
@@ -939,9 +930,55 @@
         color: #64748b;
     }
 
-    /* =========================================================
-           FORM CARD
-        ========================================================= */
+    .alert-error {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 18px;
+        border-radius: 14px;
+        background: rgba(244, 63, 94, .10);
+        border: 1px solid rgba(244, 63, 94, .30);
+        color: #fda4af;
+        font-size: 13px;
+        font-weight: 600;
+        animation: slideDown .3s ease;
+    }
+
+        .alert-error svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+        }
+
+        .alert-error .close-btn {
+            margin-left: auto;
+            background: none;
+            border: none;
+            color: inherit;
+            cursor: pointer;
+            font-size: 20px;
+            line-height: 1;
+            padding: 0;
+            opacity: .7;
+            transition: opacity .2s;
+        }
+
+            .alert-error .close-btn:hover {
+                opacity: 1;
+            }
+
+    @@keyframes slideDown {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     .form-card {
         position: relative;
         padding: 24px;
@@ -1051,9 +1088,6 @@
         animation: pulse 1.8s ease-in-out infinite;
     }
 
-    /* =========================================================
-           SUBSECTIONS
-        ========================================================= */
     .subsection {
         position: relative;
         z-index: 1;
@@ -1074,9 +1108,6 @@
         color: #475569;
     }
 
-    /* =========================================================
-           FORM GRID
-        ========================================================= */
     .form-grid {
         display: grid;
         grid-template-columns: 1fr;
@@ -1097,9 +1128,6 @@
         }
     }
 
-    /* =========================================================
-           FIELD
-        ========================================================= */
     .field {
         display: flex;
         flex-direction: column;
@@ -1191,9 +1219,6 @@
         -moz-appearance: textfield;
     }
 
-    /* =========================================================
-           FORM ACTIONS
-        ========================================================= */
     .form-actions {
         position: relative;
         z-index: 1;
@@ -1261,9 +1286,6 @@
             background: linear-gradient(135deg, rgba(30,41,59,.76), rgba(15,23,42,.58));
         }
 
-    /* =========================================================
-           TABLE CARD
-        ========================================================= */
     .table-card {
         position: relative;
         padding: 24px;
@@ -1294,9 +1316,6 @@
         margin-bottom: 18px;
     }
 
-    /* =========================================================
-           DATA TABLE
-        ========================================================= */
     .table-scroll {
         position: relative;
         z-index: 1;
@@ -1354,7 +1373,6 @@
         white-space: nowrap;
     }
 
-    /* id chip */
     .id-chip {
         display: inline-flex;
         align-items: center;
@@ -1368,7 +1386,6 @@
         border: 1px solid rgba(99,102,241,.18);
     }
 
-    /* user cell */
     .user-cell {
         display: flex;
         align-items: center;
@@ -1399,7 +1416,6 @@
         white-space: nowrap;
     }
 
-    /* email */
     .email-value {
         font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
         font-size: 11.5px;
@@ -1407,7 +1423,6 @@
         white-space: nowrap;
     }
 
-    /* document */
     .doc-chip {
         display: inline-flex;
         align-items: center;
@@ -1429,7 +1444,6 @@
         color: #475569;
     }
 
-    /* location */
     .location-chip {
         display: inline-flex;
         align-items: center;
@@ -1450,7 +1464,6 @@
             color: #94a3b8;
         }
 
-    /* row actions */
     .row-actions {
         display: inline-flex;
         gap: 8px;
@@ -1490,9 +1503,6 @@
         background: rgba(244,63,94,.08);
     }
 
-    /* =========================================================
-           EMPTY / LOADING STATES
-        ========================================================= */
     .state-empty {
         position: relative;
         z-index: 1;
@@ -1538,6 +1548,7 @@
 
     private bool isEditing = false;
     private long selectedUserId;
+    private string? errorMessage;
 
     protected override async Task OnInitializedAsync() => await LoadUsers();
 
@@ -1545,26 +1556,54 @@
 
     private async Task SaveRegister()
     {
-        var success = await UserService.CreateAsync(registerForm);
-        if (success)
+        errorMessage = null;
+
+        try
         {
-            ResetForm();
-            await LoadUsers();
+            var success = await UserService.CreateAsync(registerForm);
+            if (success)
+            {
+                ResetForm();
+                await LoadUsers();
+            }
+            else
+            {
+                errorMessage = "Não foi possível cadastrar o usuário. Verifique os dados e tente novamente.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erro ao cadastrar usuário: {ex.Message}";
         }
     }
 
     private async Task SaveUpdate()
     {
-        var success = await UserService.UpdateAsync(selectedUserId, updateForm);
-        if (success)
+        errorMessage = null;
+
+        try
         {
-            ResetForm();
-            await LoadUsers();
+            var success = await UserService.UpdateAsync(selectedUserId, updateForm);
+            if (success)
+            {
+                ResetForm();
+                await LoadUsers();
+            }
+            else
+            {
+                errorMessage = "Não foi possível atualizar o usuário. Verifique os dados e tente novamente.";
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Erro ao atualizar usuário: {ex.Message}";
         }
     }
 
     private void StartEdit(UserDTO user)
     {
+        errorMessage = null;
+
         isEditing = true;
         selectedUserId = user.Id;
 
@@ -1585,8 +1624,17 @@
 
     private async Task Delete(long id)
     {
-        var success = await UserService.DeleteAsync(id);
-        if (success) await LoadUsers();
+        errorMessage = null;
+
+        var (success, error) = await UserService.DeleteAsync(id);
+
+        if (!success)
+        {
+            errorMessage = error;
+            return;
+        }
+
+        await LoadUsers();
     }
 
     private void ResetForm()

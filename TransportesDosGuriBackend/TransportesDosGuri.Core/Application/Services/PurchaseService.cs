@@ -1,5 +1,7 @@
 ﻿using TransportesDosGuri.Core.Application.DTOs;
+using TransportesDosGuri.Core.Application.DTOs.Asaas;
 using TransportesDosGuri.Core.Application.ServiceContracts;
+using TransportesDosGuri.Core.Application.ServiceContracts.Asaas;
 using TransportesDosGuri.Core.Application.ServiceContracts.QuestPDF;
 using TransportesDosGuri.Core.Domain.Entities;
 using TransportesDosGuri.Core.Domain.RepositoryContracts;
@@ -10,13 +12,16 @@ namespace TransportesDosGuri.Core.Application.Services
     {
         private readonly IPurchaseRepository _purchaseRepository;
         private readonly IReceiptPdfGenerator _receiptPdfGenerator;
+        private readonly IAsaasCheckoutService _asaasCheckout;
 
         public PurchaseService(
             IPurchaseRepository purchaseRepository,
-            IReceiptPdfGenerator receiptPdfGenerator)
+            IReceiptPdfGenerator receiptPdfGenerator,
+            IAsaasCheckoutService asaasCheckout)
         {
             _purchaseRepository = purchaseRepository;
             _receiptPdfGenerator = receiptPdfGenerator;
+            _asaasCheckout = asaasCheckout;
         }
 
         public async Task<PurchaseDTO> CreateAsync(PurchaseDTO purchase)
@@ -157,6 +162,25 @@ namespace TransportesDosGuri.Core.Application.Services
 
             // O Core chama a interface, não a implementação concreta
             return _receiptPdfGenerator.Generate(receiptData);
+        }
+
+        public async Task<AsaasCheckoutResultDTO?> CreateCheckoutAsync(long purchaseId, long userId)
+        {
+            var purchase = await _purchaseRepository.GetByIdAsync(purchaseId);
+            if (purchase is null) return null;
+            if (purchase.ApplicationUserId != userId) return null;
+            if (purchase.Status != PurchaseStatus.Pendente) return null;
+
+            var result = await _asaasCheckout.CreateCheckoutAsync(
+                userId,
+                purchase.PurchasePrice,
+                DateTime.UtcNow.AddDays(1),
+                $"purchase:{purchase.Id}");
+
+            await _purchaseRepository.UpdateAsaasPaymentIdAsync(
+                purchase.Id, result.AsaasPaymentId, result.InvoiceUrl);
+
+            return result;
         }
     }
 }

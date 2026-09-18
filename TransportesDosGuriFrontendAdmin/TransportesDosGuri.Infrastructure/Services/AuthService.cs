@@ -126,7 +126,6 @@ namespace TransportesDosGuri.Infrastructure.Services
         {
             try
             {
-                // 1. Obtém os tokens salvos para revogação no backend
                 var (accessToken, refreshToken) = await _tokenStorage.GetTokensAsync();
 
                 if (!string.IsNullOrEmpty(accessToken) && !string.IsNullOrEmpty(refreshToken))
@@ -137,20 +136,16 @@ namespace TransportesDosGuri.Infrastructure.Services
                         RefreshToken = refreshToken
                     };
 
-                    // 2. Notifica a API para invalidar o Refresh Token no banco de dados
                     await _httpClient.PostAsJsonAsync("/api/v1/Account/Logout", dto);
                 }
             }
             catch
             {
-                // Falhas na rede não impedem o encerramento do login local
             }
             finally
             {
-                // 3. Limpa tokens do storage local (LocalStorage/SessionStorage)
                 await _tokenStorage.ClearTokensAsync();
 
-                // 4. Notifica a árvore de componentes do Blazor que o usuário deslogou
                 ((CustomAuthStateProvider)_authStateProvider).MarkUserAsLoggedOut();
             }
         }

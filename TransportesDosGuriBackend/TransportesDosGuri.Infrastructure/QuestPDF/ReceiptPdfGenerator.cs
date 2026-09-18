@@ -17,7 +17,6 @@ namespace TransportesDosGuri.Infrastructure.QuestPDF
             return document.GeneratePdf();
         }
 
-        // Classe interna que implementa o IDocument do QuestPDF
         private class ReceiptDocument : IDocument
         {
             private readonly ReceiptDTO _receipt;
@@ -35,7 +34,7 @@ namespace TransportesDosGuri.Infrastructure.QuestPDF
                 {
                     page.Size(PageSizes.A4);
                     page.Margin(30);
-                    page.DefaultTextStyle(x => x.FontSize(11).FontFamily(Fonts.Arial));
+                    page.DefaultTextStyle(x => x.FontSize(11));
 
                     page.Header().Element(ComposeHeader);
                     page.Content().Element(ComposeContent);
@@ -73,16 +72,12 @@ namespace TransportesDosGuri.Infrastructure.QuestPDF
                 {
                     col.Spacing(12);
 
-                    // DADOS DO CLIENTE
                     col.Item().Element(ComposeCustomerInfo);
 
-                    // DADOS DA VIAGEM
                     col.Item().Element(ComposeTripInfo);
 
-                    // DADOS DAS RESERVAS
                     col.Item().Element(ComposeReservations);
 
-                    // TOTAL
                     col.Item().Element(ComposeTotal);
                 });
             }
@@ -120,16 +115,15 @@ namespace TransportesDosGuri.Infrastructure.QuestPDF
                     {
                         table.ColumnsDefinition(columns =>
                         {
-                            columns.ConstantColumn(50);  // Assento
-                            columns.RelativeColumn();     // Voo
-                            columns.RelativeColumn();     // Aeronave
-                            columns.RelativeColumn();     // Classe
-                            columns.RelativeColumn();     // Localização
-                            columns.RelativeColumn();     // Lado
-                            columns.ConstantColumn(80);   // Preço
+                            columns.ConstantColumn(50);  
+                            columns.RelativeColumn();     
+                            columns.RelativeColumn();     
+                            columns.RelativeColumn();     
+                            columns.RelativeColumn();     
+                            columns.RelativeColumn();     
+                            columns.ConstantColumn(80);   
                         });
 
-                        // Header
                         table.Header(header =>
                         {
                             header.Cell().Background(Colors.Grey.Lighten3).Padding(5).Text("Assento").Bold();
@@ -141,7 +135,6 @@ namespace TransportesDosGuri.Infrastructure.QuestPDF
                             header.Cell().Background(Colors.Grey.Lighten3).Padding(5).AlignRight().Text("Preço").Bold();
                         });
 
-                        // Rows
                         foreach (var reservation in _receipt.Reservations)
                         {
                             table.Cell().Padding(5).Text(reservation.SeatNumber);

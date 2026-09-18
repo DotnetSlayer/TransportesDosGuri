@@ -3,8 +3,16 @@
     public interface IAsaasGateway
     {
         Task<string> CreateCustomerAsync(string name, string email, string phone, string cpfCnpj);
-        Task<string> CreateSinglePaymentAsync(string customerId, decimal amount, DateOnly dueDate);
-    }
 
+        Task<(string paymentId, string? invoiceUrl)> CreatePaymentAsync(
+            string customerId,
+            decimal value,
+            DateTime dueDate,
+            string description,
+            string externalReference);
+
+
+    }
 }
+
 

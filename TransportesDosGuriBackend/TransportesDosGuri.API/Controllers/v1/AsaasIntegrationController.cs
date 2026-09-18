@@ -73,9 +73,23 @@ namespace TransportesDosGuri.API.Controllers.v1
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteAsync(long id)
         {
-            var delete = await _asaasIntegrationsService.DeleteAsync(id);
+            try
+            {
+                var delete = await _asaasIntegrationsService.DeleteAsync(id);
 
-            return Ok("Base de Dados Atualizada!");
+                if (!delete)
+                    return NotFound(new { message = "Integração Asaas não encontrada." });
+
+                return Ok(new { message = "Integração Asaas excluída com sucesso." });
+            }
+            catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 547)
+            {
+                return Conflict(new
+                {
+                    message = "Não é possível excluir esta integração Asaas pois existem registros associados a ela. " +
+                              "Verifique os vínculos antes de tentar novamente."
+                });
+            }
         }
     }
 }

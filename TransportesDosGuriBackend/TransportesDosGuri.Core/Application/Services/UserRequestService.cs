@@ -10,7 +10,7 @@ namespace TransportesDosGuri.Core.Application.Services
     {
         private readonly IUserRequestRepository _userRequestRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IAsaasGateway _asaasGateway; 
+        private readonly IAsaasGateway _asaasGateway;
 
         public UserRequestService(
             IUserRequestRepository userRequestRepository,
@@ -28,7 +28,7 @@ namespace TransportesDosGuri.Core.Application.Services
             if (user == null)
                 throw new Exception("Requisição Inválida!");
 
-            string customerId = user.CustomerAsaasId; 
+            string customerId = user.CustomerAsaasId;
 
             if (string.IsNullOrEmpty(customerId))
             {
@@ -42,10 +42,14 @@ namespace TransportesDosGuri.Core.Application.Services
                 await _userRepository.UpdateAsaasCustomerIdAsync(user.Id, customerId);
             }
 
-            var paymentId = await _asaasGateway.CreateSinglePaymentAsync(
+            var dueDate = userRequestDto.DueDate.ToDateTime(TimeOnly.MinValue);
+
+            var (paymentId, _) = await _asaasGateway.CreatePaymentAsync(
                 customerId,
                 userRequestDto.Price,
-                userRequestDto.DueDate
+                dueDate,
+                $"Solicitação #{userRequestDto.Id}",
+                $"userrequest:{userRequestDto.Id}"
             );
 
             var userRequestEntity = new UserRequest

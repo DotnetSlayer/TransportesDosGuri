@@ -6,8 +6,8 @@ namespace TransportesDosGuri.Core.Enums
 {
     public enum SeatClass
     {
-        Economical = 0,
-        Executive = 1,
-        First = 2
+        Econômico = 0,
+        Executivo = 1,
+        Primeira = 2
     }
 }

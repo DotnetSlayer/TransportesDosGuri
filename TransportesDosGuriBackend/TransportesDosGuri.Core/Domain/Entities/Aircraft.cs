@@ -14,14 +14,14 @@
     {
         Indeterminado = 0,
 
-        Comercial,
+        Comercial = 1,
 
-        Executiva,
+        Executiva = 2,
 
-        Cargueira,
+        Cargueira = 3,
 
-        Regional,
+        Regional = 4,
 
-        Jato
+        Jato = 5
     }
 }

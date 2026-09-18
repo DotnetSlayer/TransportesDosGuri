@@ -32,5 +32,7 @@ namespace TransportesDosGuri.Core.Domain.RepositoryContracts
             long applicationUserId);
 
         Task<ReceiptDTO?> GetReceiptDataAsync(long purchaseId, long userId);
+
+        Task UpdateAsaasPaymentIdAsync(long purchaseId, string asaasPaymentId, string? invoiceUrl);
     }
 }

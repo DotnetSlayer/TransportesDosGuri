@@ -145,7 +145,8 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
                 AddressNumber = register.AddressNumber,
                 District = register.District,
                 City = register.City,
-                State = register.State
+                State = register.State,
+                PhoneNumber = register.PhoneNumber
             };
 
             var result = await _userManager.CreateAsync(user, register.Password);
@@ -244,6 +245,7 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
             LastName = user.LastName,
             FullName = user.FullName,
             Email = user.Email,
+            PhoneNumber = user.PhoneNumber,
             IdentityNumber = user.IdentityNumber,
             CustomerAsaasId = user.CustomerAsaasId,
             ZipCode = user.ZipCode,

@@ -7,17 +7,19 @@
 @layout EmptyLayout
 
 @using Microsoft.AspNetCore.Components.Forms
+@using Microsoft.AspNetCore.Components.Web
 @using TransportesDosGuri.Core.DTOs
 @using TransportesDosGuri.Core.Interfaces
+@using TransportesDosGuri.Infrastructure.Services
 
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
+@inject ZipCodeApiService ZipCodeService
 
 <PageTitle>@(showRegister ? "Criar conta" : "Login") - Transportes dos Guri</PageTitle>
 
 <div class="auth-page">
 
-    <!-- BACKGROUND -->
     <div class="background-effects">
         <div class="orb orb-purple"></div>
         <div class="orb orb-indigo"></div>
@@ -25,24 +27,20 @@
         <div class="grid-overlay"></div>
     </div>
 
-    <!-- MAIN CONTAINER -->
     <main class="auth-shell">
 
-        <!-- LEFT SIDE -->
         <section class="auth-panel">
 
             <div class="panel-glow"></div>
 
             <div class="content-wrapper">
 
-                <!-- LOGO -->
                 <div class="flex justify-center mb-10">
                     <img src="/images/logo.png"
                          alt="Transportes dos Guri"
                          class="w-64 sm:w-72 lg:w-80 h-auto object-contain brightness-0 invert drop-shadow-[0_0_25px_rgba(255,255,255,0.15)]" />
                 </div>
 
-                <!-- SWITCH -->
                 <div class="mode-switch">
 
                     <button type="button"
@@ -93,7 +91,6 @@
 
                 @if (!showRegister)
                 {
-                    <!-- LOGIN -->
                     <div class="form-header">
 
                         <h1>
@@ -134,7 +131,6 @@
 
                         <AntiforgeryToken />
 
-                        <!-- EMAIL -->
                         <div class="field">
 
                             <label>Email</label>
@@ -164,7 +160,6 @@
 
                         </div>
 
-                        <!-- PASSWORD -->
                         <div class="field">
 
                             <label>Senha</label>
@@ -224,15 +219,12 @@
                 }
                 else
                 {
-                    <!-- REGISTER -->
                     <div class="form-header register-header">
-
 
                         <h1>
                             Crie sua
                             <span>conta.</span>
                         </h1>
-
 
                     </div>
 
@@ -262,7 +254,6 @@
 
                         <DataAnnotationsValidator />
 
-                        <!-- PERSONAL DATA -->
                         <div class="section-label">
                             <span>01</span>
                             Dados pessoais
@@ -277,9 +268,13 @@
                                 <div class="input-wrapper">
 
                                     <input @bind="RegisterModel.Name"
-                                           placeholder="Seu nome" />
+                                           placeholder="Seu nome"
+                                           autocomplete="given-name" />
 
                                 </div>
+
+                                <ValidationMessage For="() => RegisterModel.Name"
+                                                   class="field-error" />
 
                             </div>
 
@@ -290,9 +285,13 @@
                                 <div class="input-wrapper">
 
                                     <input @bind="RegisterModel.LastName"
-                                           placeholder="Seu sobrenome" />
+                                           placeholder="Seu sobrenome"
+                                           autocomplete="family-name" />
 
                                 </div>
+
+                                <ValidationMessage For="() => RegisterModel.LastName"
+                                                   class="field-error" />
 
                             </div>
 
@@ -315,9 +314,42 @@
 
                                     <input @bind="RegisterModel.Email"
                                            type="email"
-                                           placeholder="seu@email.com" />
+                                           placeholder="seu@email.com"
+                                           autocomplete="email" />
 
                                 </div>
+
+                                <ValidationMessage For="() => RegisterModel.Email"
+                                                   class="field-error" />
+
+                            </div>
+
+                            <div class="field">
+
+                                <label>Telefone</label>
+
+                                <div class="input-wrapper">
+
+                                    <span class="input-icon">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                                                  stroke="currentColor"
+                                                  stroke-width="1.7"
+                                                  stroke-linecap="round"
+                                                  stroke-linejoin="round" />
+                                        </svg>
+                                    </span>
+
+                                    <input value="@RegisterModel.PhoneNumber"
+                                           @oninput="OnPhoneInput"
+                                           placeholder="(00) 00000-0000"
+                                           inputmode="tel"
+                                           autocomplete="tel" />
+
+                                </div>
+
+                                <ValidationMessage For="() => RegisterModel.PhoneNumber"
+                                                   class="field-error" />
 
                             </div>
 
@@ -344,9 +376,13 @@
 
                                     <input @bind="RegisterModel.Password"
                                            type="password"
-                                           placeholder="Crie uma senha" />
+                                           placeholder="Crie uma senha"
+                                           autocomplete="new-password" />
 
                                 </div>
+
+                                <ValidationMessage For="() => RegisterModel.Password"
+                                                   class="field-error" />
 
                             </div>
 
@@ -356,16 +392,21 @@
 
                                 <div class="input-wrapper">
 
-                                    <input @bind="RegisterModel.IdentityNumber"
-                                           placeholder="000.000.000-00" />
+                                    <input value="@RegisterModel.IdentityNumber"
+                                           @oninput="OnIdentityInput"
+                                           placeholder="000.000.000-00"
+                                           inputmode="numeric"
+                                           maxlength="18" />
 
                                 </div>
+
+                                <ValidationMessage For="() => RegisterModel.IdentityNumber"
+                                                   class="field-error" />
 
                             </div>
 
                         </div>
 
-                        <!-- ADDRESS -->
                         <div class="section-label address-label">
                             <span>02</span>
                             Endereço
@@ -377,12 +418,62 @@
 
                                 <label>CEP</label>
 
-                                <div class="input-wrapper">
+                                <div class="input-wrapper cep-wrapper">
 
-                                    <input @bind="RegisterModel.ZipCode"
-                                           placeholder="00000-000" />
+                                    <span class="input-icon">
+                                        <svg viewBox="0 0 24 24" fill="none">
+                                            <path d="M12 21s-7-5.5-7-11a7 7 0 1 1 14 0c0 5.5-7 11-7 11Z"
+                                                  stroke="currentColor"
+                                                  stroke-width="1.7" />
+                                            <circle cx="12" cy="10" r="2.5"
+                                                    stroke="currentColor"
+                                                    stroke-width="1.7" />
+                                        </svg>
+                                    </span>
+
+                                    <input value="@RegisterModel.ZipCode"
+                                           @oninput="OnCepInput"
+                                           @onkeydown="OnCepKeyDown"
+                                           placeholder="00000-000"
+                                           maxlength="9"
+                                           inputmode="numeric"
+                                           autocomplete="postal-code" />
+
+                                    @if (isCepLoading)
+                                    {
+                                        <span class="cep-action">
+                                            <span class="spinner-mini"></span>
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <button type="button"
+                                                class="cep-action cep-search"
+                                                title="Buscar CEP"
+                                                @onclick="BuscarCep"
+                                                disabled="@(string.IsNullOrWhiteSpace(RegisterModel.ZipCode))">
+                                            <svg viewBox="0 0 24 24" fill="none">
+                                                <circle cx="11" cy="11" r="7"
+                                                        stroke="currentColor"
+                                                        stroke-width="1.8" />
+                                                <path d="m20 20-3.5-3.5"
+                                                      stroke="currentColor"
+                                                      stroke-width="1.8"
+                                                      stroke-linecap="round" />
+                                            </svg>
+                                        </button>
+                                    }
 
                                 </div>
+
+                                @if (!string.IsNullOrEmpty(cepErrorMessage))
+                                {
+                                    <span class="field-error">@cepErrorMessage</span>
+                                }
+                                else if (cepLoaded)
+                                {
+                                    <span class="field-success">Endereço preenchido automaticamente.</span>
+                                }
 
                             </div>
 
@@ -394,9 +485,13 @@
 
                                     <input type="number"
                                            @bind="RegisterModel.AddressNumber"
-                                           placeholder="123" />
+                                           placeholder="123"
+                                           inputmode="numeric" />
 
                                 </div>
+
+                                <ValidationMessage For="() => RegisterModel.AddressNumber"
+                                                   class="field-error" />
 
                             </div>
 
@@ -407,9 +502,13 @@
                                 <div class="input-wrapper">
 
                                     <input @bind="RegisterModel.Address"
-                                           placeholder="Nome da rua" />
+                                           placeholder="Nome da rua"
+                                           autocomplete="street-address" />
 
                                 </div>
+
+                                <ValidationMessage For="() => RegisterModel.Address"
+                                                   class="field-error" />
 
                             </div>
 
@@ -424,6 +523,9 @@
 
                                 </div>
 
+                                <ValidationMessage For="() => RegisterModel.District"
+                                                   class="field-error" />
+
                             </div>
 
                             <div class="field">
@@ -433,9 +535,13 @@
                                 <div class="input-wrapper">
 
                                     <input @bind="RegisterModel.City"
-                                           placeholder="Sua cidade" />
+                                           placeholder="Sua cidade"
+                                           autocomplete="address-level2" />
 
                                 </div>
+
+                                <ValidationMessage For="() => RegisterModel.City"
+                                                   class="field-error" />
 
                             </div>
 
@@ -447,9 +553,14 @@
 
                                     <input @bind="RegisterModel.State"
                                            maxlength="2"
-                                           placeholder="SC" />
+                                           placeholder="SC"
+                                           autocomplete="address-level1"
+                                           style="text-transform: uppercase;" />
 
                                 </div>
+
+                                <ValidationMessage For="() => RegisterModel.State"
+                                                   class="field-error" />
 
                             </div>
 
@@ -484,7 +595,6 @@
 
             </div>
 
-            <!-- FOOTER -->
             <footer class="footer">
 
                 <span>
@@ -503,7 +613,6 @@
 
         </section>
 
-        <!-- RIGHT SIDE -->
         <section class="visual-panel">
 
             <img src="/images/plane.png"
@@ -513,8 +622,6 @@
             <div class="visual-overlay"></div>
 
             <div class="visual-top-gradient"></div>
-
-
 
         </section>
 
@@ -546,18 +653,14 @@
 
             <div class="modal-header">
 
-
-
                 <h3>
                     Equipe de desenvolvimento<span>.</span>
                 </h3>
-
 
             </div>
 
             <div class="team-list">
 
-                <!-- THIAGO WURSTER -->
                 <div class="team-card">
 
                     <div class="member-photo">
@@ -592,7 +695,6 @@
 
                 </div>
 
-                <!-- THIAGO THOMASI -->
                 <div class="team-card">
 
                     <div class="member-photo">
@@ -627,7 +729,6 @@
 
                 </div>
 
-                <!-- RHYAN -->
                 <div class="team-card">
 
                     <div class="member-photo">
@@ -662,7 +763,6 @@
 
                 </div>
 
-                <!-- MATEUS -->
                 <div class="team-card">
 
                     <div class="member-photo">
@@ -709,10 +809,6 @@
 
 <style>
 
-    /* =========================================================
-               GLOBAL
-            ========================================================= */
-
     * {
         box-sizing: border-box;
     }
@@ -726,10 +822,6 @@
         color: #e2e8f0;
         font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
     }
-
-    /* =========================================================
-               BACKGROUND
-            ========================================================= */
 
     .background-effects {
         position: fixed;
@@ -791,10 +883,6 @@
         }
     }
 
-    /* =========================================================
-               SHELL
-            ========================================================= */
-
     .auth-shell {
         min-height: 100vh;
         width: 100%;
@@ -802,10 +890,6 @@
         position: relative;
         z-index: 1;
     }
-
-    /* =========================================================
-               LEFT PANEL
-            ========================================================= */
 
     .auth-panel {
         width: 50%;
@@ -842,10 +926,6 @@
         z-index: 2;
     }
 
-    /* =========================================================
-               LOGO
-            ========================================================= */
-
     .logo-container {
         display: flex;
         justify-content: center;
@@ -868,10 +948,6 @@
         object-fit: contain;
         filter: brightness(0) invert(1) drop-shadow(0 0 25px rgba(255,255,255,.16));
     }
-
-    /* =========================================================
-               MODE SWITCH
-            ========================================================= */
 
     .mode-switch {
         display: flex;
@@ -927,10 +1003,6 @@
             width: 100%;
             height: 100%;
         }
-
-    /* =========================================================
-               HEADER
-            ========================================================= */
 
     .form-header {
         text-align: left;
@@ -989,10 +1061,6 @@
         line-height: 1.7;
     }
 
-    /* =========================================================
-               ALERT
-            ========================================================= */
-
     .alert {
         display: flex;
         align-items: center;
@@ -1026,10 +1094,6 @@
             width: 100%;
             height: 100%;
         }
-
-    /* =========================================================
-               FORM
-            ========================================================= */
 
     .auth-form {
         display: flex;
@@ -1103,6 +1167,81 @@
             height: 100%;
         }
 
+    /* ===== CEP: input com botão de busca ===== */
+    .cep-wrapper input {
+        padding-right: 52px;
+    }
+
+    .cep-action {
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 38px;
+        height: 38px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 11px;
+        border: 1px solid rgba(139,92,246,.20);
+        background: rgba(139,92,246,.10);
+        color: #c4b5fd;
+        cursor: pointer;
+        transition: all .2s ease;
+        z-index: 2;
+    }
+
+        .cep-action:hover:not(:disabled) {
+            background: rgba(139,92,246,.22);
+            border-color: rgba(168,85,247,.40);
+            color: #e9d5ff;
+            transform: translateY(-50%) scale(1.04);
+        }
+
+        .cep-action:disabled {
+            opacity: .35;
+            cursor: not-allowed;
+        }
+
+        .cep-action svg {
+            width: 16px;
+            height: 16px;
+        }
+
+    .cep-loading {
+        position: absolute;
+        right: 14px;
+        top: 50%;
+        transform: translateY(-50%);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .spinner-mini {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        border: 2px solid rgba(148,163,184,.2);
+        border-top-color: #a855f7;
+        animation: spin .7s linear infinite;
+    }
+
+    /* ===== Mensagens por campo ===== */
+    .field-error {
+        margin-top: 2px;
+        color: #fda4af;
+        font-size: 11px;
+        letter-spacing: .01em;
+    }
+
+    .field-success {
+        margin-top: 2px;
+        color: #86efac;
+        font-size: 11px;
+        letter-spacing: .01em;
+    }
+
     .form-options {
         display: flex;
         align-items: center;
@@ -1150,10 +1289,6 @@
             color: #c4b5fd;
         }
 
-    /* =========================================================
-               PRIMARY BUTTON
-            ========================================================= */
-
     .primary-button {
         width: 100%;
         height: 54px;
@@ -1198,10 +1333,6 @@
             opacity: .55;
             transform: none;
         }
-
-    /* =========================================================
-               REGISTER
-            ========================================================= */
 
     .register-form {
         gap: 17px;
@@ -1267,10 +1398,6 @@
         }
     }
 
-    /* =========================================================
-               FOOTER
-            ========================================================= */
-
     .footer {
         display: flex;
         align-items: center;
@@ -1306,10 +1433,6 @@
     .footer strong {
         color: #a78bfa;
     }
-
-    /* =========================================================
-               VISUAL SIDE
-            ========================================================= */
 
     .visual-panel {
         width: 50%;
@@ -1467,10 +1590,6 @@
         font-weight: 700;
         letter-spacing: .2em;
     }
-
-    /* =========================================================
-               MODAL
-            ========================================================= */
 
     .modal-backdrop {
         position: fixed;
@@ -1694,10 +1813,6 @@
             opacity: .92;
         }
 
-    /* =========================================================
-               RESPONSIVE
-            ========================================================= */
-
     @@media (max-width: 1100px) {
 
         .auth-panel {
@@ -1859,30 +1974,163 @@
     private string? errorMessage;
     private bool isSubmitting = false;
 
+    private bool isCepLoading = false;
+    private bool cepLoaded = false;
+    private string? cepErrorMessage;
+
     private bool isTeamModalOpen = false;
 
-    private void OpenTeamModal()
-        => isTeamModalOpen = true;
-
-    private void CloseTeamModal()
-        => isTeamModalOpen = false;
+    private void OpenTeamModal() => isTeamModalOpen = true;
+    private void CloseTeamModal() => isTeamModalOpen = false;
 
     protected override void OnInitialized()
     {
         if (Error == "InvalidCredentials")
         {
+            showRegister = false;
             errorMessage = "E-mail ou senha inválidos.";
         }
         else if (Error == "InvalidToken")
         {
+            showRegister = false;
             errorMessage = "Erro ao processar a autenticação. Tente novamente.";
         }
+        else if (Error == "RegisterFailed")
+        {
+            showRegister = true;
+            errorMessage = "Não foi possível concluir o cadastro. Verifique os dados.";
+        }
     }
+
+    // ---------- Máscaras ----------
+
+    private void OnPhoneInput(ChangeEventArgs e)
+    {
+        var digits = new string((e.Value?.ToString() ?? "")
+            .Where(char.IsDigit).ToArray());
+
+        if (digits.Length > 11)
+            digits = digits[..11];
+
+        RegisterModel.PhoneNumber = digits.Length switch
+        {
+            <= 2  => digits,
+            <= 6  => $"({digits[..2]}) {digits[2..]}",
+            <= 10 => $"({digits[..2]}) {digits[2..6]}-{digits[6..]}",
+            _     => $"({digits[..2]}) {digits[2..7]}-{digits[7..]}"
+        };
+    }
+
+    private void OnIdentityInput(ChangeEventArgs e)
+    {
+        var digits = new string((e.Value?.ToString() ?? "")
+            .Where(char.IsDigit).ToArray());
+
+        if (digits.Length <= 11)
+        {
+            // CPF: 000.000.000-00
+            if (digits.Length > 14)
+                digits = digits[..14];
+
+            RegisterModel.IdentityNumber = digits.Length switch
+            {
+                <= 3 => digits,
+                <= 6 => $"{digits[..3]}.{digits[3..]}",
+                <= 9 => $"{digits[..3]}.{digits[3..6]}.{digits[6..]}",
+                _    => $"{digits[..3]}.{digits[3..6]}.{digits[6..9]}-{digits[9..]}"
+            };
+        }
+        else
+        {
+            // CNPJ: 00.000.000/0000-00
+            if (digits.Length > 14)
+                digits = digits[..14];
+
+            RegisterModel.IdentityNumber = digits.Length switch
+            {
+                <= 2  => digits,
+                <= 5  => $"{digits[..2]}.{digits[2..]}",
+                <= 8  => $"{digits[..2]}.{digits[2..5]}.{digits[5..]}",
+                <= 12 => $"{digits[..2]}.{digits[2..5]}.{digits[5..8]}/{digits[8..]}",
+                _     => $"{digits[..2]}.{digits[2..5]}.{digits[5..8]}/{digits[8..12]}-{digits[12..]}"
+            };
+        }
+    }
+
+    private void OnCepInput(ChangeEventArgs e)
+    {
+        var digits = new string((e.Value?.ToString() ?? "")
+            .Where(char.IsDigit).ToArray());
+
+        if (digits.Length > 8)
+            digits = digits[..8];
+
+        RegisterModel.ZipCode = digits.Length switch
+        {
+            <= 5 => digits,
+            _    => $"{digits[..5]}-{digits[5..]}"
+        };
+
+        cepLoaded = false;
+        cepErrorMessage = null;
+    }
+
+    // ---------- CEP ----------
+
+    private async Task OnCepKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await BuscarCep();
+        }
+    }
+
+private async Task BuscarCep()
+{
+    cepErrorMessage = null;
+    cepLoaded = false;
+
+    var raw = new string((RegisterModel.ZipCode ?? "")
+        .Where(char.IsDigit).ToArray());
+
+    if (string.IsNullOrWhiteSpace(raw))
+        return;
+
+    isCepLoading = true;
+    StateHasChanged();
+
+    try
+    {
+        var result = await ZipCodeService.GetAsync(raw);
+
+        if (result.Status != ZipCodeStatus.Success || result.Data is null)
+        {
+            cepErrorMessage = result.Message ?? "Não foi possível consultar o CEP.";
+            return;
+        }
+
+        RegisterModel.ZipCode  = $"{raw[..5]}-{raw[5..]}";
+        RegisterModel.Address  = result.Data.Address;
+        RegisterModel.District = result.Data.District;
+        RegisterModel.City     = result.Data.City;
+        RegisterModel.State    = result.Data.State;
+
+        cepLoaded = true;
+    }
+    finally
+    {
+        isCepLoading = false;
+        StateHasChanged();
+    }
+}
+
+    // ---------- Registro ----------
 
     private async Task HandleRegister()
     {
         errorMessage = null;
         isSubmitting = true;
+        StateHasChanged();
 
         try
         {
@@ -1895,20 +2143,20 @@
                 LoginModel.Email = RegisterModel.Email;
 
                 RegisterModel = new();
+                cepLoaded = false;
+                cepErrorMessage = null;
 
-                errorMessage =
-                    "Conta criada com sucesso! Agora faça login.";
+                errorMessage = "Conta criada com sucesso! Agora faça login.";
             }
             else
             {
-                errorMessage =
-                    "Falha ao realizar o cadastro.";
+                errorMessage = "Falha ao realizar o cadastro. Verifique os dados e tente novamente.";
             }
         }
         finally
         {
             isSubmitting = false;
+            StateHasChanged();
         }
     }
 }
-

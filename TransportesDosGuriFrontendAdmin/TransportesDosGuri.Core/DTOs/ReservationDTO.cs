@@ -23,10 +23,10 @@ namespace TransportesDosGuri.Core.DTOs
 
     public enum ReservationStatus
     {
-        Pending,
+        Pendente = 0,
 
-        Confirmed,
+        Confirmado = 1,
 
-        Canceled
+        Cancelado = 2
     }
 }
