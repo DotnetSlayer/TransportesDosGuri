@@ -1,10 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.DependencyInjection;
 using System.Net;
-using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Threading;
-using System.Threading.Tasks;
-using Microsoft.Extensions.DependencyInjection;
 using TransportesDosGuri.Core.Common;
 using TransportesDosGuri.Core.Interfaces;
 

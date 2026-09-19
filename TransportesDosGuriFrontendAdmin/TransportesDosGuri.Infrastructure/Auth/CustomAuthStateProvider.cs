@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
-using System.Collections.Generic;
 using System.Security.Claims;
 using System.Text.Json;
-using System.Threading.Tasks;
 using TransportesDosGuri.Core.Common;
 
 namespace TransportesDosGuri.Infrastructure.Auth

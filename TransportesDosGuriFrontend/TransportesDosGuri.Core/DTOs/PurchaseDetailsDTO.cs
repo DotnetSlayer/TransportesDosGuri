@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TransportesDosGuri.Core.Enums;
+﻿using TransportesDosGuri.Core.Enums;
 
 namespace TransportesDosGuri.Core.DTOs
 {

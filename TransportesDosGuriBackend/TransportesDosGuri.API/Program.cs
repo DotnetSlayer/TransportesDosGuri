@@ -31,7 +31,6 @@ using TransportesDosGuri.Infrastructure.ExternalServices.Asaas;
 using TransportesDosGuri.Infrastructure.IdentityContext;
 using TransportesDosGuri.Infrastructure.QuestPDF;
 using TransportesDosGuri.Infrastructure.Repositories;
-using static System.Net.Mime.MediaTypeNames;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -6,7 +6,6 @@ using TransportesDosGuri.Core.Interfaces;
 using TransportesDosGuri.Infrastructure.Auth;
 using TransportesDosGuri.Infrastructure.Services;
 using TransportesDosGuri.WebUI.Components;
-using TransportesDosGuri.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +14,22 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddControllers();
+
+builder.Services.AddResponseCompression(options =>
+{
+    options.EnableForHttps = true;
+
+    options.MimeTypes = new[]
+    {
+        "text/plain",
+        "text/css",
+        "text/html",
+        "application/javascript",
+        "application/json",
+        "application/wasm",
+        "image/svg+xml"
+    };
+});
 
 builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
     .AddCookie(options =>
@@ -35,7 +50,7 @@ builder.Services.AddTransient<JwtAuthorizationHandler>();
 
 
 
-var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "https://localhost:7030";
+var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"] ?? "url_webapi_producao";
 
 builder.Services.AddHttpClient<IAuthService, AuthService>(c => c.BaseAddress = new Uri(apiBaseUrl));
 builder.Services.AddHttpClient<IPurchaseService, PurchaseService>(c => c.BaseAddress = new Uri(apiBaseUrl)).AddHttpMessageHandler<JwtAuthorizationHandler>();
@@ -60,7 +75,19 @@ if (!app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+app.UseResponseCompression();
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    OnPrepareResponse = ctx =>
+    {
+        const int durationInSeconds = 60 * 60 * 24 * 30;
+
+        ctx.Context.Response.Headers.CacheControl =
+            $"public,max-age={durationInSeconds},immutable";
+    }
+});
 
 app.UseAuthentication();
 app.UseAuthorization();

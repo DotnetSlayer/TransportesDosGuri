@@ -30,7 +30,7 @@ namespace TransportesDosGuri.Core.Application.Services.Jwt
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                
+
 
                 new Claim(JwtRegisteredClaimNames.Iat, DateTimeOffset.UtcNow.ToUnixTimeSeconds().ToString(), ClaimValueTypes.Integer64),
 
@@ -84,7 +84,7 @@ namespace TransportesDosGuri.Core.Application.Services.Jwt
                 ValidateIssuerSigningKey = true,
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!)),
                 ValidateLifetime = false,
-                RoleClaimType = ClaimTypes.Role 
+                RoleClaimType = ClaimTypes.Role
             };
 
             JwtSecurityTokenHandler jwtSecurityTokenHandler = new JwtSecurityTokenHandler();

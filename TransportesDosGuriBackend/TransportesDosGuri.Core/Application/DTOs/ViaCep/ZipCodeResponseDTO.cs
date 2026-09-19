@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TransportesDosGuri.Core.Application.DTOs.ViaCep
+﻿namespace TransportesDosGuri.Core.Application.DTOs.ViaCep
 {
     public class ZipCodeResponseDTO
     {

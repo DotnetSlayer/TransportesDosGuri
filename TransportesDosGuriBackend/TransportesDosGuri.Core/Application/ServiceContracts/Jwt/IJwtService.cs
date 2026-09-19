@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using System.Threading.Tasks;
 using TransportesDosGuri.Core.Application.DTOs.Jwt;
 using TransportesDosGuri.Core.Domain.Entities.Identity;
 

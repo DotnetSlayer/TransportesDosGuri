@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TransportesDosGuri.Core.DTOs
+﻿namespace TransportesDosGuri.Core.DTOs
 {
     public class FlightSeatDTO
     {

@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace TransportesDosGuri.Core.Enums
+﻿namespace TransportesDosGuri.Core.Enums
 {
     public enum SeatClass
     {

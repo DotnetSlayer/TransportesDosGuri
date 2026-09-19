@@ -13,7 +13,7 @@ namespace TransportesDosGuri.Core.Application.Services.Identity
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly RoleManager<ApplicationRole> _roleManager; 
+        private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IJwtService _jwtService;
 
         public IdentityService(

@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using TransportesDosGuri.Core.DTOs;
+﻿using TransportesDosGuri.Core.DTOs;
 
 namespace TransportesDosGuri.Core.Interfaces
 {

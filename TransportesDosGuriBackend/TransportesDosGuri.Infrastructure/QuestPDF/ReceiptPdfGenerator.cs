@@ -1,9 +1,6 @@
 ﻿using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using System;
-using System.Collections.Generic;
-using System.Text;
 using TransportesDosGuri.Core.Application.DTOs.QuestPDF;
 using TransportesDosGuri.Core.Application.ServiceContracts.QuestPDF;
 
@@ -115,13 +112,13 @@ namespace TransportesDosGuri.Infrastructure.QuestPDF
                     {
                         table.ColumnsDefinition(columns =>
                         {
-                            columns.ConstantColumn(50);  
-                            columns.RelativeColumn();     
-                            columns.RelativeColumn();     
-                            columns.RelativeColumn();     
-                            columns.RelativeColumn();     
-                            columns.RelativeColumn();     
-                            columns.ConstantColumn(80);   
+                            columns.ConstantColumn(50);
+                            columns.RelativeColumn();
+                            columns.RelativeColumn();
+                            columns.RelativeColumn();
+                            columns.RelativeColumn();
+                            columns.RelativeColumn();
+                            columns.ConstantColumn(80);
                         });
 
                         table.Header(header =>

@@ -67,7 +67,7 @@ namespace TransportesDosGuri.Core.Application.Services
                 PurchaseDate = purchaseEntities.PurchaseDate,
                 PurchasePrice = purchaseEntities.PurchasePrice,
                 Status = purchaseEntities.Status,
-                TripId= purchaseEntities.TripId
+                TripId = purchaseEntities.TripId
             });
         }
 

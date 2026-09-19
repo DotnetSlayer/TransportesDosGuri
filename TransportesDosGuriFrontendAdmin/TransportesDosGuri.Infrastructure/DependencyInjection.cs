@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.Extensions.DependencyInjection;
-using System;
-using System.Net.Http;
 using TransportesDosGuri.Core.Common;
 using TransportesDosGuri.Core.Interfaces;
 using TransportesDosGuri.Infrastructure.Auth;

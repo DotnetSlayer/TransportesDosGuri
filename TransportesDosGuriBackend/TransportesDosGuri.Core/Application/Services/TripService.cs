@@ -81,7 +81,7 @@ namespace TransportesDosGuri.Core.Application.Services
                 DepartureTime = tripEntity.DepartureTime,
                 ArrivalTime = tripEntity.ArrivalTime,
                 TotalPrice = tripEntity.TotalPrice,
-                TripName= tripEntity.TripName
+                TripName = tripEntity.TripName
             };
         }
 

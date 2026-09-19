@@ -1,8 +1,5 @@
-﻿using TransportesDosGuri.Core.Application.DTOs;
-using TransportesDosGuri.Core.Application.DTOs.Asaas;
-using TransportesDosGuri.Core.Application.ServiceContracts;
+﻿using TransportesDosGuri.Core.Application.DTOs.Asaas;
 using TransportesDosGuri.Core.Application.ServiceContracts.Asaas;
-using TransportesDosGuri.Core.Domain.RepositoryContracts;
 using TransportesDosGuri.Core.Domain.RepositoryContracts.Misc;
 
 namespace TransportesDosGuri.Infrastructure.ExternalServices.Asaas

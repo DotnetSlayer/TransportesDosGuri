@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using TransportesDosGuri.Core.Application.DTOs.QuestPDF;
+﻿using TransportesDosGuri.Core.Application.DTOs.QuestPDF;
 
 namespace TransportesDosGuri.Core.Application.ServiceContracts.QuestPDF
 {

@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Http;
-using System.Threading.Tasks;
 using TransportesDosGuri.Core.Common;
 
 namespace TransportesDosGuri.Infrastructure.Auth
