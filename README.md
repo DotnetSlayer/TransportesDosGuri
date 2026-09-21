@@ -20,7 +20,7 @@ Este repositório contém a implementação completa do **MVP (*Minimum Viable P
   > O Swagger está desabilitado no ambiente de produção.
 
 * 🎬 **Vídeo de Apresentação — YouTube:**
-  *link*
+  *https://www.youtube.com/watch?v=2pZz1sxG_pw*
 
 ---
 
